@@ -10,17 +10,17 @@ export const setupCorp = () => {
     const corpIdentityLocation = window.playerSide === "corp" ? ["75vw", "75vh"] : ["25vw", "25vh"]
 
     createDeck(document.querySelector("#corp-deck-list").value, "corp-deck", ...corpDeckLocation)
-    const corpIndentity = document.querySelector("#corp-identity").value.trim()
-    const corpIndentityElement = createCard(allCards.find(cardInfo => cardInfo.title === corpIndentity), ...corpIdentityLocation)
+    const corpIdentity = document.querySelector("#corp-identity").value.trim()
+    createCard(allCards.find(cardInfo => cardInfo.title === corpIdentity), ...corpIdentityLocation)
 }
 
 export const setupRunner = () => {
     const runnerDeckLocation = window.playerSide === "corp" ? ["15vw", "25vh"] : ["85vw", "75vh"]
-    const runnerIndentityLocation = window.playerSide === "corp" ? ["25vw", "25vh"] : ["75vw", "75vh"]
+    const runnerIdentityLocation = window.playerSide === "corp" ? ["25vw", "25vh"] : ["75vw", "75vh"]
 
     createDeck(document.querySelector("#runner-deck-list").value, "runner-deck", ...runnerDeckLocation)
-    const runnerIndentity = document.querySelector("#runner-identity").value.trim()
-    const runnerIndentityElement = createCard(allCards.find(cardInfo => cardInfo.title === runnerIndentity), ...runnerIndentityLocation)
+    const runnerIdentity = document.querySelector("#runner-identity").value.trim()
+    createCard(allCards.find(cardInfo => cardInfo.title === runnerIdentity), ...runnerIdentityLocation)
 }
 
 export const setupGame = () => {
@@ -30,9 +30,9 @@ export const setupGame = () => {
 
 export const main = async () => {
 
-    window.allCards = await fetchAllCards().then(cards => cards.data.map(cardIfo => {
-        cardIfo.image = `https://card-images.netrunnerdb.com/v2/large/${cardIfo.code}.jpg`
-        return cardIfo
+    window.allCards = await fetchAllCards().then(cards => cards.data.map(cardInfo => {
+        cardInfo.image = `https://card-images.netrunnerdb.com/v2/large/${cardInfo.code}.jpg`
+        return cardInfo
     }))
 
     document.addEventListener("mousedown", e => {
