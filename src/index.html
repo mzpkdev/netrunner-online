@@ -18,13 +18,16 @@
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script type="module">
         import { main } from "./scripts/game.js"
-        
+        import { initHearts } from "./scripts/hearts.js"
+
         //entry point
         window.addEventListener("load", main)
+        window.addEventListener("load", initHearts)
     </script>
 </head>
 
 <body>
+    <div id="hearts-bg" aria-hidden="true"></div>
     <div id="start-game-panel" class="modal fade hide show" style="display: block; background-color: rgba(0, 0, 0, 0.5);" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 650px;">
             <div class="modal-content" style="background-color: aliceblue;">

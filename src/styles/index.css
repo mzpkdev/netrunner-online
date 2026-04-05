@@ -107,3 +107,47 @@ h1, h2, h3, h4, h5, h6 {
 #opponent-hand {
     border-bottom: 1px solid #2cedf0;
 }
+
+/* Hearts background */
+#hearts-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.floating-heart {
+    position: absolute;
+    bottom: -60px;
+    opacity: var(--heart-opacity, 0.3);
+    animation: floatHeart linear forwards;
+    user-select: none;
+    line-height: 1;
+    will-change: transform, opacity;
+    text-shadow: 0 0 6px currentColor;
+}
+
+@keyframes floatHeart {
+    0% {
+        transform: translateY(0px) translateX(0px) rotate(0deg) scale(1);
+        opacity: var(--heart-opacity, 0.3);
+    }
+    25% {
+        transform: translateY(-25vh) translateX(calc(var(--heart-drift, 0px) * 0.4)) rotate(calc(var(--heart-rotation, 0deg) * 0.5)) scale(1.05);
+    }
+    50% {
+        transform: translateY(-50vh) translateX(calc(var(--heart-drift, 0px) * 0.7)) rotate(calc(var(--heart-rotation, 0deg) * 0.8)) scale(0.95);
+    }
+    75% {
+        transform: translateY(-75vh) translateX(var(--heart-drift, 0px)) rotate(var(--heart-rotation, 0deg)) scale(1.02);
+        opacity: calc(var(--heart-opacity, 0.3) * 0.6);
+    }
+    100% {
+        transform: translateY(-115vh) translateX(calc(var(--heart-drift, 0px) * 1.2)) rotate(calc(var(--heart-rotation, 0deg) * 1.3)) scale(0.85);
+        opacity: 0;
+    }
+}
