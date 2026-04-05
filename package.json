@@ -7,7 +7,6 @@
     "build": "vite build ./src/ --outDir ../dist/ --base \"/netrunner-online/\""
   },
   "devDependencies": {
-    "ts-patch": "^3.2.1",
     "vite": "^6.3.4"
   }
 }
