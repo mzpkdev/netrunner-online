@@ -143,6 +143,11 @@ export const setupP2P = () => {
         document.querySelector("#open-player-panel").click()
     })
 
+    peer.on("error", err => {
+        console.error("PeerJS error:", err.type, err)
+        alert(`Connection error (${err.type}). Please check the host ID and try again.`)
+    })
+
     const setupP2PConnection = (connection) => {
         const parser = new DOMParser()
         window.sendMessage = throttle((message) => connection.send(message), 200)
@@ -159,6 +164,10 @@ export const setupP2P = () => {
         connection.on("close", () => {
             console.log("Data connection has been closed.")
         });
+
+        connection.on("error", err => {
+            console.error("Connection error:", err.type, err)
+        })
     }
     
     document.querySelector("#opponent-host-id").focus()
