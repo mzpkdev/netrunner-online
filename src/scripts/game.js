@@ -30,10 +30,22 @@ export const setupGame = () => {
 
 export const main = async () => {
 
-    window.allCards = await fetchAllCards().then(cards => cards.data.map(cardIfo => {
+    const cardsResult = await fetchAllCards();
+    if (!cardsResult) {
+        const modalBody = document.querySelector('#start-game-panel .modal-body');
+        if (modalBody) {
+            const errorBanner = document.createElement('div');
+            errorBanner.className = 'alert alert-danger';
+            errorBanner.role = 'alert';
+            errorBanner.textContent = 'Failed to load card data from NetrunnerDB. Please check your connection and reload the page.';
+            modalBody.prepend(errorBanner);
+        }
+        return;
+    }
+    window.allCards = cardsResult.data.map(cardIfo => {
         cardIfo.image = `https://card-images.netrunnerdb.com/v2/large/${cardIfo.code}.jpg`
         return cardIfo
-    }))
+    })
 
     document.addEventListener("mousedown", e => {
         if (e.button === 1) {
