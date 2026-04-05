@@ -5,6 +5,7 @@
 @import "cardActions.css";
 @import "token.css";
 @import "svg.css";
+@import "hearts.css";
 
 html, body {
     font-family: 'LT Binary Neue', sans-serif !important;
@@ -22,6 +23,8 @@ body {
     flex-direction: column;
     height: 100vh;
     width: 100vw;
+    position: relative;
+    z-index: 1;
 }
 .board {
     flex-grow: 1;
