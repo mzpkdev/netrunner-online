@@ -84,9 +84,9 @@ const cardContextMenu = (element) => {
         newContextMenu.style.left = e.clientX + "px"
         newContextMenu.style.top = e.clientY + "px"
         newContextMenu.scrollIntoView()
-        // newContextMenu.querySelector("#context-menu-flip").addEventListener("click", flipCard(element))
-        // newContextMenu.querySelector("#context-menu-put-under").addEventListener("click", putCardUnder(element))
-        // newContextMenu.querySelector("#context-menu-rotate").addEventListener("click", () => element.classList.toggle("rotated"))
+        newContextMenu.querySelector("#context-menu-flip").addEventListener("click", flipCard(element))
+        newContextMenu.querySelector("#context-menu-put-under").addEventListener("click", () => putElementBottom(element))
+        newContextMenu.querySelector("#context-menu-rotate").addEventListener("click", () => element.classList.toggle("rotated"))
     }
 }
 
