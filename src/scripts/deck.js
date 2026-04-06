@@ -3,14 +3,20 @@ import { sendCreateMessage } from "./p2p.js"
 import { createCard, snapOutOfHandArea } from "./card.js"
 import { grabCard } from "./grab.js"
 
-export const createDeck = (deckList, id, x, y) => {
-    const deck = deckList.trim().split("\n").flatMap(entry => {
-        const nameParts = entry.trim().split(" ")
+export const parseDeckList = (deckListString, allCards) => {
+    return deckListString.trim().split("\n").flatMap(entry => {
+        const trimmed = entry.trim()
+        if (!trimmed) return []
+        const nameParts = trimmed.split(" ")
         const number = parseInt(nameParts.shift().replace("x", ""))
+        if (!Number.isInteger(number) || number < 1) return []
         const name = nameParts.join(" ")
+        return Array.from({ length: number }, () => name)
+    }).map(cardName => allCards.find(c => c.title === cardName))
+}
 
-        return [...new Array(number)].map(() => name)
-    }).map(cardName => window.allCards.find(c => c.title === cardName))
+export const createDeck = (deckList, id, x, y) => {
+    const deck = parseDeckList(deckList, window.allCards)
     shuffle(deck)
 
     const deckElement = document.createElement("div")
