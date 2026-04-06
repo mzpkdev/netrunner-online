@@ -112,6 +112,16 @@ export function receiveMessage(message) {
     }
 }
 
+function showP2PStatus(message, { bg = "#856404", color = "#fff3cd", border = "#ffc107" } = {}) {
+    const el = document.querySelector("#p2p-status")
+    if (!el) return
+    el.textContent = message
+    el.style.backgroundColor = bg
+    el.style.color = color
+    el.style.border = `1px solid ${border}`
+    el.style.display = "block"
+}
+
 export const setupP2P = () => {
     const peer = new window.Peer({
         key: "netrunner",
@@ -143,6 +153,11 @@ export const setupP2P = () => {
         document.querySelector("#open-player-panel").click()
     })
 
+    peer.on("error", (err) => {
+        console.error(`PeerJS error [${err.type}]:`, err)
+        showP2PStatus(`Connection error: ${err.type}`, { bg: "#721c24", color: "#f8d7da", border: "#f5c6cb" })
+    })
+
     const setupP2PConnection = (connection) => {
         const parser = new DOMParser()
         window.sendMessage = throttle((message) => connection.send(message), 200)
@@ -158,6 +173,7 @@ export const setupP2P = () => {
     
         connection.on("close", () => {
             console.log("Data connection has been closed.")
+            showP2PStatus("Opponent disconnected.")
         });
     }
     
