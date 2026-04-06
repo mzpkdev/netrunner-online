@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { shuffle, snapToGrid, isPointWithinElement, throttle } from './utils.js'
+import { shuffle, snapToGrid, isPointWithinElement, throttle, flipElement } from './utils.js'
 
 // ---------------------------------------------------------------------------
 // shuffle
@@ -163,5 +163,36 @@ describe('throttle', () => {
     throttled.cancel()
     vi.advanceTimersByTime(200)
     expect(fn).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// flipElement
+// ---------------------------------------------------------------------------
+describe('flipElement', () => {
+  const makeElement = (x, y) => ({
+    getBoundingClientRect: () => ({ x, y }),
+    style: {}
+  })
+
+  it('sets element.style.left to documentRect.width - elementRect.x', () => {
+    const el = makeElement(100, 200)
+    const documentRect = { width: 1920, height: 1080 }
+    flipElement(el, documentRect)
+    expect(el.style.left).toBe('1820px')
+  })
+
+  it('sets element.style.top to documentRect.height - elementRect.y', () => {
+    const el = makeElement(100, 200)
+    const documentRect = { width: 1920, height: 1080 }
+    flipElement(el, documentRect)
+    expect(el.style.top).toBe('880px')
+  })
+
+  it('returns the mutated element', () => {
+    const el = makeElement(50, 75)
+    const documentRect = { width: 800, height: 600 }
+    const result = flipElement(el, documentRect)
+    expect(result).toBe(el)
   })
 })
