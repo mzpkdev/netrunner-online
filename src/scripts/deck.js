@@ -12,7 +12,7 @@ export const parseDeckList = (deckListString, allCards) => {
         if (!Number.isInteger(number) || number < 1) return []
         const name = nameParts.join(" ")
         return Array.from({ length: number }, () => name)
-    }).map(cardName => allCards.find(c => c.title === cardName))
+    }).map(cardName => allCards.find(c => c.title === cardName)).filter(Boolean)
 }
 
 export const createDeck = (deckList, id, x, y) => {

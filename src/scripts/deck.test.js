@@ -36,4 +36,17 @@ describe('parseDeckList', () => {
         const result = parseDeckList('', allCards)
         expect(result).toHaveLength(0)
     })
+
+    it('excludes entries where the card name is not in allCards', () => {
+        const result = parseDeckList('2x Unknown Card', allCards)
+        expect(result).toHaveLength(0)
+    })
+
+    it('returns only recognized cards from a mixed list', () => {
+        const result = parseDeckList('2x Hedge Fund\n1x Unknown Card\n3x Ice Wall', allCards)
+        expect(result).toHaveLength(5)
+        expect(result.every(c => c !== undefined)).toBe(true)
+        expect(result.filter(c => c.title === 'Hedge Fund')).toHaveLength(2)
+        expect(result.filter(c => c.title === 'Ice Wall')).toHaveLength(3)
+    })
 })
