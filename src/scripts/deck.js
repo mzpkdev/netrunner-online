@@ -4,7 +4,7 @@ import { createCard, snapOutOfHandArea } from "./card.js"
 import { grabCard } from "./grab.js"
 
 export const parseDeckList = (deckListString, allCards) => {
-    return deckListString.trim().split("\n").flatMap(entry => {
+    const names = deckListString.trim().split("\n").flatMap(entry => {
         const trimmed = entry.trim()
         if (!trimmed) return []
         const nameParts = trimmed.split(" ")
@@ -12,11 +12,26 @@ export const parseDeckList = (deckListString, allCards) => {
         if (!Number.isInteger(number) || number < 1) return []
         const name = nameParts.join(" ")
         return Array.from({ length: number }, () => name)
-    }).map(cardName => allCards.find(c => c.title === cardName)).filter(Boolean)
+    })
+
+    const matched = []
+    const failedSet = new Set()
+
+    for (const cardName of names) {
+        const card = allCards.find(c => c.title === cardName)
+        if (card) {
+            matched.push(card)
+        } else {
+            failedSet.add(cardName)
+        }
+    }
+
+    return { matched, failed: Array.from(failedSet) }
 }
 
 export const createDeck = (deckList, id, x, y) => {
-    const deck = parseDeckList(deckList, window.allCards)
+    const { matched, failed } = parseDeckList(deckList, window.allCards)
+    const deck = matched
     shuffle(deck)
 
     const deckElement = document.createElement("div")
@@ -31,6 +46,13 @@ export const createDeck = (deckList, id, x, y) => {
     </div>`
     document.querySelector("#card-layer").appendChild(deckElement)
     snapOutOfHandArea(deckElement)
+
+    if (failed.length > 0) {
+        const errorElement = document.createElement("div")
+        errorElement.classList.add("deck-parse-errors")
+        errorElement.innerHTML = `<strong>Unrecognized cards (not loaded):</strong><ul>${failed.map(n => `<li>${n}</li>`).join("")}</ul>`
+        document.querySelector("#card-layer").appendChild(errorElement)
+    }
 
     deckElement.addEventListener("mousedown", e => {
         e.preventDefault()
