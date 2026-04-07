@@ -7,6 +7,7 @@ export async function fetchAllCards() {
         return await response.json();
     } catch (error) {
         console.error('Error fetching:', error);
+        throw error;
     }
 }
 

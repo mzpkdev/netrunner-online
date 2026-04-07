@@ -30,10 +30,18 @@ export const setupGame = () => {
 
 export const main = async () => {
 
-    window.allCards = await fetchAllCards().then(cards => cards.data.map(cardIfo => {
-        cardIfo.image = `https://card-images.netrunnerdb.com/v2/large/${cardIfo.code}.jpg`
-        return cardIfo
-    }))
+    try {
+        window.allCards = await fetchAllCards().then(cards => cards.data.map(cardIfo => {
+            cardIfo.image = `https://card-images.netrunnerdb.com/v2/large/${cardIfo.code}.jpg`
+            return cardIfo
+        }))
+    } catch (error) {
+        const msg = document.createElement('p')
+        msg.id = 'fetch-error'
+        msg.textContent = 'Card data unavailable. Check your connection and reload.'
+        document.body.appendChild(msg)
+        return
+    }
 
     document.addEventListener("mousedown", e => {
         if (e.button === 1) {

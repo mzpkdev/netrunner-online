@@ -1,5 +1,24 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { shuffle, snapToGrid, isPointWithinElement, throttle, flipElement } from './utils.js'
+import { fetchAllCards, shuffle, snapToGrid, isPointWithinElement, throttle, flipElement } from './utils.js'
+
+// ---------------------------------------------------------------------------
+// fetchAllCards
+// ---------------------------------------------------------------------------
+describe('fetchAllCards', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('rejects when the network request fails', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network error')))
+    await expect(fetchAllCards()).rejects.toThrow('network error')
+  })
+
+  it('rejects when the response is not ok', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, statusText: 'Service Unavailable' }))
+    await expect(fetchAllCards()).rejects.toThrow('Failed to fetch: Service Unavailable')
+  })
+})
 
 // ---------------------------------------------------------------------------
 // shuffle
