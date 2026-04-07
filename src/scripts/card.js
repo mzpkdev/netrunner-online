@@ -1,6 +1,7 @@
 import { sendCreateMessage } from "./p2p.js"
 import { snapToGrid, putElementBottom, putElementTop, isPointWithinElement } from "./utils.js"
 import { grabCard } from "./grab.js"
+import { selectCard } from "./keyboard.js"
 
 export const createCard = (cardInfo, x, y, id) => {
     const cardElement = document.createElement("div")
@@ -31,6 +32,7 @@ export const createCard = (cardInfo, x, y, id) => {
     cardElement.addEventListener("contextmenu", cardContextMenu(cardElement))
     cardElement.addEventListener("grab", e => {
         putElementTop(cardElement)
+        selectCard(cardElement)
     })
     cardElement.addEventListener("move", e => {
         updateCardTooltipPosition(cardElement)

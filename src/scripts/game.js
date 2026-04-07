@@ -4,6 +4,7 @@ import { setupSidePanels } from "./sidePanels.js"
 import { createDeck } from "./deck.js"
 import { createCard } from "./card.js"
 import { setupTokenSpawning } from "./token.js"
+import { setupKeyboardShortcuts } from "./keyboard.js"
 
 export const setupCorp = () => {
     const corpDeckLocation = window.playerSide === "corp" ? ["85vw", "75vh"] : ["15vw", "25vh"]
@@ -57,6 +58,7 @@ export const main = async () => {
         document.querySelector(".dropdown-menu").style.display = "none"
     })
 
+    setupKeyboardShortcuts()
     setupP2P()
     setupSidePanels()
     setupTokenSpawning()
