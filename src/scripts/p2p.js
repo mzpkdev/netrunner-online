@@ -82,6 +82,10 @@ export function receiveMessage(message) {
 
         case "grab-element":
             element = document.querySelector("#" + message.entityId)
+            if (!element) {
+                console.warn(`receiveMessage: grab-element ignored — no element with id "${message.entityId}"`)
+                break
+            }
             element.style.left = message.content.x + "px"
             element.style.top = message.content.y + "px"
             if (message.perspective !== window.playerSide) {
@@ -89,9 +93,13 @@ export function receiveMessage(message) {
             }
             element.dispatchEvent(new CustomEvent("grab", {detail: {targetX: message.x, targetY: message.y}}))
             break;
-        
+
         case "move-element":
             element = document.querySelector("#" + message.entityId)
+            if (!element) {
+                console.warn(`receiveMessage: move-element ignored — no element with id "${message.entityId}"`)
+                break
+            }
             element.style.left = message.content.x + "px"
             element.style.top = message.content.y + "px"
             if (message.perspective !== window.playerSide) {
@@ -102,6 +110,10 @@ export function receiveMessage(message) {
 
         case "ungrab-element":
             element = document.querySelector("#" + message.entityId)
+            if (!element) {
+                console.warn(`receiveMessage: ungrab-element ignored — no element with id "${message.entityId}"`)
+                break
+            }
             element.style.left = message.content.x + "px"
             element.style.top = message.content.y + "px"
             if (message.perspective !== window.playerSide) {
