@@ -142,8 +142,8 @@ export const setupP2P = () => {
             iceServers: [
                 {
                     urls: "turn:global.relay.metered.ca:80",
-                    username: "0216de3689c0327b92c21461",
-                    credential: "fAMGCn8IVFAJA0ZZ"
+                    username: import.meta.env.VITE_TURN_USERNAME,
+                    credential: import.meta.env.VITE_TURN_CREDENTIAL
                 }
             ]
         }
