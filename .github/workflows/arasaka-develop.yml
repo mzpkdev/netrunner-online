@@ -33,6 +33,7 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
+      id-token: write
       actions: write
     with:
       model: "claude-sonnet-4-6"

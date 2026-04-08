@@ -24,6 +24,7 @@ jobs:
       pull-requests: write
       issues: write
       checks: write
+      id-token: write
     with:
       model: "claude-sonnet-4-6"
     secrets:
