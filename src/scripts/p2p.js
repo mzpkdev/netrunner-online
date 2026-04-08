@@ -171,7 +171,6 @@ export const setupP2P = () => {
     })
 
     const setupP2PConnection = (connection) => {
-        const parser = new DOMParser()
         window.sendMessage = throttle((message) => connection.send(message), 200)
     
         connection.on("data", message => {

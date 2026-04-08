@@ -64,7 +64,6 @@ export const setupSidePanels = () => {
     
     document.querySelector("#corp-check").checked = "true"
     document.querySelector("#corp-check").addEventListener("click", e => {
-        console.log(window.playerSide)
         if (window.playerSide !== "corp") {
             window.playerSide = "corp"
             flipBoard()
@@ -77,7 +76,6 @@ export const setupSidePanels = () => {
     })
     
     document.querySelector("#runner-check").addEventListener("click", e => {
-        console.log(window.playerSide)
         if (window.playerSide !== "runner") {
             window.playerSide = "runner"
             flipBoard()

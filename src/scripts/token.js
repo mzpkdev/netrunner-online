@@ -3,7 +3,6 @@ import { sendCreateMessage } from "./p2p.js";
 import { putElementTop, isPointWithinElement, snapToGrid } from "./utils.js";
 
 export const createToken = (tokenName, x, y, id) => {
-    console.log(tokenName, x, y, id);
     const tokenElement = document.createElement("div")
 
     const innerElement = document.querySelector("#" + tokenName).cloneNode(true)
