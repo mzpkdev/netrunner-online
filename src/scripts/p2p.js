@@ -201,7 +201,7 @@ export const setupP2P = () => {
         const connection = peer.connect(opponentHostId.value)
         setupP2PConnection(connection)
         document.querySelector("#start-game-panel").remove()
-        window.playerSide = "corp"
+        window.playerSide = "runner"
         document.querySelector("#open-player-panel").click()
     })
     
