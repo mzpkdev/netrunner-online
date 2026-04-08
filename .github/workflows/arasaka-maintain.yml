@@ -6,16 +6,30 @@ on:
     - cron: "0 6 * * 1"
 
 jobs:
+  auth:
+    runs-on: ubuntu-latest
+    outputs:
+      token: ${{ steps.app-token.outputs.token }}
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: 3218980
+          private-key: ${{ secrets.ARASAKA_APP_PRIVATE_KEY }}
+
   maintain:
+    needs: auth
     uses: mzpkdev/preemclaud/.github/workflows/maintain.yml@v1
     permissions:
       contents: read
       pull-requests: write
       issues: write
-      id-token: write
     with:
       model: "claude-haiku-4-5"
       stale_days: "30"
       stale_label: "stale"
       max_actions: "10"
-    secrets: inherit
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      GH_APP_TOKEN: ${{ needs.auth.outputs.token }}
