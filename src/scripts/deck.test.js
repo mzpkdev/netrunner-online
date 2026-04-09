@@ -137,4 +137,44 @@ describe('createDeck', () => {
         expect(el.firstElementChild.classList.contains('red-tint')).toBe(true)
         expect(el.title).toBe('no cards left')
     })
+
+    it('sets the title to "1 card" (singular) when one card remains', () => {
+        const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
+        el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+        expect(el.title).toBe('1 card')
+    })
+
+    it('mousedown on an already-empty deck leaves title and class unchanged', () => {
+        const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
+        el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+        el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+        el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+        expect(el.firstElementChild.classList.contains('red-tint')).toBe(true)
+        expect(el.title).toBe('no cards left')
+    })
+
+    it('puttop removes red-tint when deck was empty', () => {
+        const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
+        el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+        el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+        expect(el.firstElementChild.classList.contains('red-tint')).toBe(true)
+        el.dispatchEvent(new CustomEvent('puttop', { detail: { card: makeCardElement('Sure Gamble') } }))
+        expect(el.firstElementChild.classList.contains('red-tint')).toBe(false)
+    })
+
+    it('putbottom removes red-tint when deck was empty', () => {
+        const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
+        el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+        el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+        expect(el.firstElementChild.classList.contains('red-tint')).toBe(true)
+        el.dispatchEvent(new CustomEvent('putbottom', { detail: { card: makeCardElement('Sure Gamble') } }))
+        expect(el.firstElementChild.classList.contains('red-tint')).toBe(false)
+    })
+
+    it('dispatching shuffle calls shuffle on the internal deck', () => {
+        const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
+        shuffle.mockClear()
+        el.dispatchEvent(new CustomEvent('shuffle'))
+        expect(shuffle).toHaveBeenCalledOnce()
+    })
 })
