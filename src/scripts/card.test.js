@@ -98,6 +98,7 @@ describe("handleCardBehavior", () => {
 
     beforeEach(() => {
         vi.clearAllMocks()
+        delete window.playerSide
         document.body.innerHTML = `<div id="your-hand"></div>`
         cardElement = document.createElement("div")
         cardElement.innerHTML = `
@@ -113,5 +114,83 @@ describe("handleCardBehavior", () => {
         cardElement.setAttribute("data-type", "identity")
         handleCardBehavior(cardElement)
         expect(cardElement.getAttribute("data-location")).toBe("board")
+    })
+
+    it("hides card-front and shows card-back for non-identity card in deck", () => {
+        cardElement.setAttribute("data-location", "deck")
+        cardElement.setAttribute("data-type", "asset")
+        handleCardBehavior(cardElement)
+        expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(true)
+        expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(false)
+    })
+
+    it("removes flipped class and shows card-front for hand location", () => {
+        cardElement.setAttribute("data-location", "hand")
+        cardElement.classList.add("flipped")
+        handleCardBehavior(cardElement)
+        expect(cardElement.classList.contains("flipped")).toBe(false)
+        expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(false)
+    })
+
+    it("removes flipped class and shows card-back for opponent-hand location", () => {
+        cardElement.setAttribute("data-location", "opponent-hand")
+        cardElement.classList.add("flipped")
+        handleCardBehavior(cardElement)
+        expect(cardElement.classList.contains("flipped")).toBe(false)
+        expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(false)
+    })
+
+    it("shows card-front for corp operation card on board", () => {
+        cardElement.setAttribute("data-location", "board")
+        cardElement.setAttribute("data-side", "corp")
+        cardElement.setAttribute("data-type", "operation")
+        handleCardBehavior(cardElement)
+        expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(false)
+    })
+
+    it("shows card-back and tooltip for corp non-operation card on board when data-side matches playerSide", () => {
+        window.playerSide = "corp"
+        cardElement.setAttribute("data-location", "board")
+        cardElement.setAttribute("data-side", "corp")
+        cardElement.setAttribute("data-type", "asset")
+        handleCardBehavior(cardElement)
+        expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(false)
+        expect(cardElement.querySelector(".game-card-tooltip").classList.contains("hidden")).toBe(false)
+    })
+
+    it("shows card-back and hides tooltip for corp non-operation card on board when data-side differs from playerSide", () => {
+        window.playerSide = "runner"
+        cardElement.setAttribute("data-location", "board")
+        cardElement.setAttribute("data-side", "corp")
+        cardElement.setAttribute("data-type", "asset")
+        handleCardBehavior(cardElement)
+        expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(false)
+        expect(cardElement.querySelector(".game-card-tooltip").classList.contains("hidden")).toBe(true)
+    })
+
+    it("shows card-front for runner card on board", () => {
+        cardElement.setAttribute("data-location", "board")
+        cardElement.setAttribute("data-side", "runner")
+        cardElement.setAttribute("data-type", "event")
+        handleCardBehavior(cardElement)
+        expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(false)
+    })
+
+    it("adds rotated class for ice card on board", () => {
+        window.playerSide = "runner"
+        cardElement.setAttribute("data-location", "board")
+        cardElement.setAttribute("data-side", "corp")
+        cardElement.setAttribute("data-type", "ice")
+        handleCardBehavior(cardElement)
+        expect(cardElement.classList.contains("rotated")).toBe(true)
+    })
+
+    it("removes rotated class for non-ice card on board", () => {
+        cardElement.setAttribute("data-location", "board")
+        cardElement.setAttribute("data-side", "runner")
+        cardElement.setAttribute("data-type", "event")
+        cardElement.classList.add("rotated")
+        handleCardBehavior(cardElement)
+        expect(cardElement.classList.contains("rotated")).toBe(false)
     })
 })
