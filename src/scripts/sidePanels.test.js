@@ -19,6 +19,8 @@ vi.mock('./card.js', () => ({
 }))
 
 import { flipElement, snapToGrid } from './utils.js'
+import { setupCorp, setupRunner } from './game.js'
+import { updateCardArea, updateCardHoverArea, updateCardTooltipPosition, handleCardBehavior } from './card.js'
 import { flipBoard, setupSidePanels } from './sidePanels.js'
 
 // ---------------------------------------------------------------------------
@@ -125,6 +127,27 @@ describe('flipBoard — .game-card elements', () => {
         expect(snapToGrid).toHaveBeenCalledWith(card1)
         expect(snapToGrid).toHaveBeenCalledWith(card2)
     })
+
+    it('calls updateCardTooltipPosition, updateCardArea, updateCardHoverArea, and handleCardBehavior on each .game-card', () => {
+        const cardLayer = document.querySelector('#card-layer')
+        const card1 = document.createElement('div')
+        card1.classList.add('game-card')
+        const card2 = document.createElement('div')
+        card2.classList.add('game-card')
+        cardLayer.append(card1, card2)
+
+        flipBoard()
+
+        expect(updateCardTooltipPosition).toHaveBeenCalledWith(card1)
+        expect(updateCardArea).toHaveBeenCalledWith(card1)
+        expect(updateCardHoverArea).toHaveBeenCalledWith(card1)
+        expect(handleCardBehavior).toHaveBeenCalledWith(card1)
+
+        expect(updateCardTooltipPosition).toHaveBeenCalledWith(card2)
+        expect(updateCardArea).toHaveBeenCalledWith(card2)
+        expect(updateCardHoverArea).toHaveBeenCalledWith(card2)
+        expect(handleCardBehavior).toHaveBeenCalledWith(card2)
+    })
 })
 
 // ---------------------------------------------------------------------------
@@ -197,6 +220,22 @@ describe('setupSidePanels — corp radio button', () => {
         document.querySelector('#corp-check').click()
         expect(flipElement).not.toHaveBeenCalled()
     })
+
+    it('sets #your-title to "Corporation" and #opponent-title to "Runner"', () => {
+        document.querySelector('#corp-check').click()
+        expect(document.querySelector('#your-title').innerText).toBe('Corporation')
+        expect(document.querySelector('#opponent-title').innerText).toBe('Runner')
+    })
+
+    it('removes hidden from #corp-deck-panel and adds hidden to #runner-deck-panel', () => {
+        document.querySelector('#corp-deck-panel').classList.add('hidden')
+        document.querySelector('#runner-deck-panel').classList.remove('hidden')
+
+        document.querySelector('#corp-check').click()
+
+        expect(document.querySelector('#corp-deck-panel').classList.contains('hidden')).toBe(false)
+        expect(document.querySelector('#runner-deck-panel').classList.contains('hidden')).toBe(true)
+    })
 })
 
 // ---------------------------------------------------------------------------
@@ -230,5 +269,104 @@ describe('setupSidePanels — runner radio button', () => {
         window.playerSide = 'runner'
         document.querySelector('#runner-check').click()
         expect(flipElement).not.toHaveBeenCalled()
+    })
+
+    it('sets #your-title to "Runner" and #opponent-title to "Corporation"', () => {
+        document.querySelector('#runner-check').click()
+        expect(document.querySelector('#your-title').innerText).toBe('Runner')
+        expect(document.querySelector('#opponent-title').innerText).toBe('Corporation')
+    })
+
+    it('removes hidden from #runner-deck-panel and adds hidden to #corp-deck-panel', () => {
+        document.querySelector('#runner-deck-panel').classList.add('hidden')
+        document.querySelector('#corp-deck-panel').classList.remove('hidden')
+
+        document.querySelector('#runner-check').click()
+
+        expect(document.querySelector('#runner-deck-panel').classList.contains('hidden')).toBe(false)
+        expect(document.querySelector('#corp-deck-panel').classList.contains('hidden')).toBe(true)
+    })
+})
+
+// ---------------------------------------------------------------------------
+// setupSidePanels — player panel open/close
+// ---------------------------------------------------------------------------
+describe('setupSidePanels — player panel', () => {
+    beforeEach(() => {
+        vi.clearAllMocks()
+        buildFullDOM()
+        setupSidePanels()
+    })
+
+    it('clicking #open-player-panel adds "show" and removes "hiding" on #player-panel', () => {
+        const panel = document.querySelector('#player-panel')
+        panel.classList.add('hiding')
+
+        document.querySelector('#open-player-panel').click()
+
+        expect(panel.classList.contains('show')).toBe(true)
+        expect(panel.classList.contains('hiding')).toBe(false)
+    })
+
+    it('focusout on #player-panel adds "hiding"', () => {
+        const panel = document.querySelector('#player-panel')
+
+        panel.dispatchEvent(new Event('focusout', { bubbles: true }))
+
+        expect(panel.classList.contains('hiding')).toBe(true)
+    })
+})
+
+// ---------------------------------------------------------------------------
+// setupSidePanels — resource panel open/close
+// ---------------------------------------------------------------------------
+describe('setupSidePanels — resource panel', () => {
+    beforeEach(() => {
+        vi.clearAllMocks()
+        buildFullDOM()
+        setupSidePanels()
+    })
+
+    it('clicking #open-resource-panel adds "show" and removes "hiding" on #resource-panel', () => {
+        const panel = document.querySelector('#resource-panel')
+        panel.classList.add('hiding')
+
+        document.querySelector('#open-resource-panel').click()
+
+        expect(panel.classList.contains('show')).toBe(true)
+        expect(panel.classList.contains('hiding')).toBe(false)
+    })
+
+    it('focusout on #resource-panel adds "hiding"', () => {
+        const panel = document.querySelector('#resource-panel')
+
+        panel.dispatchEvent(new Event('focusout', { bubbles: true }))
+
+        expect(panel.classList.contains('hiding')).toBe(true)
+    })
+})
+
+// ---------------------------------------------------------------------------
+// setupSidePanels — load-deck-button
+// ---------------------------------------------------------------------------
+describe('setupSidePanels — load-deck-button', () => {
+    beforeEach(() => {
+        vi.clearAllMocks()
+        buildFullDOM()
+        setupSidePanels()
+    })
+
+    it('calls setupCorp (not setupRunner) when playerSide is "corp"', () => {
+        window.playerSide = 'corp'
+        document.querySelector('#load-deck-button').click()
+        expect(setupCorp).toHaveBeenCalled()
+        expect(setupRunner).not.toHaveBeenCalled()
+    })
+
+    it('calls setupRunner (not setupCorp) when playerSide is "runner"', () => {
+        window.playerSide = 'runner'
+        document.querySelector('#load-deck-button').click()
+        expect(setupRunner).toHaveBeenCalled()
+        expect(setupCorp).not.toHaveBeenCalled()
     })
 })
