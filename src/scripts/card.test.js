@@ -102,9 +102,9 @@ describe("handleCardBehavior", () => {
         document.body.innerHTML = `<div id="your-hand"></div>`
         cardElement = document.createElement("div")
         cardElement.innerHTML = `
-            <div class="card-front"></div>
-            <div class="card-back"></div>
-            <div class="game-card-tooltip"></div>
+            <div class="card-front hidden"></div>
+            <div class="card-back hidden"></div>
+            <div class="game-card-tooltip hidden"></div>
         `
         document.body.appendChild(cardElement)
     })
@@ -130,6 +130,8 @@ describe("handleCardBehavior", () => {
         handleCardBehavior(cardElement)
         expect(cardElement.classList.contains("flipped")).toBe(false)
         expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(false)
+        expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(true)
+        expect(cardElement.querySelector(".game-card-tooltip").classList.contains("hidden")).toBe(false)
     })
 
     it("removes flipped class and shows card-back for opponent-hand location", () => {
@@ -137,7 +139,9 @@ describe("handleCardBehavior", () => {
         cardElement.classList.add("flipped")
         handleCardBehavior(cardElement)
         expect(cardElement.classList.contains("flipped")).toBe(false)
+        expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(true)
         expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(false)
+        expect(cardElement.querySelector(".game-card-tooltip").classList.contains("hidden")).toBe(true)
     })
 
     it("shows card-front for corp operation card on board", () => {
@@ -146,6 +150,18 @@ describe("handleCardBehavior", () => {
         cardElement.setAttribute("data-type", "operation")
         handleCardBehavior(cardElement)
         expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(false)
+        expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(true)
+        expect(cardElement.querySelector(".game-card-tooltip").classList.contains("hidden")).toBe(false)
+    })
+
+    it("shows card-front for corp identity card on board", () => {
+        cardElement.setAttribute("data-location", "board")
+        cardElement.setAttribute("data-side", "corp")
+        cardElement.setAttribute("data-type", "identity")
+        handleCardBehavior(cardElement)
+        expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(false)
+        expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(true)
+        expect(cardElement.querySelector(".game-card-tooltip").classList.contains("hidden")).toBe(false)
     })
 
     it("shows card-back and tooltip for corp non-operation card on board when data-side matches playerSide", () => {
@@ -154,6 +170,7 @@ describe("handleCardBehavior", () => {
         cardElement.setAttribute("data-side", "corp")
         cardElement.setAttribute("data-type", "asset")
         handleCardBehavior(cardElement)
+        expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(true)
         expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(false)
         expect(cardElement.querySelector(".game-card-tooltip").classList.contains("hidden")).toBe(false)
     })
@@ -164,6 +181,7 @@ describe("handleCardBehavior", () => {
         cardElement.setAttribute("data-side", "corp")
         cardElement.setAttribute("data-type", "asset")
         handleCardBehavior(cardElement)
+        expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(true)
         expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(false)
         expect(cardElement.querySelector(".game-card-tooltip").classList.contains("hidden")).toBe(true)
     })
@@ -174,6 +192,8 @@ describe("handleCardBehavior", () => {
         cardElement.setAttribute("data-type", "event")
         handleCardBehavior(cardElement)
         expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(false)
+        expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(true)
+        expect(cardElement.querySelector(".game-card-tooltip").classList.contains("hidden")).toBe(false)
     })
 
     it("adds rotated class for ice card on board", () => {
@@ -192,5 +212,13 @@ describe("handleCardBehavior", () => {
         cardElement.classList.add("rotated")
         handleCardBehavior(cardElement)
         expect(cardElement.classList.contains("rotated")).toBe(false)
+    })
+
+    it("shows card-front and tooltip for card in bin", () => {
+        cardElement.setAttribute("data-location", "bin")
+        handleCardBehavior(cardElement)
+        expect(cardElement.querySelector(".card-front").classList.contains("hidden")).toBe(false)
+        expect(cardElement.querySelector(".card-back").classList.contains("hidden")).toBe(true)
+        expect(cardElement.querySelector(".game-card-tooltip").classList.contains("hidden")).toBe(false)
     })
 })
