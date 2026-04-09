@@ -35,6 +35,7 @@
 }
 
 @keyframes draw {
+    /* biome-ignore lint/suspicious/noEmptyBlock: intentionally empty; start keyframe defines no properties so the browser interpolates from the element's computed style */
     0% {
     }
     100% {

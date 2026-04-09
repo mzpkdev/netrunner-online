@@ -24,8 +24,8 @@ export const grabCard = (element) => {
         e.preventDefault()
         e.stopPropagation()
 
-        element.style.left = e.clientX + offsetX + "px"
-        element.style.top = e.clientY + offsetY + "px"
+        element.style.left = `${e.clientX + offsetX}px`
+        element.style.top = `${e.clientY + offsetY}px`
 
         element.dispatchEvent(new CustomEvent("move", {detail: {targetX: e.clientX + offsetX, targetY: e.clientY + offsetY}}))
         sendMoveMessage(element.id, e.clientX + offsetX, e.clientY + offsetY)

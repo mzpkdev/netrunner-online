@@ -5,20 +5,20 @@ import { putElementTop, isPointWithinElement, snapToGrid } from "./utils.js";
 export const createToken = (tokenName, x, y, id) => {
     const tokenElement = document.createElement("div")
 
-    const innerElement = document.querySelector("#" + tokenName).cloneNode(true)
+    const innerElement = document.querySelector(`#${tokenName}`).cloneNode(true)
     innerElement.style.position = "absolute";
     innerElement.style.transform += "translate(-50%, -50%) translate(-10px, -10px)"
     tokenElement.appendChild(innerElement)
 
-    tokenElement.id = id ? id : "token-" + crypto.randomUUID()
+    tokenElement.id = id ? id : `token-${crypto.randomUUID()}`
     tokenElement.classList.add("token")
     tokenElement.style.left = x
     tokenElement.style.top = y
     tokenElement.addEventListener("mousedown", grabCard(tokenElement))
     tokenElement.addEventListener("grab", e => {
         putElementTop(tokenElement)
-        tokenElement.style.left = e.detail.targetX + "px"
-        tokenElement.style.top = e.detail.targetY + "px"
+        tokenElement.style.left = `${e.detail.targetX}px`
+        tokenElement.style.top = `${e.detail.targetY}px`
     })
     tokenElement.addEventListener("move", e => {
         tryActivateBin(e)
@@ -46,6 +46,7 @@ export const createToken = (tokenName, x, y, id) => {
         ["tag", "bad-publicity"],
         ["bad-publicity", "tag"]
     ]
+    // biome-ignore lint/complexity/noForEach: chained filter+forEach; converting to for..of would require an intermediate variable and reduce readability
     dualTokens.filter(([key, value]) => key === tokenName).forEach(([key, value]) => {
         tokenElement.addEventListener("dblclick", e => {
             e.preventDefault()
@@ -79,23 +80,25 @@ function tryActivateBin(moveEvent) {
 
 function tryPutTokenOnCard(tokenElement, tokenRect) {
     const cards = [...document.querySelectorAll(".game-card")]
+    // biome-ignore lint/complexity/noForEach: iterating DOM spread array; forEach is idiomatic here
     cards.forEach(card => {
         if (isPointWithinElement(tokenRect.x, tokenRect.y, [...card.children].find(child => getComputedStyle(child).display !== "none"))) {
             card.appendChild(tokenElement)
             const cardRect = card.getBoundingClientRect()
             if (card.classList.contains("rotated")) {
-                tokenElement.style.left = (tokenRect.y - cardRect.y) * 2 + "px"
-                tokenElement.style.top = -(tokenRect.x - cardRect.x) * 2 + "px"
+                tokenElement.style.left = `${(tokenRect.y - cardRect.y) * 2}px`
+                tokenElement.style.top = `${-(tokenRect.x - cardRect.x) * 2}px`
             } else {
-                tokenElement.style.left = (tokenRect.x - cardRect.x) * 2 + "px"
-                tokenElement.style.top = (tokenRect.y - cardRect.y) * 2 + "px"
+                tokenElement.style.left = `${(tokenRect.x - cardRect.x) * 2}px`
+                tokenElement.style.top = `${(tokenRect.y - cardRect.y) * 2}px`
             }
         }
     })
 }
 
 function tryPutTokenOnToken(tokenElement, tokenRect) {
-    const tokens = [...document.querySelectorAll(`.token`)].filter(t => t.id !== tokenElement.id && !tokenElement.contains(t))
+    const tokens = [...document.querySelectorAll(".token")].filter(t => t.id !== tokenElement.id && !tokenElement.contains(t))
+    // biome-ignore lint/complexity/noForEach: iterating filtered DOM spread array; forEach is idiomatic here
     tokens.forEach(token => {
         if (isPointWithinElement(tokenRect.x, tokenRect.y, token.firstElementChild)) {
             token.appendChild(tokenElement)
@@ -107,7 +110,7 @@ function tryPutTokenOnToken(tokenElement, tokenRect) {
 
 function flipToken(tokenElement, key, value) {
     const newTokenName = tokenElement.firstElementChild.id === key ? value : tokenElement.firstElementChild.id === value ? key : tokenElement.firstElementChild.id
-    const newInnerElement = document.querySelector("#" + newTokenName).cloneNode(true)
+    const newInnerElement = document.querySelector(`#${newTokenName}`).cloneNode(true)
     newInnerElement.style.position = "absolute";
     newInnerElement.style.transform += "translate(-50%, -50%) translate(-10px, -10px)"
     tokenElement.replaceChild(newInnerElement, tokenElement.firstElementChild)
@@ -119,11 +122,12 @@ function flipToken(tokenElement, key, value) {
 }
 
 export const setupTokenSpawning = () => {
+    // biome-ignore lint/complexity/noForEach: token name list is a short literal array; forEach is clear and concise here
     ["credit", "advancement", "power", "virus", "tag", "bad-publicity", "brain-damage"].forEach(tokenName => {
-        document.querySelector("#" + tokenName).addEventListener("mousedown", e => {
+        document.querySelector(`#${tokenName}`).addEventListener("mousedown", e => {
             e.preventDefault()
     
-            const tokenElement = createToken(tokenName, e.clientX + "px", e.clientY + "px")
+            const tokenElement = createToken(tokenName, `${e.clientX}px`, `${e.clientY}px`)
             grabCard(tokenElement)(e)
         })
     })

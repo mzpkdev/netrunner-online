@@ -8,7 +8,7 @@ export const parseDeckList = (deckListString, allCards) => {
         const trimmed = entry.trim()
         if (!trimmed) return []
         const nameParts = trimmed.split(" ")
-        const number = parseInt(nameParts.shift().replace("x", ""))
+        const number = Number.parseInt(nameParts.shift().replace("x", ""))
         if (!Number.isInteger(number) || number < 1) return []
         const name = nameParts.join(" ")
         return Array.from({ length: number }, () => name)
@@ -36,7 +36,7 @@ export const createDeck = (deckList, id, x, y) => {
 
     const deckElement = document.createElement("div")
     deckElement.id = id
-    deckElement.title = deck.length + " cards"
+    deckElement.title = `${deck.length} cards`
     deckElement.style.left = x
     deckElement.style.top = y
     deckElement.classList.add("deck")
@@ -59,14 +59,14 @@ export const createDeck = (deckList, id, x, y) => {
 
         if (deck.length) {
             const deckRect = deckElement.getBoundingClientRect()
-            const cardElement = createCard(deck.pop(), deckRect.x + "px", deckRect.y + "px")
+            const cardElement = createCard(deck.pop(), `${deckRect.x}px`, `${deckRect.y}px`)
             grabCard(cardElement)(e)
 
             if (!deck.length) {
                 deckElement.firstElementChild.classList.add("red-tint")
                 deckElement.title = "no cards left"
             } else {
-                deckElement.title = deck.length + " card" + (deck.length > 1 ? "s" : "")
+                deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`
             }
         }
     })
@@ -75,7 +75,7 @@ export const createDeck = (deckList, id, x, y) => {
         deck.push(cardInfo)
 
         deckElement.firstElementChild.classList.remove("red-tint")
-        deckElement.title = deck.length + " card" + (deck.length > 1 ? "s" : "")
+        deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`
     })
 
     deckElement.addEventListener("putbottom", e => {
@@ -83,7 +83,7 @@ export const createDeck = (deckList, id, x, y) => {
         deck.unshift(cardInfo)
 
         deckElement.firstElementChild.classList.remove("red-tint")
-        deckElement.title = deck.length + " card" + (deck.length > 1 ? "s" : "")
+        deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`
     })
 
     deckElement.addEventListener("shufflein", e => {
@@ -92,7 +92,7 @@ export const createDeck = (deckList, id, x, y) => {
         shuffle(deck)
 
         deckElement.firstElementChild.classList.remove("red-tint")
-        deckElement.title = deck.length + " card" + (deck.length > 1 ? "s" : "")
+        deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`
     })
 
     deckElement.addEventListener("shuffle", e => {

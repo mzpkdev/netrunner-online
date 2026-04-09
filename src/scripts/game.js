@@ -12,7 +12,7 @@ export const setupCorp = () => {
 
     createDeck(document.querySelector("#corp-deck-list").value, "corp-deck", ...corpDeckLocation)
     const corpIdentity = document.querySelector("#corp-identity").value.trim()
-    const corpIdentityElement = createCard(allCards.find(cardInfo => cardInfo.title === corpIdentity), ...corpIdentityLocation)
+    createCard(allCards.find(cardInfo => cardInfo.title === corpIdentity), ...corpIdentityLocation)
 }
 
 export const setupRunner = () => {
@@ -21,7 +21,7 @@ export const setupRunner = () => {
 
     createDeck(document.querySelector("#runner-deck-list").value, "runner-deck", ...runnerDeckLocation)
     const runnerIdentity = document.querySelector("#runner-identity").value.trim()
-    const runnerIdentityElement = createCard(allCards.find(cardInfo => cardInfo.title === runnerIdentity), ...runnerIdentityLocation)
+    createCard(allCards.find(cardInfo => cardInfo.title === runnerIdentity), ...runnerIdentityLocation)
 }
 
 export const setupGame = () => {
