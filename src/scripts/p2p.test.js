@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { receiveMessage } from "./p2p.js"
+import { flipElement } from "./utils.js"
 
 vi.mock("./game.js", () => ({ setupGame: vi.fn() }))
 vi.mock("./utils.js", () => ({
@@ -153,5 +154,79 @@ describe("receiveMessage coordinate dispatch", () => {
         expect(receivedEvent).not.toBeNull()
         expect(receivedEvent.detail.targetX).toBe(300)
         expect(receivedEvent.detail.targetY).toBe(400)
+    })
+})
+
+// ---------------------------------------------------------------------------
+// receiveMessage — opponent-perspective branch (flipElement + CustomEvent)
+// ---------------------------------------------------------------------------
+describe("receiveMessage opponent-perspective dispatch", () => {
+    beforeEach(() => {
+        document.body.innerHTML = ""
+        window.playerSide = "corp"
+        vi.clearAllMocks()
+    })
+
+    it("calls flipElement and dispatches grab event when perspective differs from playerSide", () => {
+        const el = document.createElement("div")
+        el.id = "test-flip-grab"
+        document.body.appendChild(el)
+
+        let receivedEvent = null
+        el.addEventListener("grab", (e) => { receivedEvent = e })
+
+        receiveMessage({
+            messageType: "grab-element",
+            entityId: "test-flip-grab",
+            perspective: "runner",
+            content: { x: 55, y: 77 },
+        })
+
+        expect(flipElement).toHaveBeenCalledOnce()
+        expect(receivedEvent).not.toBeNull()
+        expect(receivedEvent.detail.targetX).toBe(55)
+        expect(receivedEvent.detail.targetY).toBe(77)
+    })
+
+    it("calls flipElement and dispatches move event when perspective differs from playerSide", () => {
+        const el = document.createElement("div")
+        el.id = "test-flip-move"
+        document.body.appendChild(el)
+
+        let receivedEvent = null
+        el.addEventListener("move", (e) => { receivedEvent = e })
+
+        receiveMessage({
+            messageType: "move-element",
+            entityId: "test-flip-move",
+            perspective: "runner",
+            content: { x: 120, y: 240 },
+        })
+
+        expect(flipElement).toHaveBeenCalledOnce()
+        expect(receivedEvent).not.toBeNull()
+        expect(receivedEvent.detail.targetX).toBe(120)
+        expect(receivedEvent.detail.targetY).toBe(240)
+    })
+
+    it("calls flipElement and dispatches ungrab event when perspective differs from playerSide", () => {
+        const el = document.createElement("div")
+        el.id = "test-flip-ungrab"
+        document.body.appendChild(el)
+
+        let receivedEvent = null
+        el.addEventListener("ungrab", (e) => { receivedEvent = e })
+
+        receiveMessage({
+            messageType: "ungrab-element",
+            entityId: "test-flip-ungrab",
+            perspective: "runner",
+            content: { x: 88, y: 33 },
+        })
+
+        expect(flipElement).toHaveBeenCalledOnce()
+        expect(receivedEvent).not.toBeNull()
+        expect(receivedEvent.detail.targetX).toBe(88)
+        expect(receivedEvent.detail.targetY).toBe(33)
     })
 })
