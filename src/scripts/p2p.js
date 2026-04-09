@@ -134,19 +134,24 @@ function showP2PStatus(message, { bg = "#856404", color = "#fff3cd", border = "#
     el.style.display = "block"
 }
 
+function getIceServers() {
+    const credential = import.meta.env.VITE_TURN_CREDENTIAL
+    if (!credential) {
+        console.warn("VITE_TURN_CREDENTIAL not set, using STUN only")
+        return [{ urls: "stun:stun.l.google.com:19302" }]
+    }
+    return [{
+        urls: "turn:global.relay.metered.ca:80",
+        username: "0216de3689c0327b92c21461",
+        credential
+    }]
+}
+
 export const setupP2P = () => {
     const peer = new window.Peer({
         key: "netrunner",
         debug: 4,
-        config: {
-            iceServers: [
-                {
-                    urls: "turn:global.relay.metered.ca:80",
-                    username: "0216de3689c0327b92c21461",
-                    credential: "fAMGCn8IVFAJA0ZZ"
-                }
-            ]
-        }
+        config: { iceServers: getIceServers() }
     })
     
     peer.on("open", id => {

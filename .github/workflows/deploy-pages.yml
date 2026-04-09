@@ -40,6 +40,8 @@ jobs:
 
       - name: Build site
         run: npm run build
+        env:
+          VITE_TURN_CREDENTIAL: ${{ secrets.VITE_TURN_CREDENTIAL }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
