@@ -10,6 +10,8 @@ on:
     types: [submitted]
   repository_dispatch:
     types: [arasaka-revise]
+  check_suite:
+    types: [completed]
 
 jobs:
   develop:
@@ -19,6 +21,7 @@ jobs:
         github.event_name == 'schedule' ||
         github.event_name == 'repository_dispatch' ||
         github.event_name == 'pull_request_review' ||
+        github.event_name == 'check_suite' ||
         (github.event_name == 'issue_comment' && (
           contains(github.event.comment.body, '@arasaka') ||
           github.event.issue.pull_request
