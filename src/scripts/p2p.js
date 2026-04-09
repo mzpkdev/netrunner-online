@@ -91,7 +91,7 @@ export function receiveMessage(message) {
             if (message.perspective !== window.playerSide) {
                 flipElement(element, document.querySelector("body").getBoundingClientRect())
             }
-            element.dispatchEvent(new CustomEvent("grab", {detail: {targetX: message.x, targetY: message.y}}))
+            element.dispatchEvent(new CustomEvent("grab", {detail: {targetX: message.content.x, targetY: message.content.y}}))
             break;
 
         case "move-element":
@@ -105,7 +105,7 @@ export function receiveMessage(message) {
             if (message.perspective !== window.playerSide) {
                 flipElement(element, document.querySelector("body").getBoundingClientRect())
             }
-            element.dispatchEvent(new CustomEvent("move", {detail: {targetX: message.x, targetY: message.y}}))
+            element.dispatchEvent(new CustomEvent("move", {detail: {targetX: message.content.x, targetY: message.content.y}}))
             break;
 
         case "ungrab-element":
@@ -119,7 +119,7 @@ export function receiveMessage(message) {
             if (message.perspective !== window.playerSide) {
                 flipElement(element, document.querySelector("body").getBoundingClientRect())
             }
-            element.dispatchEvent(new CustomEvent("ungrab", {detail: {targetX: message.x, targetY: message.y}}))
+            element.dispatchEvent(new CustomEvent("ungrab", {detail: {targetX: message.content.x, targetY: message.content.y}}))
             break;
     }
 }
