@@ -1,7 +1,10 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { receiveMessage } from "./p2p.js"
-import { flipElement } from "./utils.js"
+import { flipElement, snapToGrid } from "./utils.js"
+import { createCard } from "./card.js"
+import { createDeck } from "./deck.js"
+import { createToken } from "./token.js"
 
 vi.mock("./game.js", () => ({ setupGame: vi.fn() }))
 vi.mock("./utils.js", () => ({
@@ -172,5 +175,108 @@ describe("receiveMessage null guard", () => {
             content: { x: 100, y: 200 },
         })
         expect(console.warn).toHaveBeenCalledOnce()
+    })
+})
+
+// ---------------------------------------------------------------------------
+// receiveMessage — create-element
+// ---------------------------------------------------------------------------
+describe("receiveMessage create-element", () => {
+    let fakeElement
+
+    beforeEach(() => {
+        document.body.innerHTML = ""
+        window.playerSide = "corp"
+        fakeElement = document.createElement("div")
+        fakeElement.id = "new-entity"
+        vi.clearAllMocks()
+    })
+
+    it("calls createCard with spread content for entityType card", () => {
+        createCard.mockReturnValue(fakeElement)
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "card",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: ["arg1", "arg2"],
+        })
+        expect(createCard).toHaveBeenCalledWith("arg1", "arg2")
+    })
+
+    it("calls createDeck with spread content for entityType deck", () => {
+        createDeck.mockReturnValue(fakeElement)
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "deck",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: ["arg1", "arg2"],
+        })
+        expect(createDeck).toHaveBeenCalledWith("arg1", "arg2")
+    })
+
+    it("calls createToken with spread content for entityType token", () => {
+        createToken.mockReturnValue(fakeElement)
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "token",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: ["arg1", "arg2"],
+        })
+        expect(createToken).toHaveBeenCalledWith("arg1", "arg2")
+    })
+
+    it("skips createCard when the entity ID already exists in the DOM", () => {
+        document.body.appendChild(fakeElement)
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "card",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: [],
+        })
+        expect(createCard).not.toHaveBeenCalled()
+    })
+
+    it("calls flipElement when perspective differs from playerSide", () => {
+        createCard.mockReturnValue(fakeElement)
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "card",
+            entityId: "new-entity",
+            perspective: "runner",
+            content: [],
+        })
+        expect(flipElement).toHaveBeenCalledWith(fakeElement, expect.any(Object))
+    })
+
+    it("calls snapToGrid on the created element", () => {
+        createCard.mockReturnValue(fakeElement)
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "card",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: [],
+        })
+        expect(snapToGrid).toHaveBeenCalledWith(fakeElement)
+    })
+})
+
+// ---------------------------------------------------------------------------
+// receiveMessage — unknown messageType
+// ---------------------------------------------------------------------------
+describe("receiveMessage unknown messageType", () => {
+    it("does not throw for an unrecognized messageType", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "unknown-type",
+                entityId: "any-id",
+                perspective: "corp",
+                content: {},
+            })
+        ).not.toThrow()
     })
 })
