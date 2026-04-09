@@ -1,15 +1,33 @@
-import { describe, it, expect, vi } from 'vitest'
-import { parseDeckList } from './deck.js'
+// @vitest-environment jsdom
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { parseDeckList, createDeck } from './deck.js'
+import { shuffle } from './utils.js'
 
 vi.mock('./p2p.js', () => ({ sendCreateMessage: vi.fn() }))
 vi.mock('./card.js', () => ({ createCard: vi.fn(), snapOutOfHandArea: vi.fn() }))
-vi.mock('./grab.js', () => ({ grabCard: vi.fn() }))
+vi.mock('./grab.js', () => ({ grabCard: vi.fn(() => vi.fn()) }))
+vi.mock('./utils.js', () => ({ shuffle: vi.fn() }))
 
 const allCards = [
     { title: 'Hedge Fund' },
     { title: 'Sure Gamble' },
     { title: 'Ice Wall' },
 ]
+
+const makeCardElement = (title = 'Hedge Fund') => {
+    const el = document.createElement('div')
+    el.setAttribute('data-title', title)
+    el.setAttribute('data-side', 'corp')
+    el.setAttribute('data-faction', 'haas-bioroid')
+    el.setAttribute('data-type', 'operation')
+    const front = document.createElement('div')
+    front.className = 'card-front'
+    const img = document.createElement('img')
+    img.src = 'https://example.com/card.png'
+    front.appendChild(img)
+    el.appendChild(front)
+    return el
+}
 
 // ---------------------------------------------------------------------------
 // parseDeckList
@@ -64,5 +82,59 @@ describe('parseDeckList', () => {
         expect(result.matched).toHaveLength(0)
         expect(result.failed).toHaveLength(1)
         expect(result.failed[0]).toBe('Unknown Card')
+    })
+})
+
+// ---------------------------------------------------------------------------
+// createDeck
+// ---------------------------------------------------------------------------
+describe('createDeck', () => {
+    beforeEach(() => {
+        document.body.innerHTML = '<div id="card-layer"></div>'
+        window.allCards = allCards
+    })
+
+    it('returns a .deck element appended to #card-layer', () => {
+        const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
+        expect(el.classList.contains('deck')).toBe(true)
+        expect(document.querySelector('#card-layer').contains(el)).toBe(true)
+    })
+
+    it('sets the title attribute to reflect the number of parsed cards', () => {
+        const el = createDeck('3x Hedge Fund', 'test-deck', '0px', '0px')
+        expect(el.title).toBe('3 cards')
+    })
+
+    it('dispatching puttop increases the deck count and updates the title', () => {
+        const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
+        el.dispatchEvent(new CustomEvent('puttop', { detail: { card: makeCardElement('Sure Gamble') } }))
+        expect(el.title).toBe('3 cards')
+    })
+
+    it('dispatching putbottom increases the deck count', () => {
+        const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
+        el.dispatchEvent(new CustomEvent('putbottom', { detail: { card: makeCardElement('Ice Wall') } }))
+        expect(el.title).toBe('3 cards')
+    })
+
+    it('dispatching shufflein adds the card to the deck and calls shuffle', () => {
+        const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
+        shuffle.mockClear()
+        el.dispatchEvent(new CustomEvent('shufflein', { detail: { card: makeCardElement('Ice Wall') } }))
+        expect(el.title).toBe('3 cards')
+        expect(shuffle).toHaveBeenCalledOnce()
+    })
+
+    it('appends a .deck-parse-errors element when card names fail to parse', () => {
+        createDeck('1x Hedge Fund\n1x Unknown Card', 'test-deck', '0px', '0px')
+        expect(document.querySelector('.deck-parse-errors')).not.toBeNull()
+    })
+
+    it('adds red-tint class and sets title to "no cards left" when all cards are drawn', () => {
+        const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
+        el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+        el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+        expect(el.firstElementChild.classList.contains('red-tint')).toBe(true)
+        expect(el.title).toBe('no cards left')
     })
 })
