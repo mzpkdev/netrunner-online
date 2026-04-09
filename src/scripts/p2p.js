@@ -135,18 +135,21 @@ function showP2PStatus(message, { bg = "#856404", color = "#fff3cd", border = "#
 }
 
 export const setupP2P = () => {
+    const iceServers = []
+    if (import.meta.env.VITE_TURN_USERNAME && import.meta.env.VITE_TURN_CREDENTIAL) {
+        iceServers.push({
+            urls: "turn:global.relay.metered.ca:80",
+            username: import.meta.env.VITE_TURN_USERNAME,
+            credential: import.meta.env.VITE_TURN_CREDENTIAL,
+        })
+    } else {
+        console.warn("VITE_TURN_USERNAME or VITE_TURN_CREDENTIAL is not set — TURN relay will be skipped")
+    }
+
     const peer = new window.Peer({
         key: "netrunner",
         debug: 4,
-        config: {
-            iceServers: [
-                {
-                    urls: "turn:global.relay.metered.ca:80",
-                    username: import.meta.env.VITE_TURN_USERNAME,
-                    credential: import.meta.env.VITE_TURN_CREDENTIAL
-                }
-            ]
-        }
+        config: { iceServers }
     })
     
     peer.on("open", id => {

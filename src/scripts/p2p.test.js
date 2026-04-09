@@ -60,6 +60,19 @@ describe("setupP2P playerSide assignment", () => {
         peerHandlers["connection"](mockConnection)
         expect(window.playerSide).toBe("corp")
     })
+
+    it("calls Peer constructor with ICE server config including TURN credentials", () => {
+        setupP2P()
+        expect(window.Peer).toHaveBeenCalledWith(
+            expect.objectContaining({
+                config: expect.objectContaining({
+                    iceServers: expect.arrayContaining([
+                        expect.objectContaining({ username: expect.any(String) }),
+                    ]),
+                }),
+            })
+        )
+    })
 })
 
 // ---------------------------------------------------------------------------
