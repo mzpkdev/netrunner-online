@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, ready_for_review, reopened]
 
 jobs:
-  review:
+  arasaka:
     uses: mzpkdev/preemclaud/.github/workflows/review.yml@v1
     permissions:
       contents: read
