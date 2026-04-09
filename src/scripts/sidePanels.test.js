@@ -199,6 +199,10 @@ describe('setupSidePanels — corp radio button', () => {
         setupSidePanels()
     })
 
+    it('sets #corp-check.checked to true during initialization', () => {
+        expect(document.querySelector('#corp-check').checked).toBeTruthy()
+    })
+
     it('sets window.playerSide to "corp" when switching from runner', () => {
         document.querySelector('#corp-check').click()
         expect(window.playerSide).toBe('corp')
@@ -306,6 +310,17 @@ describe('setupSidePanels — player panel', () => {
 
         expect(panel.classList.contains('show')).toBe(true)
         expect(panel.classList.contains('hiding')).toBe(false)
+        expect(document.activeElement).toBe(panel)
+    })
+
+    it('focusin on #player-panel adds "show" and removes "hiding"', () => {
+        const panel = document.querySelector('#player-panel')
+        panel.classList.add('hiding')
+
+        panel.dispatchEvent(new Event('focusin', { bubbles: true }))
+
+        expect(panel.classList.contains('show')).toBe(true)
+        expect(panel.classList.contains('hiding')).toBe(false)
     })
 
     it('focusout on #player-panel adds "hiding"', () => {
@@ -335,6 +350,17 @@ describe('setupSidePanels — resource panel', () => {
 
         expect(panel.classList.contains('show')).toBe(true)
         expect(panel.classList.contains('hiding')).toBe(false)
+        expect(document.activeElement).toBe(panel)
+    })
+
+    it('focusin on #resource-panel adds "show" and removes "hiding"', () => {
+        const panel = document.querySelector('#resource-panel')
+        panel.classList.add('hiding')
+
+        panel.dispatchEvent(new Event('focusin', { bubbles: true }))
+
+        expect(panel.classList.contains('show')).toBe(true)
+        expect(panel.classList.contains('hiding')).toBe(false)
     })
 
     it('focusout on #resource-panel adds "hiding"', () => {
@@ -343,6 +369,35 @@ describe('setupSidePanels — resource panel', () => {
         panel.dispatchEvent(new Event('focusout', { bubbles: true }))
 
         expect(panel.classList.contains('hiding')).toBe(true)
+    })
+})
+
+// ---------------------------------------------------------------------------
+// setupSidePanels — mousemove trigger
+// ---------------------------------------------------------------------------
+describe('setupSidePanels — mousemove trigger', () => {
+    beforeEach(() => {
+        vi.clearAllMocks()
+        buildFullDOM()
+        setupSidePanels()
+    })
+
+    it('mousemove with clientX === 0 adds "show" to #resource-panel', () => {
+        const container = document.querySelector('.flex-container').parentElement
+        const resourcePanel = document.querySelector('#resource-panel')
+
+        container.dispatchEvent(new MouseEvent('mousemove', { clientX: 0, bubbles: true }))
+
+        expect(resourcePanel.classList.contains('show')).toBe(true)
+    })
+
+    it('mousemove with clientX === window.screen.width - 1 adds "show" to #player-panel', () => {
+        const container = document.querySelector('.flex-container').parentElement
+        const playerPanel = document.querySelector('#player-panel')
+
+        container.dispatchEvent(new MouseEvent('mousemove', { clientX: window.screen.width - 1, bubbles: true }))
+
+        expect(playerPanel.classList.contains('show')).toBe(true)
     })
 })
 
@@ -368,5 +423,43 @@ describe('setupSidePanels — load-deck-button', () => {
         document.querySelector('#load-deck-button').click()
         expect(setupRunner).toHaveBeenCalled()
         expect(setupCorp).not.toHaveBeenCalled()
+    })
+
+    it('removes #corp-deck and [data-side="corp"] cards from #card-layer when playerSide is "corp"', () => {
+        const cardLayer = document.querySelector('#card-layer')
+        const corpDeck = document.createElement('div')
+        corpDeck.id = 'corp-deck'
+        const corpCard1 = document.createElement('div')
+        corpCard1.classList.add('game-card')
+        corpCard1.dataset.side = 'corp'
+        const corpCard2 = document.createElement('div')
+        corpCard2.classList.add('game-card')
+        corpCard2.dataset.side = 'corp'
+        cardLayer.append(corpDeck, corpCard1, corpCard2)
+
+        window.playerSide = 'corp'
+        document.querySelector('#load-deck-button').click()
+
+        expect(document.querySelector('#card-layer>#corp-deck')).toBeNull()
+        expect(document.querySelectorAll('#card-layer>.game-card[data-side="corp"]').length).toBe(0)
+    })
+
+    it('removes #runner-deck and [data-side="runner"] cards from #card-layer when playerSide is "runner"', () => {
+        const cardLayer = document.querySelector('#card-layer')
+        const runnerDeck = document.createElement('div')
+        runnerDeck.id = 'runner-deck'
+        const runnerCard1 = document.createElement('div')
+        runnerCard1.classList.add('game-card')
+        runnerCard1.dataset.side = 'runner'
+        const runnerCard2 = document.createElement('div')
+        runnerCard2.classList.add('game-card')
+        runnerCard2.dataset.side = 'runner'
+        cardLayer.append(runnerDeck, runnerCard1, runnerCard2)
+
+        window.playerSide = 'runner'
+        document.querySelector('#load-deck-button').click()
+
+        expect(document.querySelector('#card-layer>#runner-deck')).toBeNull()
+        expect(document.querySelectorAll('#card-layer>.game-card[data-side="runner"]').length).toBe(0)
     })
 })
