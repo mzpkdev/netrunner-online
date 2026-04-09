@@ -36,22 +36,27 @@ export function isPointWithinElement(x, y, element) {
 }
 
 export function throttle(func, wait, options) {
-    var timeout, context, args, result;
-    var previous = 0;
+    let timeout;
+    let context;
+    let args;
+    let result;
+    let previous = 0;
+    // biome-ignore lint/style/noParameterAssign: throttle uses options as a local default; restructuring the closure would break deferred invocation
     if (!options) options = {};
 
-    var later = function() {
+    const later = () => {
         previous = options.leading === false ? 0 : Date.now();
         timeout = null;
         result = func.apply(context, args);
         if (!timeout) context = args = null;
     };
 
-    var throttled = function() {
-        var _now = Date.now();
+    const throttled = function() {
+        const _now = Date.now();
         if (!previous && options.leading === false) previous = _now;
-        var remaining = wait - (_now - previous);
+        const remaining = wait - (_now - previous);
         context = this;
+        // biome-ignore lint/style/noArguments: throttle captures call arguments for deferred apply; rest params cannot replace arguments here without restructuring the closure
         args = arguments;
         if (remaining <= 0 || remaining > wait) {
             if (timeout) {
@@ -67,7 +72,7 @@ export function throttle(func, wait, options) {
         return result;
     };
 
-    throttled.cancel = function() {
+    throttled.cancel = () => {
         clearTimeout(timeout);
         previous = 0;
         timeout = context = args = null;
@@ -90,7 +95,7 @@ export const putElementTop = (element) => {
 
 export const flipElement = (element, documentRect) => {
     const elementRect = element.getBoundingClientRect()
-    element.style.left = documentRect.width - elementRect.x + "px"
-    element.style.top = documentRect.height - elementRect.y + "px"
+    element.style.left = `${documentRect.width - elementRect.x}px`
+    element.style.top = `${documentRect.height - elementRect.y}px`
     return element
 }

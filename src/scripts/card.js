@@ -10,7 +10,7 @@ export const createCard = (cardInfo, x, y, id) => {
     cardElement.setAttribute("data-faction", cardInfo.faction_code)
     cardElement.setAttribute("data-type", cardInfo.type_code)
     cardElement.setAttribute("data-location", "deck")
-    cardElement.setAttribute("id", id ? id : "card-" + crypto.randomUUID())
+    cardElement.setAttribute("id", id ? id : `card-${crypto.randomUUID()}`)
     cardElement.style = `left: ${x}; top: ${y};`
     cardElement.classList.add("game-card")
     cardElement.innerHTML = `
@@ -83,8 +83,8 @@ const cardContextMenu = (element) => {
         contextMenu.parentNode.replaceChild(newContextMenu, contextMenu)
 
         newContextMenu.style.display = "block"
-        newContextMenu.style.left = e.clientX + "px"
-        newContextMenu.style.top = e.clientY + "px"
+        newContextMenu.style.left = `${e.clientX}px`
+        newContextMenu.style.top = `${e.clientY}px`
         newContextMenu.scrollIntoView()
         newContextMenu.querySelector("#context-menu-flip").addEventListener("click", flipCard(element))
         newContextMenu.querySelector("#context-menu-put-under").addEventListener("click", () => putElementBottom(element))
@@ -138,14 +138,14 @@ export const snapOutOfHandArea = (cardElement) => {
     const yourHandY = document.querySelector("#your-hand").getBoundingClientRect().y
     const cardY = cardElement.getBoundingClientRect().y
     if (yourHandY - cardY < 75) {
-        cardElement.style.top = cardY - (75 - (yourHandY - cardY)) + "px"
+        cardElement.style.top = `${cardY - (75 - (yourHandY - cardY))}px`
     }
     snapToGrid(cardElement)
 }
 
 const snapIntoHandArea = (cardElement) => {
     const yourHandRect = document.querySelector("#your-hand").getBoundingClientRect()
-    cardElement.style.top = yourHandRect.y + yourHandRect.height / 2 + "px"
+    cardElement.style.top = `${yourHandRect.y + yourHandRect.height / 2}px`
     snapToGrid(cardElement)
 }
 

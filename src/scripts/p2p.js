@@ -49,7 +49,7 @@ export function receiveMessage(message) {
         case "create-element":
             switch (message.entityType) {
                 case "deck":
-                    if (!document.querySelector("#" + message.entityId)) {
+                    if (!document.querySelector(`#${message.entityId}`)) {
                         element = createDeck(...message.content)
                         if (message.perspective !== window.playerSide) {
                             flipElement(element, document.querySelector("body").getBoundingClientRect())
@@ -59,7 +59,7 @@ export function receiveMessage(message) {
                     break;
 
                 case "card":
-                    if (!document.querySelector("#" + message.entityId)) {
+                    if (!document.querySelector(`#${message.entityId}`)) {
                         element = createCard(...message.content)
                         if (message.perspective !== window.playerSide) {
                             flipElement(element, document.querySelector("body").getBoundingClientRect())
@@ -69,7 +69,7 @@ export function receiveMessage(message) {
                     break;
 
                 case "token":
-                    if (!document.querySelector("#" + message.entityId)) {
+                    if (!document.querySelector(`#${message.entityId}`)) {
                         element = createToken(...message.content)
                         if (message.perspective !== window.playerSide) {
                             flipElement(element, document.querySelector("body").getBoundingClientRect())
@@ -81,13 +81,13 @@ export function receiveMessage(message) {
             break;
 
         case "grab-element":
-            element = document.querySelector("#" + message.entityId)
+            element = document.querySelector(`#${message.entityId}`)
             if (!element) {
                 console.warn(`receiveMessage: grab-element ignored — no element with id "${message.entityId}"`)
                 break
             }
-            element.style.left = message.content.x + "px"
-            element.style.top = message.content.y + "px"
+            element.style.left = `${message.content.x}px`
+            element.style.top = `${message.content.y}px`
             if (message.perspective !== window.playerSide) {
                 flipElement(element, document.querySelector("body").getBoundingClientRect())
             }
@@ -95,13 +95,13 @@ export function receiveMessage(message) {
             break;
 
         case "move-element":
-            element = document.querySelector("#" + message.entityId)
+            element = document.querySelector(`#${message.entityId}`)
             if (!element) {
                 console.warn(`receiveMessage: move-element ignored — no element with id "${message.entityId}"`)
                 break
             }
-            element.style.left = message.content.x + "px"
-            element.style.top = message.content.y + "px"
+            element.style.left = `${message.content.x}px`
+            element.style.top = `${message.content.y}px`
             if (message.perspective !== window.playerSide) {
                 flipElement(element, document.querySelector("body").getBoundingClientRect())
             }
@@ -109,13 +109,13 @@ export function receiveMessage(message) {
             break;
 
         case "ungrab-element":
-            element = document.querySelector("#" + message.entityId)
+            element = document.querySelector(`#${message.entityId}`)
             if (!element) {
                 console.warn(`receiveMessage: ungrab-element ignored — no element with id "${message.entityId}"`)
                 break
             }
-            element.style.left = message.content.x + "px"
-            element.style.top = message.content.y + "px"
+            element.style.left = `${message.content.x}px`
+            element.style.top = `${message.content.y}px`
             if (message.perspective !== window.playerSide) {
                 flipElement(element, document.querySelector("body").getBoundingClientRect())
             }
@@ -182,7 +182,7 @@ export const setupP2P = () => {
         window.sendMessage = throttle((message) => connection.send(message), 200)
     
         connection.on("data", message => {
-            console.log(`Peer:`, message)
+            console.log("Peer:", message)
             receiveMessage(message)
         })
     

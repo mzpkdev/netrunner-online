@@ -4,11 +4,13 @@ import { updateCardArea, updateCardHoverArea, updateCardTooltipPosition, handleC
 
 export const flipBoard = () => {
     const bodyRect = document.querySelector("body").getBoundingClientRect()
+    // biome-ignore lint/complexity/noForEach: Array.from+forEach used consistently throughout flipBoard; converting all three to for..of loops would only add noise
     Array.from(document.querySelectorAll("#card-layer>.deck"))
         .forEach(deck => {
             flipElement(deck, bodyRect)
             snapToGrid(deck)
         })
+    // biome-ignore lint/complexity/noForEach: see above
     Array.from(document.querySelectorAll("#card-layer>.game-card"))
         .forEach(card => {
             flipElement(card, bodyRect)
@@ -18,6 +20,7 @@ export const flipBoard = () => {
             updateCardHoverArea(card)
             handleCardBehavior(card)
         })
+    // biome-ignore lint/complexity/noForEach: see above
     Array.from(document.querySelectorAll("#card-layer>.token"))
         .forEach(token => {
             flipElement(token, bodyRect)
@@ -90,10 +93,12 @@ export const setupSidePanels = () => {
     document.querySelector("#load-deck-button").addEventListener("click", e => {
         if (window.playerSide === "corp") {
             document.querySelector("#card-layer>#corp-deck")?.remove()
+            // biome-ignore lint/complexity/noForEach: single-expression NodeList traversal; forEach is idiomatic for DOM removal
             document.querySelectorAll('#card-layer>.game-card[data-side="corp"]').forEach(card => card.remove())
             setupCorp()
         } else {
             document.querySelector("#card-layer>#runner-deck")?.remove()
+            // biome-ignore lint/complexity/noForEach: single-expression NodeList traversal; forEach is idiomatic for DOM removal
             document.querySelectorAll('#card-layer>.game-card[data-side="runner"]').forEach(card => card.remove())
             setupRunner()
         }
