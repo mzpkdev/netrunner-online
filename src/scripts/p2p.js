@@ -158,9 +158,12 @@ export const setupP2P = () => {
         const yourHostId = document.querySelector("#your-host-id")
         yourHostId.value = id
         window.location.hash = id
-    
+
         const opponentHostId = document.querySelector("#opponent-host-id")
         opponentHostId.value = ""
+
+        document.querySelector("#host-game").disabled = false
+        document.querySelector("#join-game").disabled = false
     })
 
     peer.on("connection", (connection) => {
