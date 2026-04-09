@@ -142,7 +142,7 @@ function getIceServers() {
     }
     return [{
         urls: "turn:global.relay.metered.ca:80",
-        username: "0216de3689c0327b92c21461",
+        username: "9370f3a45c11a0ae0dd13256",
         credential
     }]
 }
