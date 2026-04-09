@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { receiveMessage } from "./p2p.js"
+import { receiveMessage, setupP2P } from "./p2p.js"
 
 vi.mock("./game.js", () => ({ setupGame: vi.fn() }))
 vi.mock("./utils.js", () => ({
@@ -11,6 +11,56 @@ vi.mock("./utils.js", () => ({
 vi.mock("./card.js", () => ({ createCard: vi.fn() }))
 vi.mock("./deck.js", () => ({ createDeck: vi.fn() }))
 vi.mock("./token.js", () => ({ createToken: vi.fn() }))
+
+// ---------------------------------------------------------------------------
+// setupP2P — playerSide assignment
+// ---------------------------------------------------------------------------
+describe("setupP2P playerSide assignment", () => {
+    let peerHandlers
+    let mockConnection
+
+    beforeEach(() => {
+        peerHandlers = {}
+        mockConnection = { on: vi.fn(), send: vi.fn() }
+
+        window.Peer = vi.fn(() => ({
+            on: (event, handler) => {
+                peerHandlers[event] = handler
+            },
+            connect: vi.fn(() => mockConnection),
+        }))
+
+        Object.defineProperty(navigator, "clipboard", {
+            value: { writeText: vi.fn() },
+            configurable: true,
+        })
+
+        document.body.innerHTML = `
+            <div id="start-game-panel">
+                <input id="your-host-id" />
+                <input id="opponent-host-id" />
+                <button id="host-game">Host</button>
+                <button id="join-game">Join</button>
+                <button id="play-solo">Solo</button>
+            </div>
+            <button id="open-player-panel"></button>
+        `
+
+        window.playerSide = undefined
+    })
+
+    it("sets playerSide to 'runner' when #join-game is clicked", () => {
+        setupP2P()
+        document.querySelector("#join-game").click()
+        expect(window.playerSide).toBe("runner")
+    })
+
+    it("sets playerSide to 'corp' when peer fires a connection event (host path)", () => {
+        setupP2P()
+        peerHandlers["connection"](mockConnection)
+        expect(window.playerSide).toBe("corp")
+    })
+})
 
 // ---------------------------------------------------------------------------
 // receiveMessage — null guard for unknown entityIds
