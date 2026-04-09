@@ -249,7 +249,7 @@ describe("receiveMessage create-element", () => {
             perspective: "runner",
             content: [],
         })
-        expect(flipElement).toHaveBeenCalledWith(fakeElement, expect.any(Object))
+        expect(flipElement).toHaveBeenCalledWith(fakeElement, expect.objectContaining({ x: 0, y: 0, width: 0, height: 0 }))
     })
 
     it("calls snapToGrid on the created element", () => {
@@ -262,6 +262,69 @@ describe("receiveMessage create-element", () => {
             content: [],
         })
         expect(snapToGrid).toHaveBeenCalledWith(fakeElement)
+    })
+
+    it("skips createDeck when the entity ID already exists in the DOM", () => {
+        document.body.appendChild(fakeElement)
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "deck",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: [],
+        })
+        expect(createDeck).not.toHaveBeenCalled()
+    })
+
+    it("skips createToken when the entity ID already exists in the DOM", () => {
+        document.body.appendChild(fakeElement)
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "token",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: [],
+        })
+        expect(createToken).not.toHaveBeenCalled()
+    })
+
+    it("calls flipElement with the deck element when perspective differs from playerSide", () => {
+        createDeck.mockReturnValue(fakeElement)
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "deck",
+            entityId: "new-entity",
+            perspective: "runner",
+            content: [],
+        })
+        expect(flipElement).toHaveBeenCalledWith(fakeElement, expect.objectContaining({ x: 0, y: 0, width: 0, height: 0 }))
+    })
+
+    it("calls snapToGrid with the token element", () => {
+        createToken.mockReturnValue(fakeElement)
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "token",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: [],
+        })
+        expect(snapToGrid).toHaveBeenCalledWith(fakeElement)
+    })
+
+    it("does not throw and calls no create function for an unrecognized entityType", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "create-element",
+                entityType: "unknown",
+                entityId: "new-entity",
+                perspective: "corp",
+                content: [],
+            })
+        ).not.toThrow()
+        expect(createCard).not.toHaveBeenCalled()
+        expect(createDeck).not.toHaveBeenCalled()
+        expect(createToken).not.toHaveBeenCalled()
     })
 })
 
