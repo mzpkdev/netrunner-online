@@ -138,6 +138,17 @@ describe('createDeck', () => {
         expect(errors.textContent).toContain('<img src=x onerror="xss()">')
     })
 
+    it('renders one <li> per distinct unrecognized card name', () => {
+        createDeck('1x Ghost Runner\n1x Sneakdoor Beta', 'test-deck', '0px', '0px')
+        const errors = document.querySelector('.deck-parse-errors')
+        expect(errors).not.toBeNull()
+        const items = errors.querySelectorAll('li')
+        expect(items).toHaveLength(2)
+        const texts = Array.from(items).map(li => li.textContent)
+        expect(texts).toContain('Ghost Runner')
+        expect(texts).toContain('Sneakdoor Beta')
+    })
+
     it('adds red-tint class and sets title to "no cards left" when all cards are drawn', () => {
         const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
         el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
