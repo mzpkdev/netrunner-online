@@ -50,7 +50,19 @@ export const createDeck = (deckList, id, x, y) => {
     if (failed.length > 0) {
         const errorElement = document.createElement("div")
         errorElement.classList.add("deck-parse-errors")
-        errorElement.innerHTML = `<strong>Unrecognized cards (not loaded):</strong><ul>${failed.map(n => `<li>${n}</li>`).join("")}</ul>`
+
+        const heading = document.createElement("strong")
+        heading.textContent = "Unrecognized cards (not loaded):"
+        errorElement.appendChild(heading)
+
+        const list = document.createElement("ul")
+        for (const name of failed) {
+            const item = document.createElement("li")
+            item.textContent = name
+            list.appendChild(item)
+        }
+        errorElement.appendChild(list)
+
         document.querySelector("#card-layer").appendChild(errorElement)
     }
 
