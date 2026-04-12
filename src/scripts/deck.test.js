@@ -130,6 +130,14 @@ describe('createDeck', () => {
         expect(document.querySelector('.deck-parse-errors')).not.toBeNull()
     })
 
+    it('renders HTML characters in failed card names as escaped text, not live markup', () => {
+        createDeck('1x <img src=x onerror="xss()">', 'test-deck', '0px', '0px')
+        const errors = document.querySelector('.deck-parse-errors')
+        expect(errors).not.toBeNull()
+        expect(errors.querySelector('img')).toBeNull()
+        expect(errors.textContent).toContain('<img src=x onerror="xss()">')
+    })
+
     it('adds red-tint class and sets title to "no cards left" when all cards are drawn', () => {
         const el = createDeck('2x Hedge Fund', 'test-deck', '0px', '0px')
         el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
