@@ -7,14 +7,15 @@
     height: 100vh;
     z-index: -1;
 }
-.svg-container>svg {
+.svg-container > svg {
     opacity: 0.3;
 }
-#paths-bg, #static {
+#paths-bg,
+#static {
     stroke: #84b8ec;
 }
 .path {
-    stroke: #2CEEF0;
+    stroke: #2ceef0;
     animation: draw 50s infinite;
     animation-timing-function: linear;
 }

@@ -1,55 +1,37 @@
-.game-card[data-location="hand"]:not([data-hover-location="hand"])>* {
-    box-shadow:
-        0 0 5px rgba(165, 255, 47, 0.5),
-        0 0 10px rgba(165, 255, 47, 0.5),
-        0 0 20px rgba(165, 255, 47, 0.5),
-        0 0 30px rgba(165, 255, 47, 0.5),
-        0 0 40px rgba(165, 255, 47, 0.5);
+.game-card[data-location="hand"]:not([data-hover-location="hand"]) > * {
+    box-shadow: 0 0 5px rgba(165, 255, 47, 0.5), 0 0 10px
+        rgba(165, 255, 47, 0.5), 0 0 20px rgba(165, 255, 47, 0.5), 0 0 30px
+        rgba(165, 255, 47, 0.5), 0 0 40px rgba(165, 255, 47, 0.5);
 }
-.game-card:not([data-location="hand"])[data-hover-location="hand"]>* {
-    box-shadow:
-        0 0 5px rgba(255, 165, 0, 0.5),
-        0 0 10px rgba(255, 165, 0, 0.5),
-        0 0 20px rgba(255, 165, 0, 0.5),
-        0 0 30px rgba(255, 165, 0, 0.5),
-        0 0 40px rgba(255, 165, 0, 0.5);
+.game-card:not([data-location="hand"])[data-hover-location="hand"] > * {
+    box-shadow: 0 0 5px rgba(255, 165, 0, 0.5), 0 0 10px rgba(255, 165, 0, 0.5),
+        0 0 20px rgba(255, 165, 0, 0.5), 0 0 30px rgba(255, 165, 0, 0.5), 0 0
+        40px rgba(255, 165, 0, 0.5);
 }
-.game-card:not([data-location="deck"])[data-hover-location="deck"]>* {
-    box-shadow:
-        0 0 5px rgba(0, 191, 255, 0.5),
-        0 0 10px rgb(0, 191, 255, 0.5),
-        0 0 20px rgba(0, 191, 255, 0.5),
-        0 0 30px rgba(0, 191, 255, 0.5),
-        0 0 40px rgba(0, 191, 255, 0.5);
+.game-card:not([data-location="deck"])[data-hover-location="deck"] > * {
+    box-shadow: 0 0 5px rgba(0, 191, 255, 0.5), 0 0 10px rgb(0, 191, 255, 0.5),
+        0 0 20px rgba(0, 191, 255, 0.5), 0 0 30px rgba(0, 191, 255, 0.5), 0 0
+        40px rgba(0, 191, 255, 0.5);
 }
 
-.game-card[data-location="board"]>* {
+.game-card[data-location="board"] > * {
     animation: glow-impulse 1s normal;
 }
 
 @keyframes glow-impulse {
     0% {
-        box-shadow:
-        0 0 5px rgba(255, 255, 255, 0),
-        0 0 10px rgba(255, 255, 255, 0),
-        0 0 20px rgba(255, 255, 255, 0),
-        0 0 30px rgba(255, 255, 255, 0),
-        0 0 40px rgba(255, 255, 255, 0);
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0), 0 0 10px
+            rgba(255, 255, 255, 0), 0 0 20px rgba(255, 255, 255, 0), 0 0 30px
+            rgba(255, 255, 255, 0), 0 0 40px rgba(255, 255, 255, 0);
     }
     5% {
-        box-shadow:
-        0 0 5px rgba(255, 255, 255, 1),
-        0 0 10px rgba(255, 255, 255, 1),
-        0 0 20px rgba(255, 255, 255, 1),
-        0 0 30px rgba(255, 255, 255, 1),
-        0 0 40px rgba(255, 255, 255, 1);
+        box-shadow: 0 0 5px rgba(255, 255, 255, 1), 0 0 10px
+            rgba(255, 255, 255, 1), 0 0 20px rgba(255, 255, 255, 1), 0 0 30px
+            rgba(255, 255, 255, 1), 0 0 40px rgba(255, 255, 255, 1);
     }
     100% {
-        box-shadow:
-        0 0 5px rgba(255, 255, 255, 0),
-        0 0 10px rgba(255, 255, 255, 0),
-        0 0 20px rgba(255, 255, 255, 0),
-        0 0 30px rgba(255, 255, 255, 0),
-        0 0 40px rgba(255, 255, 255, 0);
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0), 0 0 10px
+            rgba(255, 255, 255, 0), 0 0 20px rgba(255, 255, 255, 0), 0 0 30px
+            rgba(255, 255, 255, 0), 0 0 40px rgba(255, 255, 255, 0);
     }
 }

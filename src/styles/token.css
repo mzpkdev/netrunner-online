@@ -3,10 +3,10 @@
     z-index: 20;
     display: block !important;
 }
-.game-card>.token {
+.game-card > .token {
     transform: scale(2) translate(50%, 50%);
 }
-.game-card.rotated>.token {
+.game-card.rotated > .token {
     transform: rotate(-90deg) scale(2) translate(50%, 50%);
 }
 .token:hover {

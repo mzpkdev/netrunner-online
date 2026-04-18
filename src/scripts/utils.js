@@ -1,12 +1,14 @@
 export async function fetchAllCards() {
     try {
-        const response = await fetch("https://netrunnerdb.com/api/2.0/public/cards");
+        const response = await fetch(
+            "https://netrunnerdb.com/api/2.0/public/cards",
+        );
         if (!response.ok) {
             throw new Error(`Failed to fetch: ${response.statusText}`);
         }
         return await response.json();
     } catch (error) {
-        console.error('Error fetching:', error);
+        console.error("Error fetching:", error);
         throw error;
     }
 }
@@ -19,20 +21,17 @@ export function shuffle(array) {
 }
 
 export function snapToGrid(element, grid = 25) {
-    const left = Math.round(element.getBoundingClientRect().x / grid) * grid
-    const top = Math.round(element.getBoundingClientRect().y / grid) * grid
+    const left = Math.round(element.getBoundingClientRect().x / grid) * grid;
+    const top = Math.round(element.getBoundingClientRect().y / grid) * grid;
     element.style.left = `${left}px`;
     element.style.top = `${top}px`;
 }
 
 export function isPointWithinElement(x, y, element) {
-    const rect = element.getBoundingClientRect()
+    const rect = element.getBoundingClientRect();
     return (
-        x >= rect.left &&
-        x <= rect.right &&
-        y >= rect.top &&
-        y <= rect.bottom
-    )
+        x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+    );
 }
 
 export function throttle(func, wait, options) {
@@ -51,7 +50,7 @@ export function throttle(func, wait, options) {
         if (!timeout) context = args = null;
     };
 
-    const throttled = function() {
+    const throttled = function () {
         const _now = Date.now();
         if (!previous && options.leading === false) previous = _now;
         const remaining = wait - (_now - previous);
@@ -81,21 +80,21 @@ export function throttle(func, wait, options) {
 }
 
 export const putElementBottom = (element) => {
-    const cardLayer = document.querySelector("#card-layer")
-    cardLayer.insertBefore(element, cardLayer.firstElementChild)
-}
+    const cardLayer = document.querySelector("#card-layer");
+    cardLayer.insertBefore(element, cardLayer.firstElementChild);
+};
 
 export const putElementTop = (element) => {
-    const cardLayer = document.querySelector("#card-layer")
+    const cardLayer = document.querySelector("#card-layer");
     if (cardLayer.lastElementChild !== element) {
-        cardLayer.appendChild(element)
-        element.click()
+        cardLayer.appendChild(element);
+        element.click();
     }
-}
+};
 
 export const flipElement = (element, documentRect) => {
-    const elementRect = element.getBoundingClientRect()
-    element.style.left = `${documentRect.width - elementRect.x}px`
-    element.style.top = `${documentRect.height - elementRect.y}px`
-    return element
-}
+    const elementRect = element.getBoundingClientRect();
+    element.style.left = `${documentRect.width - elementRect.x}px`;
+    element.style.top = `${documentRect.height - elementRect.y}px`;
+    return element;
+};
