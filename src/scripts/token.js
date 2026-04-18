@@ -5,9 +5,9 @@ import { isPointWithinElement, putElementTop, snapToGrid } from "./utils.js";
 export const createToken = (tokenName, x, y, id) => {
     const tokenElement = document.createElement("div");
 
-    const innerElement = document
-        .querySelector(`#${tokenName}`)
-        .cloneNode(true);
+    const innerElement = /** @type {HTMLElement} */ (
+        document.querySelector(`#${tokenName}`).cloneNode(true)
+    );
     innerElement.style.position = "absolute";
     innerElement.style.transform +=
         "translate(-50%, -50%) translate(-10px, -10px)";
@@ -20,8 +20,9 @@ export const createToken = (tokenName, x, y, id) => {
     tokenElement.addEventListener("mousedown", grabCard(tokenElement));
     tokenElement.addEventListener("grab", (e) => {
         putElementTop(tokenElement);
-        tokenElement.style.left = `${e.detail.targetX}px`;
-        tokenElement.style.top = `${e.detail.targetY}px`;
+        const grabEvent = /** @type {CustomEvent} */ (e);
+        tokenElement.style.left = `${grabEvent.detail.targetX}px`;
+        tokenElement.style.top = `${grabEvent.detail.targetY}px`;
     });
     tokenElement.addEventListener("move", (e) => {
         tryActivateBin(e);
@@ -150,9 +151,9 @@ function flipToken(tokenElement, key, value) {
             : tokenElement.firstElementChild.id === value
               ? key
               : tokenElement.firstElementChild.id;
-    const newInnerElement = document
-        .querySelector(`#${newTokenName}`)
-        .cloneNode(true);
+    const newInnerElement = /** @type {HTMLElement} */ (
+        document.querySelector(`#${newTokenName}`).cloneNode(true)
+    );
     newInnerElement.style.position = "absolute";
     newInnerElement.style.transform +=
         "translate(-50%, -50%) translate(-10px, -10px)";
@@ -179,13 +180,13 @@ export const setupTokenSpawning = () => {
             .querySelector(`#${tokenName}`)
             .addEventListener("mousedown", (e) => {
                 e.preventDefault();
-
+                const mouseEvent = /** @type {MouseEvent} */ (e);
                 const tokenElement = createToken(
                     tokenName,
-                    `${e.clientX}px`,
-                    `${e.clientY}px`,
+                    `${mouseEvent.clientX}px`,
+                    `${mouseEvent.clientY}px`,
                 );
-                grabCard(tokenElement)(e);
+                grabCard(tokenElement)(mouseEvent);
             });
     });
 };

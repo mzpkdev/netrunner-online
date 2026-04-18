@@ -13,13 +13,13 @@ export const setupCorp = () => {
         window.playerSide === "corp" ? ["75vw", "75vh"] : ["25vw", "25vh"];
 
     createDeck(
-        document.querySelector("#corp-deck-list").value,
+        /** @type {HTMLInputElement} */ (document.querySelector("#corp-deck-list")).value,
         "corp-deck",
         ...corpDeckLocation,
     );
-    const corpIdentity = document.querySelector("#corp-identity").value.trim();
+    const corpIdentity = /** @type {HTMLInputElement} */ (document.querySelector("#corp-identity")).value.trim();
     createCard(
-        allCards.find((cardInfo) => cardInfo.title === corpIdentity),
+        window.allCards.find((cardInfo) => cardInfo.title === corpIdentity),
         ...corpIdentityLocation,
     );
 };
@@ -31,15 +31,15 @@ export const setupRunner = () => {
         window.playerSide === "corp" ? ["25vw", "25vh"] : ["75vw", "75vh"];
 
     createDeck(
-        document.querySelector("#runner-deck-list").value,
+        /** @type {HTMLInputElement} */ (document.querySelector("#runner-deck-list")).value,
         "runner-deck",
         ...runnerDeckLocation,
     );
-    const runnerIdentity = document
-        .querySelector("#runner-identity")
-        .value.trim();
+    const runnerIdentity = /** @type {HTMLInputElement} */ (
+        document.querySelector("#runner-identity")
+    ).value.trim();
     createCard(
-        allCards.find((cardInfo) => cardInfo.title === runnerIdentity),
+        window.allCards.find((cardInfo) => cardInfo.title === runnerIdentity),
         ...runnerIdentityLocation,
     );
 };
@@ -73,11 +73,11 @@ export const main = async () => {
     });
 
     document.addEventListener("click", (e) => {
-        document.querySelector(".dropdown-menu").style.display = "none";
+        /** @type {HTMLElement} */ (document.querySelector(".dropdown-menu")).style.display = "none";
     });
 
     document.addEventListener("auxclick", (e) => {
-        document.querySelector(".dropdown-menu").style.display = "none";
+        /** @type {HTMLElement} */ (document.querySelector(".dropdown-menu")).style.display = "none";
     });
 
     setupKeyboardShortcuts();

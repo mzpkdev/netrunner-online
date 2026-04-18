@@ -44,6 +44,7 @@ export function sendUngrabMessage(id, x, y) {
 }
 
 export function receiveMessage(message) {
+    /** @type {HTMLElement | null} */
     let element = null;
     switch (message.messageType) {
         case "create-element":
@@ -96,7 +97,7 @@ export function receiveMessage(message) {
             break;
 
         case "grab-element":
-            element = document.querySelector(`#${message.entityId}`);
+            element = /** @type {HTMLElement | null} */ (document.querySelector(`#${message.entityId}`));
             if (!element) {
                 console.warn(
                     `receiveMessage: grab-element ignored — no element with id "${message.entityId}"`,
@@ -122,7 +123,7 @@ export function receiveMessage(message) {
             break;
 
         case "move-element":
-            element = document.querySelector(`#${message.entityId}`);
+            element = /** @type {HTMLElement | null} */ (document.querySelector(`#${message.entityId}`));
             if (!element) {
                 console.warn(
                     `receiveMessage: move-element ignored — no element with id "${message.entityId}"`,
@@ -148,7 +149,7 @@ export function receiveMessage(message) {
             break;
 
         case "ungrab-element":
-            element = document.querySelector(`#${message.entityId}`);
+            element = /** @type {HTMLElement | null} */ (document.querySelector(`#${message.entityId}`));
             if (!element) {
                 console.warn(
                     `receiveMessage: ungrab-element ignored — no element with id "${message.entityId}"`,
@@ -179,7 +180,7 @@ function showP2PStatus(
     message,
     { bg = "#856404", color = "#fff3cd", border = "#ffc107" } = {},
 ) {
-    const el = document.querySelector("#p2p-status");
+    const el = /** @type {HTMLElement | null} */ (document.querySelector("#p2p-status"));
     if (!el) return;
     el.textContent = message;
     el.style.backgroundColor = bg;
@@ -211,22 +212,22 @@ export const setupP2P = () => {
     });
 
     peer.on("open", (id) => {
-        const yourHostId = document.querySelector("#your-host-id");
+        const yourHostId = /** @type {HTMLInputElement} */ (document.querySelector("#your-host-id"));
         yourHostId.value = id;
         window.location.hash = id;
 
-        const opponentHostId = document.querySelector("#opponent-host-id");
+        const opponentHostId = /** @type {HTMLInputElement} */ (document.querySelector("#opponent-host-id"));
         opponentHostId.value = "";
 
-        document.querySelector("#host-game").disabled = false;
-        document.querySelector("#join-game").disabled = false;
+        /** @type {HTMLButtonElement} */ (document.querySelector("#host-game")).disabled = false;
+        /** @type {HTMLButtonElement} */ (document.querySelector("#join-game")).disabled = false;
     });
 
     peer.on("connection", (connection) => {
         setupP2PConnection(connection);
         document.querySelector("#start-game-panel").remove();
         window.playerSide = "corp";
-        document.querySelector("#open-player-panel").click();
+        /** @type {HTMLElement} */ (document.querySelector("#open-player-panel")).click();
     });
 
     peer.on("error", (err) => {
@@ -259,21 +260,21 @@ export const setupP2P = () => {
         });
     };
 
-    document.querySelector("#opponent-host-id").focus();
+    /** @type {HTMLElement} */ (document.querySelector("#opponent-host-id")).focus();
 
     document.querySelector("#host-game").addEventListener("click", (e) => {
-        const yourHostId = document.querySelector("#your-host-id");
+        const yourHostId = /** @type {HTMLInputElement} */ (document.querySelector("#your-host-id"));
         yourHostId.select();
         navigator.clipboard.writeText(yourHostId.value);
     });
 
     document.querySelector("#join-game").addEventListener("click", (e) => {
-        const opponentHostId = document.querySelector("#opponent-host-id");
+        const opponentHostId = /** @type {HTMLInputElement} */ (document.querySelector("#opponent-host-id"));
         const connection = peer.connect(opponentHostId.value);
         setupP2PConnection(connection);
         document.querySelector("#start-game-panel").remove();
         window.playerSide = "runner";
-        document.querySelector("#open-player-panel").click();
+        /** @type {HTMLElement} */ (document.querySelector("#open-player-panel")).click();
     });
 
     document.querySelector("#play-solo").addEventListener("click", (e) => {
