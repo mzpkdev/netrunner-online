@@ -1,119 +1,126 @@
-import { shuffle } from "./utils.js"
-import { sendCreateMessage } from "./p2p.js"
-import { createCard, snapOutOfHandArea } from "./card.js"
-import { grabCard } from "./grab.js"
+import { createCard, snapOutOfHandArea } from "./card.js";
+import { grabCard } from "./grab.js";
+import { sendCreateMessage } from "./p2p.js";
+import { shuffle } from "./utils.js";
 
 export const parseDeckList = (deckListString, allCards) => {
-    const names = deckListString.trim().split("\n").flatMap(entry => {
-        const trimmed = entry.trim()
-        if (!trimmed) return []
-        const nameParts = trimmed.split(" ")
-        const number = Number.parseInt(nameParts.shift().replace("x", ""))
-        if (!Number.isInteger(number) || number < 1) return []
-        const name = nameParts.join(" ")
-        return Array.from({ length: number }, () => name)
-    })
+    const names = deckListString
+        .trim()
+        .split("\n")
+        .flatMap((entry) => {
+            const trimmed = entry.trim();
+            if (!trimmed) return [];
+            const nameParts = trimmed.split(" ");
+            const number = Number.parseInt(nameParts.shift().replace("x", ""));
+            if (!Number.isInteger(number) || number < 1) return [];
+            const name = nameParts.join(" ");
+            return Array.from({ length: number }, () => name);
+        });
 
-    const matched = []
-    const failedSet = new Set()
+    const matched = [];
+    const failedSet = new Set();
 
     for (const cardName of names) {
-        const card = allCards.find(c => c.title === cardName)
+        const card = allCards.find((c) => c.title === cardName);
         if (card) {
-            matched.push(card)
+            matched.push(card);
         } else {
-            failedSet.add(cardName)
+            failedSet.add(cardName);
         }
     }
 
-    return { matched, failed: Array.from(failedSet) }
-}
+    return { matched, failed: Array.from(failedSet) };
+};
 
 export const createDeck = (deckList, id, x, y) => {
-    const { matched, failed } = parseDeckList(deckList, window.allCards)
-    const deck = matched
-    shuffle(deck)
+    const { matched, failed } = parseDeckList(deckList, window.allCards);
+    const deck = matched;
+    shuffle(deck);
 
-    const deckElement = document.createElement("div")
-    deckElement.id = id
-    deckElement.title = `${deck.length} cards`
-    deckElement.style.left = x
-    deckElement.style.top = y
-    deckElement.classList.add("deck")
+    const deckElement = document.createElement("div");
+    deckElement.id = id;
+    deckElement.title = `${deck.length} cards`;
+    deckElement.style.left = x;
+    deckElement.style.top = y;
+    deckElement.classList.add("deck");
     deckElement.innerHTML = `
     <div class="deck-card-back">
         <img width="190" height="265" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEArMDpLqCtEe0kLcWh5dJj0s-dAnCShz_cQ&s">
-    </div>`
-    document.querySelector("#card-layer").appendChild(deckElement)
-    snapOutOfHandArea(deckElement)
+    </div>`;
+    document.querySelector("#card-layer").appendChild(deckElement);
+    snapOutOfHandArea(deckElement);
 
     if (failed.length > 0) {
-        const errorElement = document.createElement("div")
-        errorElement.classList.add("deck-parse-errors")
+        const errorElement = document.createElement("div");
+        errorElement.classList.add("deck-parse-errors");
 
-        const heading = document.createElement("strong")
-        heading.textContent = "Unrecognized cards (not loaded):"
-        errorElement.appendChild(heading)
+        const heading = document.createElement("strong");
+        heading.textContent = "Unrecognized cards (not loaded):";
+        errorElement.appendChild(heading);
 
-        const list = document.createElement("ul")
+        const list = document.createElement("ul");
         for (const name of failed) {
-            const item = document.createElement("li")
-            item.textContent = name
-            list.appendChild(item)
+            const item = document.createElement("li");
+            item.textContent = name;
+            list.appendChild(item);
         }
-        errorElement.appendChild(list)
+        errorElement.appendChild(list);
 
-        document.querySelector("#card-layer").appendChild(errorElement)
+        document.querySelector("#card-layer").appendChild(errorElement);
     }
 
-    deckElement.addEventListener("mousedown", e => {
-        e.preventDefault()
+    deckElement.addEventListener("mousedown", (e) => {
+        e.preventDefault();
 
         if (deck.length) {
-            const deckRect = deckElement.getBoundingClientRect()
-            const cardElement = createCard(deck.pop(), `${deckRect.x}px`, `${deckRect.y}px`)
-            grabCard(cardElement)(e)
+            const deckRect = deckElement.getBoundingClientRect();
+            const cardElement = createCard(
+                deck.pop(),
+                `${deckRect.x}px`,
+                `${deckRect.y}px`,
+            );
+            grabCard(cardElement)(e);
 
             if (!deck.length) {
-                deckElement.firstElementChild.classList.add("red-tint")
-                deckElement.title = "no cards left"
+                deckElement.firstElementChild.classList.add("red-tint");
+                deckElement.title = "no cards left";
             } else {
-                deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`
+                deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`;
             }
         }
-    })
-    deckElement.addEventListener("puttop", e => {
-        const cardInfo = cardElementToCardInfo(e.detail.card)
-        deck.push(cardInfo)
+    });
+    deckElement.addEventListener("puttop", (e) => {
+        const cardInfo = cardElementToCardInfo(e.detail.card);
+        deck.push(cardInfo);
 
-        deckElement.firstElementChild.classList.remove("red-tint")
-        deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`
-    })
+        deckElement.firstElementChild.classList.remove("red-tint");
+        deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`;
+    });
 
-    deckElement.addEventListener("putbottom", e => {
-        const cardInfo = cardElementToCardInfo(e.detail.card)
-        deck.unshift(cardInfo)
+    deckElement.addEventListener("putbottom", (e) => {
+        const cardInfo = cardElementToCardInfo(e.detail.card);
+        deck.unshift(cardInfo);
 
-        deckElement.firstElementChild.classList.remove("red-tint")
-        deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`
-    })
+        deckElement.firstElementChild.classList.remove("red-tint");
+        deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`;
+    });
 
-    deckElement.addEventListener("shufflein", e => {
-        const cardInfo = cardElementToCardInfo(e.detail.card)
-        deck.push(cardInfo)
-        shuffle(deck)
+    deckElement.addEventListener("shufflein", (e) => {
+        const cardInfo = cardElementToCardInfo(e.detail.card);
+        deck.push(cardInfo);
+        shuffle(deck);
 
-        deckElement.firstElementChild.classList.remove("red-tint")
-        deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`
-    })
+        deckElement.firstElementChild.classList.remove("red-tint");
+        deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`;
+    });
 
-    deckElement.addEventListener("shuffle", e => {
-        shuffle(deck)
-    })
-    
-    sendCreateMessage("deck", id, [deckList, id, x, y])
-    return deckElement
-}
+    deckElement.addEventListener("shuffle", (e) => {
+        shuffle(deck);
+    });
+
+    sendCreateMessage("deck", id, [deckList, id, x, y]);
+    return deckElement;
+};
 
 const cardElementToCardInfo = (cardElement) => {
     return {
@@ -121,6 +128,6 @@ const cardElementToCardInfo = (cardElement) => {
         side_code: cardElement.getAttribute("data-side"),
         faction_code: cardElement.getAttribute("data-faction"),
         type_code: cardElement.getAttribute("data-type"),
-        image: cardElement.querySelector(".card-front img").src
-    }
-}
+        image: cardElement.querySelector(".card-front img").src,
+    };
+};

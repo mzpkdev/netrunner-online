@@ -1,6 +1,6 @@
 .game-card {
     position: absolute;
-    transform: translate(-50%, -50%) scale(.5);
+    transform: translate(-50%, -50%) scale(0.5);
     z-index: 1;
 }
 .game-card:hover {
@@ -31,7 +31,7 @@
     position: absolute;
     visibility: hidden;
     transform: scale(3.1415) translate(-30px, -230px) var(--force-in-view);
-    
+
     z-index: 3099;
 }
 
@@ -42,19 +42,20 @@
 .hidden {
     display: none;
 }
-.flipped>:not(.hidden) {
+.flipped > :not(.hidden) {
     display: none;
 }
-.flipped>.hidden {
+.flipped > .hidden {
     display: block;
 }
-.flipped>.card-front.hidden~.game-card-tooltip:not(.hidden) {
+.flipped > .card-front.hidden ~ .game-card-tooltip:not(.hidden) {
     display: block;
 }
 
 .game-card.rotated {
-    transform: translate(-50%, -50%) scale(.5) rotate(90deg);
+    transform: translate(-50%, -50%) scale(0.5) rotate(90deg);
 }
 .rotated .game-card-tooltip {
-    transform: rotate(-90deg) scale(3.1415) translate(45px, -210px) var(--force-in-view);
+    transform: rotate(-90deg) scale(3.1415) translate(45px, -210px)
+        var(--force-in-view);
 }

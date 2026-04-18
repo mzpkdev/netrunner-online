@@ -1,6 +1,6 @@
 .deck {
     position: absolute;
-    transform: translate(-50%, -50%) scale(.5);
+    transform: translate(-50%, -50%) scale(0.5);
 }
 .deck-card-back {
     position: absolute;
@@ -15,7 +15,7 @@
     background-color: black;
 }
 .red-tint::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;

@@ -1,13 +1,14 @@
-@import url('https://fonts.cdnfonts.com/css/lt-binary-neue');
-@import url('https://fonts.cdnfonts.com/css/procyon');
+@import url("https://fonts.cdnfonts.com/css/lt-binary-neue");
+@import url("https://fonts.cdnfonts.com/css/procyon");
 @import "deck.css";
 @import "card.css";
 @import "cardActions.css";
 @import "token.css";
 @import "svg.css";
 
-html, body {
-    font-family: 'LT Binary Neue', sans-serif !important;
+html,
+body {
+    font-family: "LT Binary Neue", sans-serif !important;
     margin: 0;
     padding: 0;
     height: 100vh;
@@ -29,8 +30,13 @@ body {
     flex-grow: 1;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Procyon', sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "Procyon", sans-serif;
 }
 
 :root {
@@ -44,28 +50,25 @@ h1, h2, h3, h4, h5, h6 {
 .grid-container {
     width: 100%;
     height: 100vh;
-    background-image: 
-        linear-gradient(to right, lightgray 1px, transparent 1px),
+    background-image: linear-gradient(to right, lightgray 1px, transparent 1px),
         linear-gradient(to bottom, lightgray 1px, transparent 1px);
     background-size: 25px 25px;
 }
 
-#your-title, #opponent-title {
+#your-title,
+#opponent-title {
     color: #2ceef0 !important;
-    text-shadow:
-        0px 4px 3px rgba(0,0,0,0.3),
-        0px 8px 13px rgba(0,0,0,0.3),
-        0px 18px 23px rgba(0,0,0,0.3);
+    text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.3), 0px 8px 13px rgba(0, 0, 0, 0.3),
+        0px 18px 23px rgba(0, 0, 0, 0.3);
 }
-#open-resource-panel, #open-player-panel {
-    color: #2CEEF0;
-    background-color: #0C4160 !important;
+#open-resource-panel,
+#open-player-panel {
+    color: #2ceef0;
+    background-color: #0c4160 !important;
     border: 1px solid #2cedf0;
     border-left: 0;
-    text-shadow:
-        0px 4px 3px rgba(0,0,0,0.4),
-        0px 8px 13px rgba(0,0,0,0.4),
-        0px 18px 23px rgba(0,0,0,0.4);
+    text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.4), 0px 8px 13px rgba(0, 0, 0, 0.4),
+        0px 18px 23px rgba(0, 0, 0, 0.4);
 }
 .player-hand {
     height: 150px;
@@ -77,29 +80,22 @@ h1, h2, h3, h4, h5, h6 {
         0 0 10px rgb(0, 0, 0, 0.3),
         0 0 20px rgba(0, 0, 0, 0.3),
         0 0 30px rgba(0, 0, 0, 0.3);
-    background-color: #0C4160 !important;
+    background-color: #0c4160 !important;
     opacity: 0.6;
-    background-image:
-        /* Horizontal lines */
-        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+    /* Horizontal lines */
+    background-image: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.1) 1px,
+            transparent 1px
+        ), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
         /* Vertical lines */
-        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
-    background-size: 
-        /* Size of horizontal lines */
-        25px 25px,
-        100px 100px,
-        /* Size of vertical lines */
-        25px 25px,
-        100px 100px;
-    background-position: 
-        /* Position of horizontal lines */
-        0 0,
-        0 5px,
-        /* Position of vertical lines */
-        0 0,
-        5px 0;
+        linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    /* Size of horizontal lines */
+    background-size: 25px 25px, 100px 100px, /* Size of vertical lines */ 25px
+        25px, 100px 100px;
+    /* Position of horizontal lines */
+    background-position: 0 0, 0 5px, /* Position of vertical lines */ 0 0, 5px 0;
 }
 
 #your-hand {
