@@ -90,7 +90,7 @@ export const createDeck = (deckList, id, x, y) => {
         }
     });
     deckElement.addEventListener("puttop", (e) => {
-        const cardInfo = cardElementToCardInfo(e.detail.card);
+        const cardInfo = cardElementToCardInfo(/** @type {CustomEvent} */ (e).detail.card);
         deck.push(cardInfo);
 
         deckElement.firstElementChild.classList.remove("red-tint");
@@ -98,7 +98,7 @@ export const createDeck = (deckList, id, x, y) => {
     });
 
     deckElement.addEventListener("putbottom", (e) => {
-        const cardInfo = cardElementToCardInfo(e.detail.card);
+        const cardInfo = cardElementToCardInfo(/** @type {CustomEvent} */ (e).detail.card);
         deck.unshift(cardInfo);
 
         deckElement.firstElementChild.classList.remove("red-tint");
@@ -106,7 +106,7 @@ export const createDeck = (deckList, id, x, y) => {
     });
 
     deckElement.addEventListener("shufflein", (e) => {
-        const cardInfo = cardElementToCardInfo(e.detail.card);
+        const cardInfo = cardElementToCardInfo(/** @type {CustomEvent} */ (e).detail.card);
         deck.push(cardInfo);
         shuffle(deck);
 

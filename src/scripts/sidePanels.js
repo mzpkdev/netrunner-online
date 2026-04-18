@@ -37,7 +37,7 @@ export const flipBoard = () => {
 };
 
 export const setupSidePanels = () => {
-    const playerPanel = document.querySelector("#player-panel");
+    const playerPanel = /** @type {HTMLElement | null} */ (document.querySelector("#player-panel"));
     document
         .querySelector("#open-player-panel")
         .addEventListener("click", (e) => {
@@ -53,7 +53,7 @@ export const setupSidePanels = () => {
         playerPanel.classList.add("hiding");
     });
 
-    const resourcePanel = document.querySelector("#resource-panel");
+    const resourcePanel = /** @type {HTMLElement | null} */ (document.querySelector("#resource-panel"));
     document
         .querySelector("#open-resource-panel")
         .addEventListener("click", (e) => {
@@ -73,20 +73,20 @@ export const setupSidePanels = () => {
         .querySelector(".flex-container")
         .parentElement.addEventListener("mousemove", (e) => {
             if (e.clientX === 0) {
-                document.querySelector("#open-resource-panel").click();
+                /** @type {HTMLElement} */ (document.querySelector("#open-resource-panel")).click();
             } else if (e.clientX === window.innerWidth - 1) {
-                document.querySelector("#open-player-panel").click();
+                /** @type {HTMLElement} */ (document.querySelector("#open-player-panel")).click();
             }
         });
 
-    document.querySelector("#corp-check").checked = "true";
+    /** @type {HTMLInputElement} */ (document.querySelector("#corp-check")).checked = true;
     document.querySelector("#corp-check").addEventListener("click", (e) => {
         if (window.playerSide !== "corp") {
             window.playerSide = "corp";
             flipBoard();
         }
-        document.querySelector("#your-title").innerText = "Corporation";
-        document.querySelector("#opponent-title").innerText = "Runner";
+        /** @type {HTMLElement} */ (document.querySelector("#your-title")).innerText = "Corporation";
+        /** @type {HTMLElement} */ (document.querySelector("#opponent-title")).innerText = "Runner";
 
         document.querySelector("#corp-deck-panel").classList.remove("hidden");
         document.querySelector("#runner-deck-panel").classList.add("hidden");
@@ -97,8 +97,8 @@ export const setupSidePanels = () => {
             window.playerSide = "runner";
             flipBoard();
         }
-        document.querySelector("#your-title").innerText = "Runner";
-        document.querySelector("#opponent-title").innerText = "Corporation";
+        /** @type {HTMLElement} */ (document.querySelector("#your-title")).innerText = "Runner";
+        /** @type {HTMLElement} */ (document.querySelector("#opponent-title")).innerText = "Corporation";
 
         document.querySelector("#corp-deck-panel").classList.add("hidden");
         document.querySelector("#runner-deck-panel").classList.remove("hidden");

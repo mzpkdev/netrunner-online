@@ -93,7 +93,7 @@ const cardContextMenu = (element) => {
     return (e) => {
         e.preventDefault();
         const contextMenu = document.querySelector(".dropdown-menu");
-        const newContextMenu = contextMenu.cloneNode(true);
+        const newContextMenu = /** @type {HTMLElement} */ (contextMenu.cloneNode(true));
         contextMenu.parentNode.replaceChild(newContextMenu, contextMenu);
 
         newContextMenu.style.display = "block";

@@ -4,11 +4,15 @@
         "module": "ESNext",
         "moduleResolution": "bundler",
         "allowJs": true,
-        "checkJs": false,
+        "checkJs": true,
+        "noImplicitAny": false,
+        "strictNullChecks": false,
+        "noImplicitThis": false,
         "noEmit": true,
         "isolatedModules": true,
         "esModuleInterop": true,
         "skipLibCheck": true
     },
-    "include": ["src"]
+    "include": ["src"],
+    "exclude": ["src/**/*.test.js"]
 }
