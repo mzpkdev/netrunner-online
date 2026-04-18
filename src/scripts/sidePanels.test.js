@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setupCorp, setupRunner } from "./game.js";
 import { flipBoard, setupSidePanels } from "./sidePanels.js";
 import { flipElement, snapToGrid } from "./utils.js";
@@ -90,6 +90,8 @@ describe("setupSidePanels — mousemove edge triggers", () => {
         setupSidePanels();
     });
 
+    afterEach(() => vi.unstubAllGlobals());
+
     it("opens resource panel when clientX is 0", () => {
         const resourcePanel = document.querySelector("#resource-panel");
         const container = document.querySelector(".flex-container").parentElement;
@@ -99,7 +101,7 @@ describe("setupSidePanels — mousemove edge triggers", () => {
 
     it("opens player panel when clientX equals window.innerWidth - 1", () => {
         const playerPanel = document.querySelector("#player-panel");
-        Object.defineProperty(window, "innerWidth", { value: 1280, writable: true, configurable: true });
+        vi.stubGlobal("innerWidth", 1280);
         const container = document.querySelector(".flex-container").parentElement;
         container.dispatchEvent(new MouseEvent("mousemove", { clientX: 1279 }));
         expect(playerPanel.classList.contains("show")).toBe(true);
