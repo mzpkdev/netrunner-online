@@ -74,7 +74,7 @@ export const setupSidePanels = () => {
         .parentElement.addEventListener("mousemove", (e) => {
             if (e.clientX === 0) {
                 document.querySelector("#open-resource-panel").click();
-            } else if (e.clientX === window.screen.width - 1) {
+            } else if (e.clientX === window.innerWidth - 1) {
                 document.querySelector("#open-player-panel").click();
             }
         });
