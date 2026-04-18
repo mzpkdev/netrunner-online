@@ -355,3 +355,88 @@ describe("receiveMessage unknown messageType", () => {
         ).not.toThrow();
     });
 });
+
+// ---------------------------------------------------------------------------
+// receiveMessage — perspective flip for grab / move / ungrab
+// ---------------------------------------------------------------------------
+describe("receiveMessage perspective flip", () => {
+    let element;
+
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        element = document.createElement("div");
+        element.id = "test-entity";
+        document.body.appendChild(element);
+        window.playerSide = "corp";
+        vi.clearAllMocks();
+    });
+
+    it("calls flipElement for grab-element when perspective differs from playerSide", () => {
+        receiveMessage({
+            messageType: "grab-element",
+            entityId: "test-entity",
+            perspective: "runner",
+            content: { x: 100, y: 200 },
+        });
+        expect(flipElement).toHaveBeenCalledWith(
+            element,
+            expect.objectContaining({ x: 0, y: 0, width: 0, height: 0 }),
+        );
+    });
+
+    it("does not call flipElement for grab-element when perspective matches playerSide", () => {
+        receiveMessage({
+            messageType: "grab-element",
+            entityId: "test-entity",
+            perspective: "corp",
+            content: { x: 100, y: 200 },
+        });
+        expect(flipElement).not.toHaveBeenCalled();
+    });
+
+    it("calls flipElement for move-element when perspective differs from playerSide", () => {
+        receiveMessage({
+            messageType: "move-element",
+            entityId: "test-entity",
+            perspective: "runner",
+            content: { x: 100, y: 200 },
+        });
+        expect(flipElement).toHaveBeenCalledWith(
+            element,
+            expect.objectContaining({ x: 0, y: 0, width: 0, height: 0 }),
+        );
+    });
+
+    it("does not call flipElement for move-element when perspective matches playerSide", () => {
+        receiveMessage({
+            messageType: "move-element",
+            entityId: "test-entity",
+            perspective: "corp",
+            content: { x: 100, y: 200 },
+        });
+        expect(flipElement).not.toHaveBeenCalled();
+    });
+
+    it("calls flipElement for ungrab-element when perspective differs from playerSide", () => {
+        receiveMessage({
+            messageType: "ungrab-element",
+            entityId: "test-entity",
+            perspective: "runner",
+            content: { x: 100, y: 200 },
+        });
+        expect(flipElement).toHaveBeenCalledWith(
+            element,
+            expect.objectContaining({ x: 0, y: 0, width: 0, height: 0 }),
+        );
+    });
+
+    it("does not call flipElement for ungrab-element when perspective matches playerSide", () => {
+        receiveMessage({
+            messageType: "ungrab-element",
+            entityId: "test-entity",
+            perspective: "corp",
+            content: { x: 100, y: 200 },
+        });
+        expect(flipElement).not.toHaveBeenCalled();
+    });
+});

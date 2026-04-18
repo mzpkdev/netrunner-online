@@ -1,6 +1,13 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createCard, handleCardBehavior, snapOutOfHandArea } from "./card.js";
+import {
+    createCard,
+    handleCardBehavior,
+    snapOutOfHandArea,
+    updateCardArea,
+    updateCardHoverArea,
+} from "./card.js";
+import { isPointWithinElement } from "./utils.js";
 
 vi.mock("./p2p.js", () => ({ sendCreateMessage: vi.fn() }));
 vi.mock("./utils.js", () => ({
@@ -120,6 +127,251 @@ describe("handleCardBehavior", () => {
         cardElement.setAttribute("data-location", "deck");
         cardElement.setAttribute("data-type", "identity");
         handleCardBehavior(cardElement);
+        expect(cardElement.getAttribute("data-location")).toBe("board");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// handleCardBehavior — visibility matrix
+// ---------------------------------------------------------------------------
+describe("handleCardBehavior — visibility matrix", () => {
+    let cardElement;
+
+    function vis(el) {
+        return {
+            front: !el
+                .querySelector(".card-front")
+                .classList.contains("hidden"),
+            back: !el.querySelector(".card-back").classList.contains("hidden"),
+            tooltip: !el
+                .querySelector(".game-card-tooltip")
+                .classList.contains("hidden"),
+        };
+    }
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        document.body.innerHTML = `<div id="your-hand"></div>`;
+        cardElement = document.createElement("div");
+        cardElement.innerHTML = `
+            <div class="card-front"></div>
+            <div class="card-back"></div>
+            <div class="game-card-tooltip"></div>
+        `;
+        document.body.appendChild(cardElement);
+        window.playerSide = "corp";
+    });
+
+    it.each([
+        {
+            desc: "deck non-identity — back only visible",
+            location: "deck",
+            type: "ice",
+            side: "corp",
+            playerSide: "corp",
+            expected: { front: false, back: true, tooltip: false },
+        },
+        {
+            desc: "deck identity — front+tooltip visible, location promoted to board",
+            location: "deck",
+            type: "identity",
+            side: "corp",
+            playerSide: "corp",
+            expected: { front: true, back: false, tooltip: true },
+        },
+        {
+            desc: "opponent-hand — back only visible",
+            location: "opponent-hand",
+            type: "ice",
+            side: "corp",
+            playerSide: "corp",
+            expected: { front: false, back: true, tooltip: false },
+        },
+        {
+            desc: "board corp operation — front+tooltip visible",
+            location: "board",
+            type: "operation",
+            side: "corp",
+            playerSide: "corp",
+            expected: { front: true, back: false, tooltip: true },
+        },
+        {
+            desc: "board corp identity — front+tooltip visible",
+            location: "board",
+            type: "identity",
+            side: "corp",
+            playerSide: "corp",
+            expected: { front: true, back: false, tooltip: true },
+        },
+        {
+            desc: "board corp ice same side — back+tooltip visible",
+            location: "board",
+            type: "ice",
+            side: "corp",
+            playerSide: "corp",
+            expected: { front: false, back: true, tooltip: true },
+        },
+        {
+            desc: "board corp ice opposite side — back only visible",
+            location: "board",
+            type: "ice",
+            side: "corp",
+            playerSide: "runner",
+            expected: { front: false, back: true, tooltip: false },
+        },
+        {
+            desc: "board runner — front+tooltip visible",
+            location: "board",
+            type: "ice",
+            side: "runner",
+            playerSide: "corp",
+            expected: { front: true, back: false, tooltip: true },
+        },
+        {
+            desc: "bin — front+tooltip visible",
+            location: "bin",
+            type: "ice",
+            side: "corp",
+            playerSide: "corp",
+            expected: { front: true, back: false, tooltip: true },
+        },
+    ])("$desc", ({ location, type, side, playerSide, expected }) => {
+        window.playerSide = playerSide;
+        cardElement.setAttribute("data-location", location);
+        cardElement.setAttribute("data-type", type);
+        cardElement.setAttribute("data-side", side);
+        handleCardBehavior(cardElement);
+        expect(vis(cardElement)).toEqual(expected);
+    });
+
+    it("hand — front+tooltip visible and flipped class removed", () => {
+        cardElement.classList.add("flipped");
+        cardElement.setAttribute("data-location", "hand");
+        cardElement.setAttribute("data-type", "ice");
+        cardElement.setAttribute("data-side", "corp");
+        handleCardBehavior(cardElement);
+        expect(cardElement.classList.contains("flipped")).toBe(false);
+        expect(vis(cardElement)).toEqual({
+            front: true,
+            back: false,
+            tooltip: true,
+        });
+    });
+
+    it("opponent-hand — flipped class removed", () => {
+        cardElement.classList.add("flipped");
+        cardElement.setAttribute("data-location", "opponent-hand");
+        cardElement.setAttribute("data-type", "ice");
+        cardElement.setAttribute("data-side", "corp");
+        handleCardBehavior(cardElement);
+        expect(cardElement.classList.contains("flipped")).toBe(false);
+    });
+
+    it("ice on board — rotated class added", () => {
+        cardElement.setAttribute("data-location", "board");
+        cardElement.setAttribute("data-type", "ice");
+        cardElement.setAttribute("data-side", "corp");
+        handleCardBehavior(cardElement);
+        expect(cardElement.classList.contains("rotated")).toBe(true);
+    });
+
+    it("non-ice on board — rotated class not added", () => {
+        cardElement.setAttribute("data-location", "board");
+        cardElement.setAttribute("data-type", "agenda");
+        cardElement.setAttribute("data-side", "corp");
+        handleCardBehavior(cardElement);
+        expect(cardElement.classList.contains("rotated")).toBe(false);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// updateCardHoverArea
+// ---------------------------------------------------------------------------
+describe("updateCardHoverArea", () => {
+    let cardElement;
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        // clientHeight defaults to 0 in jsdom; handHeight = 0 − 10 = −10
+        // hand threshold: cardRect.y > 0 − (−10) = 10
+        // opponent-hand threshold: cardRect.y < −10
+        // board: −10 ≤ cardRect.y ≤ 10
+        document.body.innerHTML = `<div id="your-hand"></div>`;
+        cardElement = document.createElement("div");
+        document.body.appendChild(cardElement);
+    });
+
+    it("sets data-hover-location to deck when card overlaps a deck", () => {
+        const deckWrapper = document.createElement("div");
+        deckWrapper.className = "deck";
+        deckWrapper.appendChild(document.createElement("div"));
+        document.body.appendChild(deckWrapper);
+        isPointWithinElement.mockReturnValueOnce(true);
+        cardElement.getBoundingClientRect = vi.fn(() => ({ y: 0, x: 0 }));
+        updateCardHoverArea(cardElement);
+        expect(cardElement.getAttribute("data-hover-location")).toBe("deck");
+    });
+
+    it("sets data-hover-location to hand when card.y exceeds the bottom threshold", () => {
+        cardElement.getBoundingClientRect = vi.fn(() => ({ y: 50, x: 0 }));
+        updateCardHoverArea(cardElement);
+        expect(cardElement.getAttribute("data-hover-location")).toBe("hand");
+    });
+
+    it("sets data-hover-location to opponent-hand when card.y is below the top threshold", () => {
+        cardElement.getBoundingClientRect = vi.fn(() => ({ y: -50, x: 0 }));
+        updateCardHoverArea(cardElement);
+        expect(cardElement.getAttribute("data-hover-location")).toBe(
+            "opponent-hand",
+        );
+    });
+
+    it("sets data-hover-location to board when card is in neither zone", () => {
+        cardElement.getBoundingClientRect = vi.fn(() => ({ y: 0, x: 0 }));
+        updateCardHoverArea(cardElement);
+        expect(cardElement.getAttribute("data-hover-location")).toBe("board");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// updateCardArea
+// ---------------------------------------------------------------------------
+describe("updateCardArea", () => {
+    let cardElement;
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        document.body.innerHTML = `<div id="your-hand"></div>`;
+        cardElement = document.createElement("div");
+        document.body.appendChild(cardElement);
+    });
+
+    it("sets data-location to deck when card overlaps a deck", () => {
+        const deckWrapper = document.createElement("div");
+        deckWrapper.className = "deck";
+        deckWrapper.appendChild(document.createElement("div"));
+        document.body.appendChild(deckWrapper);
+        isPointWithinElement.mockReturnValueOnce(true);
+        cardElement.getBoundingClientRect = vi.fn(() => ({ y: 0, x: 0 }));
+        updateCardArea(cardElement);
+        expect(cardElement.getAttribute("data-location")).toBe("deck");
+    });
+
+    it("sets data-location to hand when card.y exceeds the bottom threshold", () => {
+        cardElement.getBoundingClientRect = vi.fn(() => ({ y: 50, x: 0 }));
+        updateCardArea(cardElement);
+        expect(cardElement.getAttribute("data-location")).toBe("hand");
+    });
+
+    it("sets data-location to opponent-hand when card.y is below the top threshold", () => {
+        cardElement.getBoundingClientRect = vi.fn(() => ({ y: -50, x: 0 }));
+        updateCardArea(cardElement);
+        expect(cardElement.getAttribute("data-location")).toBe("opponent-hand");
+    });
+
+    it("sets data-location to board when card is in neither zone", () => {
+        cardElement.getBoundingClientRect = vi.fn(() => ({ y: 0, x: 0 }));
+        updateCardArea(cardElement);
         expect(cardElement.getAttribute("data-location")).toBe("board");
     });
 });
