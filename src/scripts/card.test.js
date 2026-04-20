@@ -58,8 +58,8 @@ describe("createCard", () => {
 
     it("renders the card-back img with a non-empty local src", () => {
         const el = createCard(cardInfo, "0px", "0px", "back-test");
-        const src = el.querySelector(".card-back img").src;
-        expect(src).toBeTruthy();
+        const src = el.querySelector(".card-back img").getAttribute("src");
+        expect(src).toContain("card-back");
         expect(src).not.toContain("gstatic.com");
     });
 });
