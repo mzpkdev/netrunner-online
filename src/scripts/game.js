@@ -52,9 +52,9 @@ export const setupGame = () => {
 export const main = async () => {
     try {
         window.allCards = await fetchAllCards().then((cards) =>
-            cards.data.map((cardIfo) => {
-                cardIfo.image = `https://card-images.netrunnerdb.com/v2/large/${cardIfo.code}.jpg`;
-                return cardIfo;
+            cards.data.map((cardInfo) => {
+                cardInfo.image = `https://card-images.netrunnerdb.com/v2/large/${cardInfo.code}.jpg`;
+                return cardInfo;
             }),
         );
     } catch (error) {

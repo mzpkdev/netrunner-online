@@ -158,9 +158,9 @@ function flipToken(tokenElement, key, value) {
         "translate(-50%, -50%) translate(-10px, -10px)";
     tokenElement.replaceChild(newInnerElement, tokenElement.firstElementChild);
 
-    const stactedToken = tokenElement.querySelector(".token");
-    if (stactedToken) {
-        flipToken(stactedToken, key, value);
+    const stackedToken = tokenElement.querySelector(".token");
+    if (stackedToken) {
+        flipToken(stackedToken, key, value);
     }
 }
 
