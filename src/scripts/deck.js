@@ -1,3 +1,4 @@
+import cardBackUrl from "../assets/card-back.jpg";
 import { createCard, snapOutOfHandArea } from "./card.js";
 import { grabCard } from "./grab.js";
 import { sendCreateMessage } from "./p2p.js";
@@ -45,7 +46,7 @@ export const createDeck = (deckList, id, x, y) => {
     deckElement.classList.add("deck");
     deckElement.innerHTML = `
     <div class="deck-card-back">
-        <img width="190" height="265" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEArMDpLqCtEe0kLcWh5dJj0s-dAnCShz_cQ&s">
+        <img width="190" height="265" src="${cardBackUrl}">
     </div>`;
     document.querySelector("#card-layer").appendChild(deckElement);
     snapOutOfHandArea(deckElement);
