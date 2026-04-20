@@ -1,3 +1,4 @@
+import cardBackUrl from "../assets/card-back.jpg";
 import { grabCard } from "./grab.js";
 import { selectCard } from "./keyboard.js";
 import { sendCreateMessage } from "./p2p.js";
@@ -23,7 +24,7 @@ export const createCard = (cardInfo, x, y, id) => {
         <img width="190" height="265" src="${cardInfo.image}">
     </div>
     <div class="card-back">
-        <img width="190" height="265" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEArMDpLqCtEe0kLcWh5dJj0s-dAnCShz_cQ&s">
+        <img width="190" height="265" src="${cardBackUrl}">
     </div>
     <div class="game-card-tooltip">
         <img width="190" height="265" src="${cardInfo.image}">
