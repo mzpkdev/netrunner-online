@@ -55,6 +55,13 @@ describe("createCard", () => {
         const el = createCard(cardInfo, "10px", "20px", "layer-test");
         expect(document.querySelector("#card-layer").contains(el)).toBe(true);
     });
+
+    it("renders the card-back img with a non-empty local src", () => {
+        const el = createCard(cardInfo, "0px", "0px", "back-test");
+        const src = el.querySelector(".card-back img").src;
+        expect(src).toBeTruthy();
+        expect(src).not.toContain("gstatic.com");
+    });
 });
 
 // ---------------------------------------------------------------------------
