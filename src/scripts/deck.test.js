@@ -177,4 +177,11 @@ describe("createDeck", () => {
         expect(el.firstElementChild.classList.contains("red-tint")).toBe(true);
         expect(el.title).toBe("no cards left");
     });
+
+    it("renders the deck-card-back img with a non-empty local src", () => {
+        const el = createDeck("1x Hedge Fund", "deck-back-test", "0px", "0px");
+        const src = el.querySelector(".deck-card-back img").src;
+        expect(src).toBeTruthy();
+        expect(src).not.toContain("gstatic.com");
+    });
 });
