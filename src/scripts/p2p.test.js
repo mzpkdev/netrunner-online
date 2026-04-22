@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCard } from "./card.js";
 import { createDeck } from "./deck.js";
-import { receiveMessage } from "./p2p.js";
+import { receiveMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
 import { createToken } from "./token.js";
 import { flipElement, snapToGrid } from "./utils.js";
 
@@ -493,6 +493,66 @@ describe("receiveMessage rotate-element null guard", () => {
             content: { rotated: true },
         });
         expect(console.warn).toHaveBeenCalledOnce();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// sendFlipMessage — payload shape
+// ---------------------------------------------------------------------------
+describe("sendFlipMessage", () => {
+    beforeEach(() => {
+        window.playerSide = "corp";
+        window.sendMessageImmediate = vi.fn();
+    });
+
+    it("calls window.sendMessageImmediate with the correct flip-element payload when flipped is true", () => {
+        sendFlipMessage("card-1", true);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            messageType: "flip-element",
+            entityId: "card-1",
+            perspective: "corp",
+            content: { flipped: true },
+        });
+    });
+
+    it("calls window.sendMessageImmediate with flipped: false when the second argument is false", () => {
+        sendFlipMessage("card-1", false);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            messageType: "flip-element",
+            entityId: "card-1",
+            perspective: "corp",
+            content: { flipped: false },
+        });
+    });
+});
+
+// ---------------------------------------------------------------------------
+// sendRotateMessage — payload shape
+// ---------------------------------------------------------------------------
+describe("sendRotateMessage", () => {
+    beforeEach(() => {
+        window.playerSide = "corp";
+        window.sendMessageImmediate = vi.fn();
+    });
+
+    it("calls window.sendMessageImmediate with the correct rotate-element payload when rotated is true", () => {
+        sendRotateMessage("card-1", true);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            messageType: "rotate-element",
+            entityId: "card-1",
+            perspective: "corp",
+            content: { rotated: true },
+        });
+    });
+
+    it("calls window.sendMessageImmediate with rotated: false when the second argument is false", () => {
+        sendRotateMessage("card-1", false);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            messageType: "rotate-element",
+            entityId: "card-1",
+            perspective: "corp",
+            content: { rotated: false },
+        });
     });
 });
 

@@ -13,6 +13,7 @@ import {
     selectCard,
     setupKeyboardShortcuts,
 } from "./keyboard.js";
+import { sendFlipMessage, sendRotateMessage } from "./p2p.js";
 
 const makeCard = (id = "test-card") => {
     const el = document.createElement("div");
@@ -35,6 +36,7 @@ beforeAll(() => {
 beforeEach(() => {
     document.body.innerHTML = "";
     deselectCard();
+    vi.clearAllMocks();
 });
 
 // ---------------------------------------------------------------------------
@@ -100,6 +102,27 @@ describe("R key", () => {
         pressKey("r");
         expect(card.classList.contains("rotated")).toBe(false);
     });
+
+    it("calls sendRotateMessage with (card.id, true) when toggling on", () => {
+        const card = makeCard();
+        selectCard(card);
+        pressKey("r");
+        expect(sendRotateMessage).toHaveBeenCalledWith(card.id, true);
+    });
+
+    it("calls sendRotateMessage with (card.id, false) when toggling off", () => {
+        const card = makeCard();
+        card.classList.add("rotated");
+        selectCard(card);
+        pressKey("R");
+        expect(sendRotateMessage).toHaveBeenCalledWith(card.id, false);
+    });
+
+    it("does not call sendRotateMessage when no card is selected", () => {
+        makeCard();
+        pressKey("r");
+        expect(sendRotateMessage).not.toHaveBeenCalled();
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -125,6 +148,27 @@ describe("F key", () => {
         const card = makeCard();
         pressKey("f");
         expect(card.classList.contains("flipped")).toBe(false);
+    });
+
+    it("calls sendFlipMessage with (card.id, true) when toggling on", () => {
+        const card = makeCard();
+        selectCard(card);
+        pressKey("f");
+        expect(sendFlipMessage).toHaveBeenCalledWith(card.id, true);
+    });
+
+    it("calls sendFlipMessage with (card.id, false) when toggling off", () => {
+        const card = makeCard();
+        card.classList.add("flipped");
+        selectCard(card);
+        pressKey("F");
+        expect(sendFlipMessage).toHaveBeenCalledWith(card.id, false);
+    });
+
+    it("does not call sendFlipMessage when no card is selected", () => {
+        makeCard();
+        pressKey("f");
+        expect(sendFlipMessage).not.toHaveBeenCalled();
     });
 });
 

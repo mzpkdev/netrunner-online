@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCard, handleCardBehavior, snapOutOfHandArea } from "./card.js";
+import { sendFlipMessage, sendRotateMessage } from "./p2p.js";
 
 vi.mock("./p2p.js", () => ({
     sendCreateMessage: vi.fn(),
@@ -132,5 +133,65 @@ describe("handleCardBehavior", () => {
         cardElement.setAttribute("data-type", "identity");
         handleCardBehavior(cardElement);
         expect(cardElement.getAttribute("data-location")).toBe("board");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// createCard — dblclick handler calls sendFlipMessage
+// ---------------------------------------------------------------------------
+describe("createCard dblclick handler", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        setupDOM();
+    });
+
+    it("calls sendFlipMessage with (element.id, true) on first dblclick", () => {
+        const el = createCard(cardInfo, "10px", "20px", "dblclick-test-1");
+        vi.clearAllMocks();
+        el.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+        expect(sendFlipMessage).toHaveBeenCalledWith("dblclick-test-1", true);
+    });
+
+    it("calls sendFlipMessage with (element.id, false) on second dblclick (toggle off)", () => {
+        const el = createCard(cardInfo, "10px", "20px", "dblclick-test-2");
+        vi.clearAllMocks();
+        el.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+        el.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+        expect(sendFlipMessage).toHaveBeenLastCalledWith("dblclick-test-2", false);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// createCard — context-menu-rotate handler calls sendRotateMessage
+// ---------------------------------------------------------------------------
+describe("createCard context-menu-rotate handler", () => {
+    beforeEach(() => {
+        Element.prototype.scrollIntoView = vi.fn();
+        vi.clearAllMocks();
+        setupDOM();
+    });
+
+    it("calls sendRotateMessage with (element.id, true) when context-menu-rotate is clicked the first time", () => {
+        const el = createCard(cardInfo, "10px", "20px", "rotate-ctx-test-1");
+        vi.clearAllMocks();
+        el.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true }));
+        document
+            .querySelector("#context-menu-rotate")
+            .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        expect(sendRotateMessage).toHaveBeenCalledWith("rotate-ctx-test-1", true);
+    });
+
+    it("calls sendRotateMessage with (element.id, false) on second click (toggle off)", () => {
+        const el = createCard(cardInfo, "10px", "20px", "rotate-ctx-test-2");
+        vi.clearAllMocks();
+        el.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true }));
+        document
+            .querySelector("#context-menu-rotate")
+            .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        el.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true }));
+        document
+            .querySelector("#context-menu-rotate")
+            .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        expect(sendRotateMessage).toHaveBeenLastCalledWith("rotate-ctx-test-2", false);
     });
 });
