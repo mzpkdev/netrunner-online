@@ -338,6 +338,18 @@ describe("receiveMessage create-element", () => {
         expect(createDeck).not.toHaveBeenCalled();
         expect(createToken).not.toHaveBeenCalled();
     });
+
+    it("emits a console.warn when entityType is unrecognized", () => {
+        vi.spyOn(console, "warn").mockImplementation(() => {});
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "unknown",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: [],
+        });
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -569,5 +581,16 @@ describe("receiveMessage unknown messageType", () => {
                 content: {},
             }),
         ).not.toThrow();
+    });
+
+    it("emits a console.warn for an unrecognized messageType", () => {
+        vi.spyOn(console, "warn").mockImplementation(() => {});
+        receiveMessage({
+            messageType: "unknown-type",
+            entityId: "any-id",
+            perspective: "corp",
+            content: {},
+        });
+        expect(console.warn).toHaveBeenCalledOnce();
     });
 });
