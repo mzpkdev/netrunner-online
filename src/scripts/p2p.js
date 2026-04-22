@@ -111,6 +111,13 @@ export function receiveMessage(message) {
                         snapToGrid(element);
                     }
                     break;
+
+                default:
+                    console.warn(
+                        `receiveMessage: create-element — unknown entityType "${message.entityType}"`,
+                        message,
+                    );
+                    break;
             }
             break;
 
@@ -212,6 +219,13 @@ export function receiveMessage(message) {
                 break;
             }
             element.classList.toggle("rotated", message.content.rotated);
+            break;
+
+        default:
+            console.warn(
+                `receiveMessage: unknown messageType "${message.messageType}"`,
+                message,
+            );
             break;
     }
 }
