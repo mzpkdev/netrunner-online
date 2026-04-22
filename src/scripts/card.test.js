@@ -2,7 +2,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCard, handleCardBehavior, snapOutOfHandArea } from "./card.js";
 
-vi.mock("./p2p.js", () => ({ sendCreateMessage: vi.fn() }));
+vi.mock("./p2p.js", () => ({
+    sendCreateMessage: vi.fn(),
+    sendFlipMessage: vi.fn(),
+    sendRotateMessage: vi.fn(),
+}));
 vi.mock("./utils.js", () => ({
     snapToGrid: vi.fn(),
     putElementBottom: vi.fn(),

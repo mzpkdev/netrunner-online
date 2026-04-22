@@ -341,6 +341,162 @@ describe("receiveMessage create-element", () => {
 });
 
 // ---------------------------------------------------------------------------
+// receiveMessage — flip-element positive path
+// ---------------------------------------------------------------------------
+describe("receiveMessage flip-element positive path", () => {
+    let element;
+
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        element = document.createElement("div");
+        element.id = "flip-entity";
+        document.body.appendChild(element);
+        window.playerSide = "corp";
+        vi.clearAllMocks();
+    });
+
+    it("adds the flipped class when content.flipped is true", () => {
+        receiveMessage({
+            messageType: "flip-element",
+            entityId: "flip-entity",
+            perspective: "corp",
+            content: { flipped: true },
+        });
+        expect(element.classList.contains("flipped")).toBe(true);
+    });
+
+    it("removes the flipped class when content.flipped is false", () => {
+        element.classList.add("flipped");
+        receiveMessage({
+            messageType: "flip-element",
+            entityId: "flip-entity",
+            perspective: "corp",
+            content: { flipped: false },
+        });
+        expect(element.classList.contains("flipped")).toBe(false);
+    });
+
+    it("applies the same flipped state regardless of perspective", () => {
+        receiveMessage({
+            messageType: "flip-element",
+            entityId: "flip-entity",
+            perspective: "runner",
+            content: { flipped: true },
+        });
+        expect(element.classList.contains("flipped")).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// receiveMessage — flip-element null guard
+// ---------------------------------------------------------------------------
+describe("receiveMessage flip-element null guard", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        vi.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    it("does not throw when flip-element references a nonexistent entityId", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "flip-element",
+                entityId: "nonexistent-entity",
+                perspective: "corp",
+                content: { flipped: true },
+            }),
+        ).not.toThrow();
+    });
+
+    it("emits a console.warn when flip-element references a nonexistent entityId", () => {
+        receiveMessage({
+            messageType: "flip-element",
+            entityId: "nonexistent-entity",
+            perspective: "corp",
+            content: { flipped: true },
+        });
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// receiveMessage — rotate-element positive path
+// ---------------------------------------------------------------------------
+describe("receiveMessage rotate-element positive path", () => {
+    let element;
+
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        element = document.createElement("div");
+        element.id = "rotate-entity";
+        document.body.appendChild(element);
+        window.playerSide = "corp";
+        vi.clearAllMocks();
+    });
+
+    it("adds the rotated class when content.rotated is true", () => {
+        receiveMessage({
+            messageType: "rotate-element",
+            entityId: "rotate-entity",
+            perspective: "corp",
+            content: { rotated: true },
+        });
+        expect(element.classList.contains("rotated")).toBe(true);
+    });
+
+    it("removes the rotated class when content.rotated is false", () => {
+        element.classList.add("rotated");
+        receiveMessage({
+            messageType: "rotate-element",
+            entityId: "rotate-entity",
+            perspective: "corp",
+            content: { rotated: false },
+        });
+        expect(element.classList.contains("rotated")).toBe(false);
+    });
+
+    it("applies the same rotated state regardless of perspective", () => {
+        receiveMessage({
+            messageType: "rotate-element",
+            entityId: "rotate-entity",
+            perspective: "runner",
+            content: { rotated: true },
+        });
+        expect(element.classList.contains("rotated")).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// receiveMessage — rotate-element null guard
+// ---------------------------------------------------------------------------
+describe("receiveMessage rotate-element null guard", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        vi.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    it("does not throw when rotate-element references a nonexistent entityId", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "rotate-element",
+                entityId: "nonexistent-entity",
+                perspective: "corp",
+                content: { rotated: true },
+            }),
+        ).not.toThrow();
+    });
+
+    it("emits a console.warn when rotate-element references a nonexistent entityId", () => {
+        receiveMessage({
+            messageType: "rotate-element",
+            entityId: "nonexistent-entity",
+            perspective: "corp",
+            content: { rotated: true },
+        });
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+});
+
+// ---------------------------------------------------------------------------
 // receiveMessage — unknown messageType
 // ---------------------------------------------------------------------------
 describe("receiveMessage unknown messageType", () => {

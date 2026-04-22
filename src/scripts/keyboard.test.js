@@ -1,7 +1,12 @@
 /**
  * @vitest-environment jsdom
  */
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("./p2p.js", () => ({
+    sendFlipMessage: vi.fn(),
+    sendRotateMessage: vi.fn(),
+}));
 import {
     deselectCard,
     getSelectedCard,

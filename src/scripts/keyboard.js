@@ -1,3 +1,5 @@
+import { sendFlipMessage, sendRotateMessage } from "./p2p.js";
+
 let selectedCard = null;
 
 export const selectCard = (cardElement) => {
@@ -30,11 +32,17 @@ export const setupKeyboardShortcuts = () => {
         switch (e.key) {
             case "r":
             case "R":
-                if (selectedCard) selectedCard.classList.toggle("rotated");
+                if (selectedCard) {
+                    selectedCard.classList.toggle("rotated");
+                    sendRotateMessage(selectedCard.id, selectedCard.classList.contains("rotated"));
+                }
                 break;
             case "f":
             case "F":
-                if (selectedCard) selectedCard.classList.toggle("flipped");
+                if (selectedCard) {
+                    selectedCard.classList.toggle("flipped");
+                    sendFlipMessage(selectedCard.id, selectedCard.classList.contains("flipped"));
+                }
                 break;
             case "Delete":
                 if (selectedCard) {

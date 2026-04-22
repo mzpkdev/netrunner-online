@@ -1,7 +1,7 @@
 import cardBackUrl from "../assets/card-back.jpg";
 import { grabCard } from "./grab.js";
 import { selectCard } from "./keyboard.js";
-import { sendCreateMessage } from "./p2p.js";
+import { sendCreateMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
 import {
     isPointWithinElement,
     putElementBottom,
@@ -77,6 +77,7 @@ export const createCard = (cardInfo, x, y, id) => {
 const flipCard = (element) => {
     return () => {
         element.classList.toggle("flipped");
+        sendFlipMessage(element.id, element.classList.contains("flipped"));
     };
 };
 
@@ -109,9 +110,10 @@ const cardContextMenu = (element) => {
             .addEventListener("click", () => putElementBottom(element));
         newContextMenu
             .querySelector("#context-menu-rotate")
-            .addEventListener("click", () =>
-                element.classList.toggle("rotated"),
-            );
+            .addEventListener("click", () => {
+                element.classList.toggle("rotated");
+                sendRotateMessage(element.id, element.classList.contains("rotated"));
+            });
     };
 };
 

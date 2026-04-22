@@ -43,6 +43,24 @@ export function sendUngrabMessage(id, x, y) {
     });
 }
 
+export function sendFlipMessage(id, flipped) {
+    window.sendMessage({
+        perspective: window.playerSide,
+        messageType: "flip-element",
+        entityId: id,
+        content: { flipped: flipped },
+    });
+}
+
+export function sendRotateMessage(id, rotated) {
+    window.sendMessage({
+        perspective: window.playerSide,
+        messageType: "rotate-element",
+        entityId: id,
+        content: { rotated: rotated },
+    });
+}
+
 export function receiveMessage(message) {
     let element = null;
     switch (message.messageType) {
@@ -171,6 +189,28 @@ export function receiveMessage(message) {
                     },
                 }),
             );
+            break;
+
+        case "flip-element":
+            element = document.querySelector(`#${message.entityId}`);
+            if (!element) {
+                console.warn(
+                    `receiveMessage: flip-element ignored — no element with id "${message.entityId}"`,
+                );
+                break;
+            }
+            element.classList.toggle("flipped", message.content.flipped);
+            break;
+
+        case "rotate-element":
+            element = document.querySelector(`#${message.entityId}`);
+            if (!element) {
+                console.warn(
+                    `receiveMessage: rotate-element ignored — no element with id "${message.entityId}"`,
+                );
+                break;
+            }
+            element.classList.toggle("rotated", message.content.rotated);
             break;
     }
 }
