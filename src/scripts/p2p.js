@@ -114,7 +114,7 @@ export function receiveMessage(message) {
 
                 default:
                     console.warn(
-                        `receiveMessage: create-element — unknown entityType "${message.entityType}"`,
+                        `receiveMessage: create-element — unknown entityType "${String(message.entityType).slice(0, 64)}"`,
                         message,
                     );
                     break;
@@ -223,7 +223,7 @@ export function receiveMessage(message) {
 
         default:
             console.warn(
-                `receiveMessage: unknown messageType "${message.messageType}"`,
+                `receiveMessage: unknown messageType "${String(message.messageType).slice(0, 64)}"`,
                 message,
             );
             break;

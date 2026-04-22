@@ -196,6 +196,7 @@ describe("receiveMessage create-element", () => {
         fakeElement = document.createElement("div");
         fakeElement.id = "new-entity";
         vi.clearAllMocks();
+        vi.spyOn(console, "warn").mockImplementation(() => {});
     });
 
     it("calls createCard with spread content for entityType card", () => {
@@ -340,7 +341,6 @@ describe("receiveMessage create-element", () => {
     });
 
     it("emits a console.warn when entityType is unrecognized", () => {
-        vi.spyOn(console, "warn").mockImplementation(() => {});
         receiveMessage({
             messageType: "create-element",
             entityType: "unknown",
