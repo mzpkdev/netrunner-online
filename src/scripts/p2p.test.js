@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCard } from "./card.js";
 import { createDeck } from "./deck.js";
-import { receiveMessage } from "./p2p.js";
+import { receiveMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
 import { createToken } from "./token.js";
 import { flipElement, snapToGrid } from "./utils.js";
 
@@ -337,6 +337,222 @@ describe("receiveMessage create-element", () => {
         expect(createCard).not.toHaveBeenCalled();
         expect(createDeck).not.toHaveBeenCalled();
         expect(createToken).not.toHaveBeenCalled();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// receiveMessage — flip-element positive path
+// ---------------------------------------------------------------------------
+describe("receiveMessage flip-element positive path", () => {
+    let element;
+
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        element = document.createElement("div");
+        element.id = "flip-entity";
+        document.body.appendChild(element);
+        window.playerSide = "corp";
+        vi.clearAllMocks();
+    });
+
+    it("adds the flipped class when content.flipped is true", () => {
+        receiveMessage({
+            messageType: "flip-element",
+            entityId: "flip-entity",
+            perspective: "corp",
+            content: { flipped: true },
+        });
+        expect(element.classList.contains("flipped")).toBe(true);
+    });
+
+    it("removes the flipped class when content.flipped is false", () => {
+        element.classList.add("flipped");
+        receiveMessage({
+            messageType: "flip-element",
+            entityId: "flip-entity",
+            perspective: "corp",
+            content: { flipped: false },
+        });
+        expect(element.classList.contains("flipped")).toBe(false);
+    });
+
+    it("applies the same flipped state regardless of perspective", () => {
+        receiveMessage({
+            messageType: "flip-element",
+            entityId: "flip-entity",
+            perspective: "runner",
+            content: { flipped: true },
+        });
+        expect(element.classList.contains("flipped")).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// receiveMessage — flip-element null guard
+// ---------------------------------------------------------------------------
+describe("receiveMessage flip-element null guard", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        vi.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    it("does not throw when flip-element references a nonexistent entityId", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "flip-element",
+                entityId: "nonexistent-entity",
+                perspective: "corp",
+                content: { flipped: true },
+            }),
+        ).not.toThrow();
+    });
+
+    it("emits a console.warn when flip-element references a nonexistent entityId", () => {
+        receiveMessage({
+            messageType: "flip-element",
+            entityId: "nonexistent-entity",
+            perspective: "corp",
+            content: { flipped: true },
+        });
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// receiveMessage — rotate-element positive path
+// ---------------------------------------------------------------------------
+describe("receiveMessage rotate-element positive path", () => {
+    let element;
+
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        element = document.createElement("div");
+        element.id = "rotate-entity";
+        document.body.appendChild(element);
+        window.playerSide = "corp";
+        vi.clearAllMocks();
+    });
+
+    it("adds the rotated class when content.rotated is true", () => {
+        receiveMessage({
+            messageType: "rotate-element",
+            entityId: "rotate-entity",
+            perspective: "corp",
+            content: { rotated: true },
+        });
+        expect(element.classList.contains("rotated")).toBe(true);
+    });
+
+    it("removes the rotated class when content.rotated is false", () => {
+        element.classList.add("rotated");
+        receiveMessage({
+            messageType: "rotate-element",
+            entityId: "rotate-entity",
+            perspective: "corp",
+            content: { rotated: false },
+        });
+        expect(element.classList.contains("rotated")).toBe(false);
+    });
+
+    it("applies the same rotated state regardless of perspective", () => {
+        receiveMessage({
+            messageType: "rotate-element",
+            entityId: "rotate-entity",
+            perspective: "runner",
+            content: { rotated: true },
+        });
+        expect(element.classList.contains("rotated")).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// receiveMessage — rotate-element null guard
+// ---------------------------------------------------------------------------
+describe("receiveMessage rotate-element null guard", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        vi.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    it("does not throw when rotate-element references a nonexistent entityId", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "rotate-element",
+                entityId: "nonexistent-entity",
+                perspective: "corp",
+                content: { rotated: true },
+            }),
+        ).not.toThrow();
+    });
+
+    it("emits a console.warn when rotate-element references a nonexistent entityId", () => {
+        receiveMessage({
+            messageType: "rotate-element",
+            entityId: "nonexistent-entity",
+            perspective: "corp",
+            content: { rotated: true },
+        });
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// sendFlipMessage — payload shape
+// ---------------------------------------------------------------------------
+describe("sendFlipMessage", () => {
+    beforeEach(() => {
+        window.playerSide = "corp";
+        window.sendMessageImmediate = vi.fn();
+    });
+
+    it("calls window.sendMessageImmediate with the correct flip-element payload when flipped is true", () => {
+        sendFlipMessage("card-1", true);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            messageType: "flip-element",
+            entityId: "card-1",
+            perspective: "corp",
+            content: { flipped: true },
+        });
+    });
+
+    it("calls window.sendMessageImmediate with flipped: false when the second argument is false", () => {
+        sendFlipMessage("card-1", false);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            messageType: "flip-element",
+            entityId: "card-1",
+            perspective: "corp",
+            content: { flipped: false },
+        });
+    });
+});
+
+// ---------------------------------------------------------------------------
+// sendRotateMessage — payload shape
+// ---------------------------------------------------------------------------
+describe("sendRotateMessage", () => {
+    beforeEach(() => {
+        window.playerSide = "corp";
+        window.sendMessageImmediate = vi.fn();
+    });
+
+    it("calls window.sendMessageImmediate with the correct rotate-element payload when rotated is true", () => {
+        sendRotateMessage("card-1", true);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            messageType: "rotate-element",
+            entityId: "card-1",
+            perspective: "corp",
+            content: { rotated: true },
+        });
+    });
+
+    it("calls window.sendMessageImmediate with rotated: false when the second argument is false", () => {
+        sendRotateMessage("card-1", false);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            messageType: "rotate-element",
+            entityId: "card-1",
+            perspective: "corp",
+            content: { rotated: false },
+        });
     });
 });
 

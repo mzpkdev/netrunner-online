@@ -5,6 +5,7 @@ import { createToken } from "./token.js";
 import { flipElement, snapToGrid, throttle } from "./utils.js";
 
 window.sendMessage = () => {};
+window.sendMessageImmediate = () => {};
 
 export function sendCreateMessage(entity, id, params) {
     window.sendMessage({
@@ -40,6 +41,24 @@ export function sendUngrabMessage(id, x, y) {
         messageType: "ungrab-element",
         entityId: id,
         content: { x: x, y: y },
+    });
+}
+
+export function sendFlipMessage(id, flipped) {
+    window.sendMessageImmediate({
+        perspective: window.playerSide,
+        messageType: "flip-element",
+        entityId: id,
+        content: { flipped: flipped },
+    });
+}
+
+export function sendRotateMessage(id, rotated) {
+    window.sendMessageImmediate({
+        perspective: window.playerSide,
+        messageType: "rotate-element",
+        entityId: id,
+        content: { rotated: rotated },
     });
 }
 
@@ -172,6 +191,28 @@ export function receiveMessage(message) {
                 }),
             );
             break;
+
+        case "flip-element":
+            element = document.querySelector(`#${message.entityId}`);
+            if (!element) {
+                console.warn(
+                    `receiveMessage: flip-element ignored — no element with id "${message.entityId}"`,
+                );
+                break;
+            }
+            element.classList.toggle("flipped", message.content.flipped);
+            break;
+
+        case "rotate-element":
+            element = document.querySelector(`#${message.entityId}`);
+            if (!element) {
+                console.warn(
+                    `receiveMessage: rotate-element ignored — no element with id "${message.entityId}"`,
+                );
+                break;
+            }
+            element.classList.toggle("rotated", message.content.rotated);
+            break;
     }
 }
 
@@ -243,6 +284,7 @@ export const setupP2P = () => {
             (message) => connection.send(message),
             200,
         );
+        window.sendMessageImmediate = (message) => connection.send(message);
 
         connection.on("data", (message) => {
             console.log("Peer:", message);
