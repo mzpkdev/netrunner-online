@@ -1,8 +1,14 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createCard } from "./card.js";
 import { createDeck } from "./deck.js";
-import { receiveMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
+import {
+    receiveMessage,
+    sendFlipMessage,
+    sendRotateMessage,
+    setupHeartbeat,
+    teardownHeartbeat,
+} from "./p2p.js";
 import { createToken } from "./token.js";
 import { flipElement, snapToGrid } from "./utils.js";
 
@@ -592,5 +598,73 @@ describe("receiveMessage unknown messageType", () => {
             content: {},
         });
         expect(console.warn).toHaveBeenCalledOnce();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Heartbeat — setupHeartbeat / teardownHeartbeat / receiveMessage("heartbeat")
+// ---------------------------------------------------------------------------
+describe("heartbeat", () => {
+    let statusEl;
+    let mockConnection;
+
+    beforeEach(() => {
+        vi.useFakeTimers();
+        document.body.innerHTML = '<div id="p2p-status" style="display:none;"></div>';
+        statusEl = document.querySelector("#p2p-status");
+        mockConnection = { send: vi.fn() };
+    });
+
+    afterEach(() => {
+        teardownHeartbeat();
+        vi.useRealTimers();
+    });
+
+    it("sends a heartbeat message to the peer on each 5-second interval", () => {
+        setupHeartbeat(mockConnection);
+        vi.advanceTimersByTime(5000);
+        expect(mockConnection.send).toHaveBeenCalledWith({ messageType: "heartbeat" });
+    });
+
+    it("does not show the disconnect banner before 3 missed pings", () => {
+        setupHeartbeat(mockConnection);
+        vi.advanceTimersByTime(10000); // 2 intervals
+        expect(statusEl.style.display).not.toBe("block");
+    });
+
+    it("shows the disconnect banner after 3 consecutive missed heartbeat intervals", () => {
+        setupHeartbeat(mockConnection);
+        vi.advanceTimersByTime(15000); // 3 intervals
+        expect(statusEl.style.display).toBe("block");
+    });
+
+    it("receiveMessage heartbeat resets the missed-ping counter so the banner is not shown", () => {
+        setupHeartbeat(mockConnection);
+        vi.advanceTimersByTime(10000); // 2 intervals — no banner yet
+        receiveMessage({ messageType: "heartbeat" });
+        vi.advanceTimersByTime(10000); // 2 more intervals after reset — still no banner
+        expect(statusEl.style.display).not.toBe("block");
+    });
+
+    it("clears the disconnect banner when a heartbeat is received after the banner appeared", () => {
+        setupHeartbeat(mockConnection);
+        vi.advanceTimersByTime(15000); // trigger banner
+        expect(statusEl.style.display).toBe("block");
+        receiveMessage({ messageType: "heartbeat" });
+        expect(statusEl.style.display).toBe("none");
+    });
+
+    it("teardownHeartbeat stops heartbeat messages from being sent", () => {
+        setupHeartbeat(mockConnection);
+        teardownHeartbeat();
+        vi.advanceTimersByTime(15000);
+        expect(mockConnection.send).not.toHaveBeenCalled();
+    });
+
+    it("teardownHeartbeat prevents the disconnect banner from appearing", () => {
+        setupHeartbeat(mockConnection);
+        teardownHeartbeat();
+        vi.advanceTimersByTime(15000);
+        expect(statusEl.style.display).not.toBe("block");
     });
 });
