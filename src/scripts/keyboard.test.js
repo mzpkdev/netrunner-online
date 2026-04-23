@@ -19,7 +19,16 @@ const makeCard = (id = "test-card") => {
     const el = document.createElement("div");
     el.id = id;
     el.classList.add("game-card");
+    el.setAttribute("tabindex", "0");
     document.body.appendChild(el);
+    return el;
+};
+
+// Creates a card that also wires up the focus→selectCard listener,
+// matching the behaviour of createCard() in card.js.
+const makeCardWithFocusListener = (id = "test-card") => {
+    const el = makeCard(id);
+    el.addEventListener("focus", () => selectCard(el));
     return el;
 };
 
@@ -248,5 +257,196 @@ describe("text-input guard", () => {
         input.focus();
         pressKey("Delete");
         expect(document.getElementById("test-card")).not.toBeNull();
+    });
+
+    it("does not move focus on ArrowRight when an <input> has focus", () => {
+        const card1 = makeCard("card1");
+        const card2 = makeCard("card2");
+        card1.focus();
+        const input = document.createElement("input");
+        document.body.appendChild(input);
+        input.focus();
+        pressKey("ArrowRight");
+        expect(document.activeElement).toBe(input);
+    });
+
+    it("does not flip on Enter when an <input> has focus", () => {
+        const card = makeCard();
+        selectCard(card);
+        const input = document.createElement("input");
+        document.body.appendChild(input);
+        input.focus();
+        pressKey("Enter");
+        expect(card.classList.contains("flipped")).toBe(false);
+    });
+
+    it("does not flip on Space when a <textarea> has focus", () => {
+        const card = makeCard();
+        selectCard(card);
+        const textarea = document.createElement("textarea");
+        document.body.appendChild(textarea);
+        textarea.focus();
+        pressKey(" ");
+        expect(card.classList.contains("flipped")).toBe(false);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// ArrowRight key — focus cycling forward
+// ---------------------------------------------------------------------------
+describe("ArrowRight key", () => {
+    it("moves focus to the next card in DOM order", () => {
+        const card1 = makeCard("card1");
+        const card2 = makeCard("card2");
+        card1.focus();
+        pressKey("ArrowRight");
+        expect(document.activeElement).toBe(card2);
+    });
+
+    it("wraps from the last card to the first", () => {
+        const card1 = makeCard("card1");
+        const card2 = makeCard("card2");
+        card2.focus();
+        pressKey("ArrowRight");
+        expect(document.activeElement).toBe(card1);
+    });
+
+    it("focuses the first card when no card is currently focused", () => {
+        const card1 = makeCard("card1");
+        makeCard("card2");
+        pressKey("ArrowRight");
+        expect(document.activeElement).toBe(card1);
+    });
+
+    it("does nothing when there are no cards", () => {
+        // Should not throw
+        expect(() => pressKey("ArrowRight")).not.toThrow();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// ArrowLeft key — focus cycling backward
+// ---------------------------------------------------------------------------
+describe("ArrowLeft key", () => {
+    it("moves focus to the previous card in DOM order", () => {
+        const card1 = makeCard("card1");
+        const card2 = makeCard("card2");
+        card2.focus();
+        pressKey("ArrowLeft");
+        expect(document.activeElement).toBe(card1);
+    });
+
+    it("wraps from the first card to the last", () => {
+        const card1 = makeCard("card1");
+        const card2 = makeCard("card2");
+        card1.focus();
+        pressKey("ArrowLeft");
+        expect(document.activeElement).toBe(card2);
+    });
+
+    it("focuses the last card when no card is currently focused", () => {
+        makeCard("card1");
+        const card2 = makeCard("card2");
+        pressKey("ArrowLeft");
+        expect(document.activeElement).toBe(card2);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Enter and Space keys — flip activation
+// ---------------------------------------------------------------------------
+describe("Enter key", () => {
+    it("toggles 'flipped' on the selected card", () => {
+        const card = makeCard();
+        selectCard(card);
+        pressKey("Enter");
+        expect(card.classList.contains("flipped")).toBe(true);
+    });
+
+    it("removes 'flipped' if the card is already flipped (toggle)", () => {
+        const card = makeCard();
+        card.classList.add("flipped");
+        selectCard(card);
+        pressKey("Enter");
+        expect(card.classList.contains("flipped")).toBe(false);
+    });
+
+    it("calls sendFlipMessage with (card.id, true) when toggling on", () => {
+        const card = makeCard();
+        selectCard(card);
+        pressKey("Enter");
+        expect(sendFlipMessage).toHaveBeenCalledWith(card.id, true);
+    });
+
+    it("does nothing when no card is selected", () => {
+        makeCard();
+        pressKey("Enter");
+        expect(sendFlipMessage).not.toHaveBeenCalled();
+    });
+});
+
+describe("Space key", () => {
+    it("toggles 'flipped' on the selected card", () => {
+        const card = makeCard();
+        selectCard(card);
+        pressKey(" ");
+        expect(card.classList.contains("flipped")).toBe(true);
+    });
+
+    it("removes 'flipped' if the card is already flipped (toggle)", () => {
+        const card = makeCard();
+        card.classList.add("flipped");
+        selectCard(card);
+        pressKey(" ");
+        expect(card.classList.contains("flipped")).toBe(false);
+    });
+
+    it("calls sendFlipMessage with (card.id, true) when toggling on", () => {
+        const card = makeCard();
+        selectCard(card);
+        pressKey(" ");
+        expect(sendFlipMessage).toHaveBeenCalledWith(card.id, true);
+    });
+
+    it("does nothing when no card is selected", () => {
+        makeCard();
+        pressKey(" ");
+        expect(sendFlipMessage).not.toHaveBeenCalled();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// focus-sets-selection — keyboard focus syncs selected card
+// ---------------------------------------------------------------------------
+describe("focus-sets-selection", () => {
+    it("focusing a card via the focus event calls selectCard", () => {
+        const card = makeCardWithFocusListener();
+        card.focus();
+        expect(getSelectedCard()).toBe(card);
+    });
+
+    it("ArrowRight focus updates the active selection", () => {
+        const card1 = makeCardWithFocusListener("card1");
+        const card2 = makeCardWithFocusListener("card2");
+        card1.focus();
+        pressKey("ArrowRight");
+        expect(getSelectedCard()).toBe(card2);
+    });
+
+    it("ArrowLeft focus updates the active selection", () => {
+        const card1 = makeCardWithFocusListener("card1");
+        const card2 = makeCardWithFocusListener("card2");
+        card2.focus();
+        pressKey("ArrowLeft");
+        expect(getSelectedCard()).toBe(card1);
+    });
+
+    it("clears selection on the previously focused card", () => {
+        const card1 = makeCardWithFocusListener("card1");
+        const card2 = makeCardWithFocusListener("card2");
+        card1.focus();
+        card2.focus();
+        expect(card1.classList.contains("selected")).toBe(false);
+        expect(card2.classList.contains("selected")).toBe(true);
     });
 });

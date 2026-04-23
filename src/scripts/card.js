@@ -19,6 +19,7 @@ export const createCard = (cardInfo, x, y, id) => {
     cardElement.setAttribute("id", id ? id : `card-${crypto.randomUUID()}`);
     cardElement.style = `left: ${x}; top: ${y};`;
     cardElement.classList.add("game-card");
+    cardElement.setAttribute("tabindex", "0");
     cardElement.innerHTML = `
     <div class="card-front">
         <img width="190" height="265" src="${cardInfo.image}">
@@ -38,6 +39,9 @@ export const createCard = (cardInfo, x, y, id) => {
     cardElement.addEventListener("contextmenu", cardContextMenu(cardElement));
     cardElement.addEventListener("grab", (e) => {
         putElementTop(cardElement);
+        selectCard(cardElement);
+    });
+    cardElement.addEventListener("focus", () => {
         selectCard(cardElement);
     });
     cardElement.addEventListener("move", (e) => {
