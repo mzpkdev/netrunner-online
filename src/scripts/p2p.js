@@ -7,6 +7,10 @@ import { flipElement, snapToGrid, throttle } from "./utils.js";
 window.sendMessage = () => {};
 window.sendMessageImmediate = () => {};
 
+let _heartbeatIntervalId = null;
+let _missedPings = 0;
+let _heartbeatBannerVisible = false;
+
 export function sendCreateMessage(entity, id, params) {
     window.sendMessage({
         perspective: window.playerSide,
@@ -221,6 +225,15 @@ export function receiveMessage(message) {
             element.classList.toggle("rotated", message.content.rotated);
             break;
 
+        case "heartbeat":
+            _missedPings = 0;
+            if (_heartbeatBannerVisible) {
+                const statusEl = document.querySelector("#p2p-status");
+                if (statusEl) statusEl.style.display = "none";
+                _heartbeatBannerVisible = false;
+            }
+            break;
+
         default:
             console.warn(
                 `receiveMessage: unknown messageType "${message.messageType}"`,
@@ -241,6 +254,36 @@ function showP2PStatus(
     el.style.color = color;
     el.style.border = `1px solid ${border}`;
     el.style.display = "block";
+}
+
+export function setupHeartbeat(connection) {
+    _missedPings = 0;
+    _heartbeatBannerVisible = false;
+    if (_heartbeatIntervalId !== null) {
+        clearInterval(_heartbeatIntervalId);
+    }
+    _heartbeatIntervalId = setInterval(() => {
+        connection.send({ messageType: "heartbeat" });
+        _missedPings++;
+        if (_missedPings >= 3) {
+            showP2PStatus("Opponent may have disconnected.", {
+                bg: "#721c24",
+                color: "#f8d7da",
+                border: "#f5c6cb",
+            });
+            _heartbeatBannerVisible = true;
+        }
+    }, 5000);
+    return _heartbeatIntervalId;
+}
+
+export function teardownHeartbeat() {
+    if (_heartbeatIntervalId !== null) {
+        clearInterval(_heartbeatIntervalId);
+        _heartbeatIntervalId = null;
+    }
+    _missedPings = 0;
+    _heartbeatBannerVisible = false;
 }
 
 function getIceServers() {
@@ -307,10 +350,12 @@ export const setupP2P = () => {
 
         connection.on("open", () => {
             console.log("Connection established. You can send messages now.");
+            setupHeartbeat(connection);
         });
 
         connection.on("close", () => {
             console.log("Data connection has been closed.");
+            teardownHeartbeat();
             showP2PStatus("Opponent disconnected.");
         });
     };
