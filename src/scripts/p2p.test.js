@@ -667,4 +667,22 @@ describe("heartbeat", () => {
         vi.advanceTimersByTime(15000);
         expect(statusEl.style.display).not.toBe("block");
     });
+
+    it("teardownHeartbeat hides the disconnect banner when it is already showing", () => {
+        setupHeartbeat(mockConnection);
+        vi.advanceTimersByTime(15000); // banner appears
+        expect(statusEl.style.display).toBe("block");
+        teardownHeartbeat();
+        expect(statusEl.style.display).toBe("none");
+    });
+
+    it("calling setupHeartbeat a second time cancels the first interval", () => {
+        const conn1 = { send: vi.fn() };
+        const conn2 = { send: vi.fn() };
+        setupHeartbeat(conn1);
+        setupHeartbeat(conn2);
+        vi.advanceTimersByTime(5000);
+        expect(conn1.send).not.toHaveBeenCalled();
+        expect(conn2.send).toHaveBeenCalledOnce();
+    });
 });

@@ -263,7 +263,6 @@ export function setupHeartbeat(connection) {
         clearInterval(_heartbeatIntervalId);
     }
     _heartbeatIntervalId = setInterval(() => {
-        connection.send({ messageType: "heartbeat" });
         _missedPings++;
         if (_missedPings >= 3) {
             showP2PStatus("Opponent may have disconnected.", {
@@ -272,12 +271,20 @@ export function setupHeartbeat(connection) {
                 border: "#f5c6cb",
             });
             _heartbeatBannerVisible = true;
+            clearInterval(_heartbeatIntervalId);
+            _heartbeatIntervalId = null;
+            return;
         }
+        connection.send({ messageType: "heartbeat" });
     }, 5000);
     return _heartbeatIntervalId;
 }
 
 export function teardownHeartbeat() {
+    const statusEl = document.querySelector("#p2p-status");
+    if (_heartbeatBannerVisible && statusEl) {
+        statusEl.style.display = "none";
+    }
     if (_heartbeatIntervalId !== null) {
         clearInterval(_heartbeatIntervalId);
         _heartbeatIntervalId = null;
