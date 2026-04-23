@@ -38,6 +38,13 @@ const pressKey = (key) => {
     );
 };
 
+const pressKeyAndSpy = (key) => {
+    const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true });
+    const spy = vi.spyOn(event, "preventDefault");
+    document.dispatchEvent(event);
+    return spy;
+};
+
 beforeAll(() => {
     setupKeyboardShortcuts();
 });
@@ -322,6 +329,17 @@ describe("ArrowRight key", () => {
         // Should not throw
         expect(() => pressKey("ArrowRight")).not.toThrow();
     });
+
+    it("calls e.preventDefault() when cards are present", () => {
+        makeCard("card1");
+        const spy = pressKeyAndSpy("ArrowRight");
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it("does not call e.preventDefault() when no cards are present", () => {
+        const spy = pressKeyAndSpy("ArrowRight");
+        expect(spy).not.toHaveBeenCalled();
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -349,6 +367,12 @@ describe("ArrowLeft key", () => {
         const card2 = makeCard("card2");
         pressKey("ArrowLeft");
         expect(document.activeElement).toBe(card2);
+    });
+
+    it("calls e.preventDefault() when cards are present", () => {
+        makeCard("card1");
+        const spy = pressKeyAndSpy("ArrowLeft");
+        expect(spy).toHaveBeenCalled();
     });
 });
 
@@ -383,6 +407,29 @@ describe("Enter key", () => {
         pressKey("Enter");
         expect(sendFlipMessage).not.toHaveBeenCalled();
     });
+
+    it("calls sendFlipMessage with (card.id, false) when toggling off", () => {
+        const card = makeCard();
+        card.classList.add("flipped");
+        selectCard(card);
+        pressKey("Enter");
+        expect(sendFlipMessage).toHaveBeenCalledWith(card.id, false);
+    });
+
+    it("calls e.preventDefault()", () => {
+        const card = makeCard();
+        selectCard(card);
+        const spy = pressKeyAndSpy("Enter");
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it("activates the focused card when selectedCard is null after Escape", () => {
+        const card = makeCardWithFocusListener();
+        card.focus();
+        pressKey("Escape");
+        pressKey("Enter");
+        expect(card.classList.contains("flipped")).toBe(true);
+    });
 });
 
 describe("Space key", () => {
@@ -412,6 +459,29 @@ describe("Space key", () => {
         makeCard();
         pressKey(" ");
         expect(sendFlipMessage).not.toHaveBeenCalled();
+    });
+
+    it("calls sendFlipMessage with (card.id, false) when toggling off", () => {
+        const card = makeCard();
+        card.classList.add("flipped");
+        selectCard(card);
+        pressKey(" ");
+        expect(sendFlipMessage).toHaveBeenCalledWith(card.id, false);
+    });
+
+    it("calls e.preventDefault()", () => {
+        const card = makeCard();
+        selectCard(card);
+        const spy = pressKeyAndSpy(" ");
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it("activates the focused card when selectedCard is null after Escape", () => {
+        const card = makeCardWithFocusListener();
+        card.focus();
+        pressKey("Escape");
+        pressKey(" ");
+        expect(card.classList.contains("flipped")).toBe(true);
     });
 });
 

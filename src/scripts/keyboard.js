@@ -56,6 +56,7 @@ export const setupKeyboardShortcuts = () => {
             case "ArrowRight": {
                 const cards = Array.from(document.querySelectorAll(".game-card"));
                 if (cards.length === 0) break;
+                e.preventDefault();
                 const idx = cards.indexOf(document.activeElement);
                 const next = (idx === -1 || idx === cards.length - 1) ? 0 : idx + 1;
                 cards[next].focus();
@@ -64,18 +65,25 @@ export const setupKeyboardShortcuts = () => {
             case "ArrowLeft": {
                 const cards = Array.from(document.querySelectorAll(".game-card"));
                 if (cards.length === 0) break;
+                e.preventDefault();
                 const idx = cards.indexOf(document.activeElement);
                 const prev = idx <= 0 ? cards.length - 1 : idx - 1;
                 cards[prev].focus();
                 break;
             }
             case "Enter":
-            case " ":
-                if (selectedCard) {
-                    selectedCard.classList.toggle("flipped");
-                    sendFlipMessage(selectedCard.id, selectedCard.classList.contains("flipped"));
+            case " ": {
+                e.preventDefault();
+                const target = selectedCard ??
+                    (document.activeElement?.classList.contains("game-card")
+                        ? document.activeElement
+                        : null);
+                if (target) {
+                    target.classList.toggle("flipped");
+                    sendFlipMessage(target.id, target.classList.contains("flipped"));
                 }
                 break;
+            }
         }
     });
 };

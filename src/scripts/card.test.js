@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCard, handleCardBehavior, snapOutOfHandArea } from "./card.js";
+import { selectCard } from "./keyboard.js";
 import { sendFlipMessage, sendRotateMessage } from "./p2p.js";
 
 vi.mock("./p2p.js", () => ({
@@ -66,6 +67,17 @@ describe("createCard", () => {
         const src = el.querySelector(".card-back img").src;
         expect(src).toBeTruthy();
         expect(src).not.toContain("gstatic.com");
+    });
+
+    it("sets tabindex='0' on the card element", () => {
+        const el = createCard(cardInfo, "10px", "20px", "tabindex-test");
+        expect(el.getAttribute("tabindex")).toBe("0");
+    });
+
+    it("calls selectCard when the card element receives a focus event", () => {
+        const el = createCard(cardInfo, "10px", "20px", "focus-test");
+        el.dispatchEvent(new Event("focus"));
+        expect(selectCard).toHaveBeenCalledWith(el);
     });
 });
 
