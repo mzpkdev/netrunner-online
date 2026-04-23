@@ -78,6 +78,18 @@ describe("setupCorp", () => {
         document.querySelector("#corp-identity").value = "Unknown Corp Identity";
         setupCorp();
         expect(document.querySelector("#corp-identity-error")).not.toBeNull();
+        expect(
+            document.querySelector("#corp-identity-error").textContent,
+        ).toContain("Unknown Corp Identity");
+    });
+
+    it("replaces the error element rather than duplicating it when setupCorp is called twice with an unmatched identity", () => {
+        document.querySelector("#corp-identity").value = "Unknown Corp Identity";
+        setupCorp();
+        setupCorp();
+        expect(
+            document.querySelectorAll("#corp-identity-error").length,
+        ).toBe(1);
     });
 
     it("still calls createDeck when the corp identity input value does not match any card in allCards", () => {
@@ -134,6 +146,19 @@ describe("setupRunner", () => {
             "Unknown Runner Identity";
         setupRunner();
         expect(document.querySelector("#runner-identity-error")).not.toBeNull();
+        expect(
+            document.querySelector("#runner-identity-error").textContent,
+        ).toContain("Unknown Runner Identity");
+    });
+
+    it("replaces the error element rather than duplicating it when setupRunner is called twice with an unmatched identity", () => {
+        document.querySelector("#runner-identity").value =
+            "Unknown Runner Identity";
+        setupRunner();
+        setupRunner();
+        expect(
+            document.querySelectorAll("#runner-identity-error").length,
+        ).toBe(1);
     });
 
     it("still calls createDeck when the runner identity input value does not match any card in allCards", () => {

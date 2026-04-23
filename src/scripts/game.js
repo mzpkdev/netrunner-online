@@ -24,6 +24,7 @@ export const setupCorp = () => {
     if (corpIdentityCard) {
         createCard(corpIdentityCard, ...corpIdentityLocation);
     } else {
+        document.querySelector("#corp-identity-error")?.remove();
         const error = document.createElement("p");
         error.id = "corp-identity-error";
         error.textContent = `Identity not recognized: "${corpIdentity}"`;
@@ -51,6 +52,7 @@ export const setupRunner = () => {
     if (runnerIdentityCard) {
         createCard(runnerIdentityCard, ...runnerIdentityLocation);
     } else {
+        document.querySelector("#runner-identity-error")?.remove();
         const error = document.createElement("p");
         error.id = "runner-identity-error";
         error.textContent = `Identity not recognized: "${runnerIdentity}"`;
