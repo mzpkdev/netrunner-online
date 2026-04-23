@@ -18,10 +18,17 @@ export const setupCorp = () => {
         ...corpDeckLocation,
     );
     const corpIdentity = document.querySelector("#corp-identity").value.trim();
-    createCard(
-        allCards.find((cardInfo) => cardInfo.title === corpIdentity),
-        ...corpIdentityLocation,
+    const corpIdentityCard = allCards.find(
+        (cardInfo) => cardInfo.title === corpIdentity,
     );
+    if (corpIdentityCard) {
+        createCard(corpIdentityCard, ...corpIdentityLocation);
+    } else {
+        const error = document.createElement("p");
+        error.id = "corp-identity-error";
+        error.textContent = `Identity not recognized: "${corpIdentity}"`;
+        document.body.appendChild(error);
+    }
 };
 
 export const setupRunner = () => {
@@ -38,10 +45,17 @@ export const setupRunner = () => {
     const runnerIdentity = document
         .querySelector("#runner-identity")
         .value.trim();
-    createCard(
-        allCards.find((cardInfo) => cardInfo.title === runnerIdentity),
-        ...runnerIdentityLocation,
+    const runnerIdentityCard = allCards.find(
+        (cardInfo) => cardInfo.title === runnerIdentity,
     );
+    if (runnerIdentityCard) {
+        createCard(runnerIdentityCard, ...runnerIdentityLocation);
+    } else {
+        const error = document.createElement("p");
+        error.id = "runner-identity-error";
+        error.textContent = `Identity not recognized: "${runnerIdentity}"`;
+        document.body.appendChild(error);
+    }
 };
 
 export const setupGame = () => {
