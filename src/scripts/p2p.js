@@ -48,6 +48,14 @@ export function sendUngrabMessage(id, x, y) {
     });
 }
 
+export function sendDeleteMessage(id) {
+    window.sendMessageImmediate({
+        perspective: window.playerSide,
+        messageType: "delete-element",
+        entityId: id,
+    });
+}
+
 export function sendFlipMessage(id, flipped) {
     window.sendMessageImmediate({
         perspective: window.playerSide,
@@ -223,6 +231,17 @@ export function receiveMessage(message) {
                 break;
             }
             element.classList.toggle("rotated", message.content.rotated);
+            break;
+
+        case "delete-element":
+            element = document.querySelector(`#${message.entityId}`);
+            if (!element) {
+                console.warn(
+                    `receiveMessage: delete-element ignored — no element with id "${message.entityId}"`,
+                );
+                break;
+            }
+            element.remove();
             break;
 
         case "heartbeat":

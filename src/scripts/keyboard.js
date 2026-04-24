@@ -1,4 +1,4 @@
-import { sendFlipMessage, sendRotateMessage } from "./p2p.js";
+import { sendDeleteMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
 
 let selectedCard = null;
 
@@ -46,6 +46,7 @@ export const setupKeyboardShortcuts = () => {
                 break;
             case "Delete":
                 if (selectedCard) {
+                    sendDeleteMessage(selectedCard.id);
                     selectedCard.remove();
                     selectedCard = null;
                 }

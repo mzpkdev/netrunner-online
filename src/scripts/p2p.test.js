@@ -515,6 +515,62 @@ describe("receiveMessage rotate-element null guard", () => {
 });
 
 // ---------------------------------------------------------------------------
+// receiveMessage — delete-element positive path
+// ---------------------------------------------------------------------------
+describe("receiveMessage delete-element positive path", () => {
+    let element;
+
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        element = document.createElement("div");
+        element.id = "delete-entity";
+        document.body.appendChild(element);
+        vi.clearAllMocks();
+    });
+
+    it("removes the element from the DOM when the id matches", () => {
+        receiveMessage({
+            messageType: "delete-element",
+            entityId: "delete-entity",
+            perspective: "corp",
+            content: {},
+        });
+        expect(document.getElementById("delete-entity")).toBeNull();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// receiveMessage — delete-element null guard
+// ---------------------------------------------------------------------------
+describe("receiveMessage delete-element null guard", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        vi.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    it("does not throw when delete-element references a nonexistent entityId", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "delete-element",
+                entityId: "nonexistent-entity",
+                perspective: "corp",
+                content: {},
+            }),
+        ).not.toThrow();
+    });
+
+    it("emits a console.warn when delete-element references a nonexistent entityId", () => {
+        receiveMessage({
+            messageType: "delete-element",
+            entityId: "nonexistent-entity",
+            perspective: "corp",
+            content: {},
+        });
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+});
+
+// ---------------------------------------------------------------------------
 // sendFlipMessage — payload shape
 // ---------------------------------------------------------------------------
 describe("sendFlipMessage", () => {
