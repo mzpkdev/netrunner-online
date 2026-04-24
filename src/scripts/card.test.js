@@ -178,6 +178,20 @@ describe("handleCardBehavior", () => {
         ).toBe(false);
     });
 
+    it("board corp non-operation non-identity with matching playerSide shows tooltip", () => {
+        window.playerSide = "corp";
+        cardElement.setAttribute("data-location", "board");
+        cardElement.setAttribute("data-side", "corp");
+        cardElement.setAttribute("data-type", "asset");
+        handleCardBehavior(cardElement);
+        expect(
+            cardElement
+                .querySelector(".game-card-tooltip")
+                .classList.contains("hidden"),
+        ).toBe(false);
+        delete window.playerSide;
+    });
+
     it("board runner shows card-front", () => {
         cardElement.setAttribute("data-location", "board");
         cardElement.setAttribute("data-side", "runner");
@@ -188,12 +202,18 @@ describe("handleCardBehavior", () => {
         ).toBe(false);
     });
 
-    it("ICE card on board receives rotated class", () => {
+    it("ICE card on board receives rotated class and is rendered face-down", () => {
         cardElement.setAttribute("data-location", "board");
         cardElement.setAttribute("data-side", "corp");
         cardElement.setAttribute("data-type", "ice");
         handleCardBehavior(cardElement);
         expect(cardElement.classList.contains("rotated")).toBe(true);
+        expect(
+            cardElement.querySelector(".card-front").classList.contains("hidden"),
+        ).toBe(true);
+        expect(
+            cardElement.querySelector(".card-back").classList.contains("hidden"),
+        ).toBe(false);
     });
 
     it("non-ICE card on board has rotated class removed", () => {
