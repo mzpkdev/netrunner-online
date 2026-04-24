@@ -9,6 +9,13 @@ import {
     snapToGrid,
 } from "./utils.js";
 
+/**
+ * @param {import('./types.ts').CardInfo} cardInfo
+ * @param {string} x
+ * @param {string} y
+ * @param {string} [id]
+ * @returns {HTMLElement}
+ */
 export const createCard = (cardInfo, x, y, id) => {
     const cardElement = document.createElement("div");
     cardElement.setAttribute("data-title", cardInfo.title);
