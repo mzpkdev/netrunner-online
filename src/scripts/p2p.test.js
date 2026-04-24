@@ -534,7 +534,6 @@ describe("receiveMessage delete-element positive path", () => {
             messageType: "delete-element",
             entityId: "delete-entity",
             perspective: "corp",
-            content: {},
         });
         expect(document.getElementById("delete-entity")).toBeNull();
     });
@@ -555,7 +554,6 @@ describe("receiveMessage delete-element null guard", () => {
                 messageType: "delete-element",
                 entityId: "nonexistent-entity",
                 perspective: "corp",
-                content: {},
             }),
         ).not.toThrow();
     });
@@ -565,7 +563,6 @@ describe("receiveMessage delete-element null guard", () => {
             messageType: "delete-element",
             entityId: "nonexistent-entity",
             perspective: "corp",
-            content: {},
         });
         expect(console.warn).toHaveBeenCalledOnce();
     });
