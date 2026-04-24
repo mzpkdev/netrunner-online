@@ -2,6 +2,13 @@ import { grabCard } from "./grab.js";
 import { sendCreateMessage } from "./p2p.js";
 import { isPointWithinElement, putElementTop, snapToGrid } from "./utils.js";
 
+/**
+ * @param {import('./types.ts').TokenName} tokenName
+ * @param {string} x
+ * @param {string} y
+ * @param {string} [id]
+ * @returns {HTMLElement}
+ */
 export const createToken = (tokenName, x, y, id) => {
     const tokenElement = document.createElement("div");
 

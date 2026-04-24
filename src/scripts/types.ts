@@ -28,12 +28,31 @@ export interface CardInfo {
 // P2P message union — discriminated on `messageType`
 // ---------------------------------------------------------------------------
 
-export interface CreateElementMessage {
+/** `create-element` message for a card entity. `content` matches the `createCard` parameter list. */
+export interface CreateCardMessage {
     messageType: "create-element";
     perspective: PlayerSide;
-    entityType: EntityType;
+    entityType: "card";
     entityId: string;
-    content: unknown[];
+    content: [CardInfo, string, string, string?];
+}
+
+/** `create-element` message for a deck entity. `content` matches the `createDeck` parameter list. */
+export interface CreateDeckMessage {
+    messageType: "create-element";
+    perspective: PlayerSide;
+    entityType: "deck";
+    entityId: string;
+    content: [string, string, string, string];
+}
+
+/** `create-element` message for a token entity. `content` matches the `createToken` parameter list. */
+export interface CreateTokenMessage {
+    messageType: "create-element";
+    perspective: PlayerSide;
+    entityType: "token";
+    entityId: string;
+    content: [TokenName, string, string, string?];
 }
 
 export interface GrabElementMessage {
@@ -83,7 +102,9 @@ export interface HeartbeatMessage {
 
 /** Discriminated union of every P2P message shape exchanged between peers. */
 export type P2PMessage =
-    | CreateElementMessage
+    | CreateCardMessage
+    | CreateDeckMessage
+    | CreateTokenMessage
     | GrabElementMessage
     | MoveElementMessage
     | UngrabElementMessage
