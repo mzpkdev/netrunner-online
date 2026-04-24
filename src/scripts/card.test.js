@@ -134,6 +134,76 @@ describe("handleCardBehavior", () => {
         handleCardBehavior(cardElement);
         expect(cardElement.getAttribute("data-location")).toBe("board");
     });
+
+    it("hand location removes flipped class and shows card-front", () => {
+        cardElement.setAttribute("data-location", "hand");
+        cardElement.classList.add("flipped");
+        handleCardBehavior(cardElement);
+        expect(cardElement.classList.contains("flipped")).toBe(false);
+        expect(
+            cardElement.querySelector(".card-front").classList.contains("hidden"),
+        ).toBe(false);
+    });
+
+    it("opponent-hand location removes flipped class and hides card-front", () => {
+        cardElement.setAttribute("data-location", "opponent-hand");
+        cardElement.classList.add("flipped");
+        handleCardBehavior(cardElement);
+        expect(cardElement.classList.contains("flipped")).toBe(false);
+        expect(
+            cardElement.querySelector(".card-front").classList.contains("hidden"),
+        ).toBe(true);
+    });
+
+    it("board corp operation shows card-front", () => {
+        cardElement.setAttribute("data-location", "board");
+        cardElement.setAttribute("data-side", "corp");
+        cardElement.setAttribute("data-type", "operation");
+        handleCardBehavior(cardElement);
+        expect(
+            cardElement.querySelector(".card-front").classList.contains("hidden"),
+        ).toBe(false);
+    });
+
+    it("board corp non-operation non-identity sets card face-down", () => {
+        cardElement.setAttribute("data-location", "board");
+        cardElement.setAttribute("data-side", "corp");
+        cardElement.setAttribute("data-type", "asset");
+        handleCardBehavior(cardElement);
+        expect(
+            cardElement.querySelector(".card-front").classList.contains("hidden"),
+        ).toBe(true);
+        expect(
+            cardElement.querySelector(".card-back").classList.contains("hidden"),
+        ).toBe(false);
+    });
+
+    it("board runner shows card-front", () => {
+        cardElement.setAttribute("data-location", "board");
+        cardElement.setAttribute("data-side", "runner");
+        cardElement.setAttribute("data-type", "program");
+        handleCardBehavior(cardElement);
+        expect(
+            cardElement.querySelector(".card-front").classList.contains("hidden"),
+        ).toBe(false);
+    });
+
+    it("ICE card on board receives rotated class", () => {
+        cardElement.setAttribute("data-location", "board");
+        cardElement.setAttribute("data-side", "corp");
+        cardElement.setAttribute("data-type", "ice");
+        handleCardBehavior(cardElement);
+        expect(cardElement.classList.contains("rotated")).toBe(true);
+    });
+
+    it("non-ICE card on board has rotated class removed", () => {
+        cardElement.setAttribute("data-location", "board");
+        cardElement.setAttribute("data-side", "runner");
+        cardElement.setAttribute("data-type", "program");
+        cardElement.classList.add("rotated");
+        handleCardBehavior(cardElement);
+        expect(cardElement.classList.contains("rotated")).toBe(false);
+    });
 });
 
 // ---------------------------------------------------------------------------
