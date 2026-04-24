@@ -4,6 +4,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("./p2p.js", () => ({
+    sendDeleteMessage: vi.fn(),
     sendFlipMessage: vi.fn(),
     sendRotateMessage: vi.fn(),
 }));
@@ -13,7 +14,7 @@ import {
     selectCard,
     setupKeyboardShortcuts,
 } from "./keyboard.js";
-import { sendFlipMessage, sendRotateMessage } from "./p2p.js";
+import { sendDeleteMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
 
 const makeCard = (id = "test-card") => {
     const el = document.createElement("div");
@@ -203,6 +204,26 @@ describe("Delete key", () => {
         const card = makeCard();
         pressKey("Delete");
         expect(document.getElementById("test-card")).not.toBeNull();
+    });
+
+    it("calls sendDeleteMessage with the card id when Delete is pressed", () => {
+        const card = makeCard();
+        selectCard(card);
+        pressKey("Delete");
+        expect(sendDeleteMessage).toHaveBeenCalledWith(card.id);
+    });
+
+    it("calls sendDeleteMessage exactly once when Delete is pressed with a selected card", () => {
+        const card = makeCard();
+        selectCard(card);
+        pressKey("Delete");
+        expect(sendDeleteMessage).toHaveBeenCalledOnce();
+    });
+
+    it("does not call sendDeleteMessage when no card is selected", () => {
+        makeCard();
+        pressKey("Delete");
+        expect(sendDeleteMessage).not.toHaveBeenCalled();
     });
 });
 
