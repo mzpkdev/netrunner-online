@@ -75,9 +75,23 @@ export function sendRotateMessage(id, rotated) {
 }
 
 export function receiveMessage(message) {
+    if (!message || !message.messageType) {
+        console.warn(
+            "receiveMessage: ignored — message is null, undefined, or missing messageType",
+            message,
+        );
+        return;
+    }
     let element = null;
     switch (message.messageType) {
         case "create-element":
+            if (!message.entityType || !message.entityId || !message.content) {
+                console.warn(
+                    "receiveMessage: create-element ignored — missing entityType, entityId, or content",
+                    message,
+                );
+                break;
+            }
             switch (message.entityType) {
                 case "deck":
                     if (!document.querySelector(`#${message.entityId}`)) {
@@ -141,6 +155,17 @@ export function receiveMessage(message) {
                 );
                 break;
             }
+            if (
+                !message.content ||
+                typeof message.content.x !== "number" ||
+                typeof message.content.y !== "number"
+            ) {
+                console.warn(
+                    "receiveMessage: grab-element ignored — content is falsy or coordinates are non-numeric",
+                    message,
+                );
+                break;
+            }
             element.style.left = `${message.content.x}px`;
             element.style.top = `${message.content.y}px`;
             if (message.perspective !== window.playerSide) {
@@ -167,6 +192,17 @@ export function receiveMessage(message) {
                 );
                 break;
             }
+            if (
+                !message.content ||
+                typeof message.content.x !== "number" ||
+                typeof message.content.y !== "number"
+            ) {
+                console.warn(
+                    "receiveMessage: move-element ignored — content is falsy or coordinates are non-numeric",
+                    message,
+                );
+                break;
+            }
             element.style.left = `${message.content.x}px`;
             element.style.top = `${message.content.y}px`;
             if (message.perspective !== window.playerSide) {
@@ -190,6 +226,17 @@ export function receiveMessage(message) {
             if (!element) {
                 console.warn(
                     `receiveMessage: ungrab-element ignored — no element with id "${message.entityId}"`,
+                );
+                break;
+            }
+            if (
+                !message.content ||
+                typeof message.content.x !== "number" ||
+                typeof message.content.y !== "number"
+            ) {
+                console.warn(
+                    "receiveMessage: ungrab-element ignored — content is falsy or coordinates are non-numeric",
+                    message,
                 );
                 break;
             }
