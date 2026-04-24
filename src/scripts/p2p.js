@@ -157,8 +157,8 @@ export function receiveMessage(message) {
             }
             if (
                 !message.content ||
-                typeof message.content.x !== "number" ||
-                typeof message.content.y !== "number"
+                !Number.isFinite(message.content.x) ||
+                !Number.isFinite(message.content.y)
             ) {
                 console.warn(
                     "receiveMessage: grab-element ignored — content is falsy or coordinates are non-numeric",
@@ -194,8 +194,8 @@ export function receiveMessage(message) {
             }
             if (
                 !message.content ||
-                typeof message.content.x !== "number" ||
-                typeof message.content.y !== "number"
+                !Number.isFinite(message.content.x) ||
+                !Number.isFinite(message.content.y)
             ) {
                 console.warn(
                     "receiveMessage: move-element ignored — content is falsy or coordinates are non-numeric",
@@ -231,8 +231,8 @@ export function receiveMessage(message) {
             }
             if (
                 !message.content ||
-                typeof message.content.x !== "number" ||
-                typeof message.content.y !== "number"
+                !Number.isFinite(message.content.x) ||
+                !Number.isFinite(message.content.y)
             ) {
                 console.warn(
                     "receiveMessage: ungrab-element ignored — content is falsy or coordinates are non-numeric",
