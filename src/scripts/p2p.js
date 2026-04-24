@@ -74,6 +74,10 @@ export function sendRotateMessage(id, rotated) {
     });
 }
 
+/**
+ * @param {import('./types.ts').P2PMessage} message
+ * @returns {void}
+ */
 export function receiveMessage(message) {
     if (!message || !message.messageType) {
         console.warn(

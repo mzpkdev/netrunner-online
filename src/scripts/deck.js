@@ -123,6 +123,10 @@ export const createDeck = (deckList, id, x, y) => {
     return deckElement;
 };
 
+/**
+ * @param {Element} cardElement
+ * @returns {import('./types.ts').CardInfo}
+ */
 const cardElementToCardInfo = (cardElement) => {
     return {
         title: cardElement.getAttribute("data-title"),
