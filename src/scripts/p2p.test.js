@@ -678,6 +678,104 @@ describe("receiveMessage unknown messageType", () => {
 });
 
 // ---------------------------------------------------------------------------
+// receiveMessage — malformed payload guards
+// ---------------------------------------------------------------------------
+describe("receiveMessage malformed payload guards", () => {
+    let element;
+
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        element = document.createElement("div");
+        element.id = "test-entity";
+        document.body.appendChild(element);
+        window.playerSide = "corp";
+        vi.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    it("does not throw and emits console.warn when message is null", () => {
+        expect(() => receiveMessage(null)).not.toThrow();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("does not throw and emits console.warn when message is missing messageType", () => {
+        expect(() =>
+            receiveMessage({ entityId: "test-entity", content: { x: 1, y: 2 } }),
+        ).not.toThrow();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("does not throw and emits console.warn for grab-element when content is null", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "grab-element",
+                entityId: "test-entity",
+                perspective: "corp",
+                content: null,
+            }),
+        ).not.toThrow();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("does not throw and emits console.warn for move-element when coordinates are non-numeric", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "move-element",
+                entityId: "test-entity",
+                perspective: "corp",
+                content: { x: "bad", y: "data" },
+            }),
+        ).not.toThrow();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("does not throw and emits console.warn for ungrab-element when content is null", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "ungrab-element",
+                entityId: "test-entity",
+                perspective: "corp",
+                content: null,
+            }),
+        ).not.toThrow();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("does not throw and emits console.warn for create-element when content is missing", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "create-element",
+                entityType: "card",
+                entityId: "test-entity",
+                perspective: "corp",
+            }),
+        ).not.toThrow();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("does not throw and emits console.warn for create-element when entityId is missing", () => {
+        expect(() =>
+            receiveMessage({
+                messageType: "create-element",
+                entityType: "card",
+                perspective: "corp",
+                content: ["arg1"],
+            }),
+        ).not.toThrow();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("does not call createCard when grab-element content.x is non-numeric", () => {
+        receiveMessage({
+            messageType: "grab-element",
+            entityId: "test-entity",
+            perspective: "corp",
+            content: { x: null, y: 50 },
+        });
+        expect(element.style.left).toBe("");
+    });
+});
+
+// ---------------------------------------------------------------------------
 // Heartbeat — setupHeartbeat / teardownHeartbeat / receiveMessage("heartbeat")
 // ---------------------------------------------------------------------------
 describe("heartbeat", () => {
