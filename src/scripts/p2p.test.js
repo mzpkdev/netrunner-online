@@ -4,6 +4,7 @@ import { createCard } from "./card.js";
 import { createDeck } from "./deck.js";
 import {
     receiveMessage,
+    sendDeleteMessage,
     sendFlipMessage,
     sendRotateMessage,
     setupHeartbeat,
@@ -626,6 +627,25 @@ describe("sendRotateMessage", () => {
             entityId: "card-1",
             perspective: "corp",
             content: { rotated: false },
+        });
+    });
+});
+
+// ---------------------------------------------------------------------------
+// sendDeleteMessage — payload shape
+// ---------------------------------------------------------------------------
+describe("sendDeleteMessage", () => {
+    beforeEach(() => {
+        window.playerSide = "corp";
+        window.sendMessageImmediate = vi.fn();
+    });
+
+    it("calls window.sendMessageImmediate with the correct delete-element payload", () => {
+        sendDeleteMessage("card-1");
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            messageType: "delete-element",
+            entityId: "card-1",
+            perspective: "corp",
         });
     });
 });
