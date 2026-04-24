@@ -231,10 +231,17 @@ describe("putElementBottom", () => {
 
     it("inserts the element before the first child of #card-layer", () => {
         putElementBottom(element);
+        expect(document.querySelector).toHaveBeenCalledWith("#card-layer");
         expect(cardLayer.insertBefore).toHaveBeenCalledWith(
             element,
             cardLayer.firstElementChild,
         );
+    });
+
+    it("calls insertBefore with null when #card-layer has no children", () => {
+        cardLayer.firstElementChild = null;
+        putElementBottom(element);
+        expect(cardLayer.insertBefore).toHaveBeenCalledWith(element, null);
     });
 });
 
@@ -262,6 +269,7 @@ describe("putElementTop", () => {
 
     it("appends the element to #card-layer when it is not already the last child", () => {
         putElementTop(element);
+        expect(document.querySelector).toHaveBeenCalledWith("#card-layer");
         expect(cardLayer.appendChild).toHaveBeenCalledWith(element);
     });
 
