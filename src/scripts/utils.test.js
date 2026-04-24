@@ -3,6 +3,8 @@ import {
     fetchAllCards,
     flipElement,
     isPointWithinElement,
+    putElementBottom,
+    putElementTop,
     shuffle,
     snapToGrid,
     throttle,
@@ -202,6 +204,77 @@ describe("throttle", () => {
         throttled.cancel();
         vi.advanceTimersByTime(200);
         expect(fn).toHaveBeenCalledTimes(1);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// putElementBottom
+// ---------------------------------------------------------------------------
+describe("putElementBottom", () => {
+    let cardLayer;
+    let element;
+
+    beforeEach(() => {
+        element = { id: "target" };
+        cardLayer = {
+            firstElementChild: { id: "first" },
+            insertBefore: vi.fn(),
+        };
+        vi.stubGlobal("document", {
+            querySelector: vi.fn().mockReturnValue(cardLayer),
+        });
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    it("inserts the element before the first child of #card-layer", () => {
+        putElementBottom(element);
+        expect(cardLayer.insertBefore).toHaveBeenCalledWith(
+            element,
+            cardLayer.firstElementChild,
+        );
+    });
+});
+
+// ---------------------------------------------------------------------------
+// putElementTop
+// ---------------------------------------------------------------------------
+describe("putElementTop", () => {
+    let cardLayer;
+    let element;
+
+    beforeEach(() => {
+        element = { id: "target", click: vi.fn() };
+        cardLayer = {
+            lastElementChild: { id: "other" },
+            appendChild: vi.fn(),
+        };
+        vi.stubGlobal("document", {
+            querySelector: vi.fn().mockReturnValue(cardLayer),
+        });
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    it("appends the element to #card-layer when it is not already the last child", () => {
+        putElementTop(element);
+        expect(cardLayer.appendChild).toHaveBeenCalledWith(element);
+    });
+
+    it("calls element.click() when the element is not already the last child", () => {
+        putElementTop(element);
+        expect(element.click).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not reorder and does not call click() when element is already the last child", () => {
+        cardLayer.lastElementChild = element;
+        putElementTop(element);
+        expect(cardLayer.appendChild).not.toHaveBeenCalled();
+        expect(element.click).not.toHaveBeenCalled();
     });
 });
 
