@@ -2,12 +2,18 @@ import { grabCard } from "./grab.js";
 import { sendCreateMessage } from "./p2p.js";
 import { isPointWithinElement, putElementTop, snapToGrid } from "./utils.js";
 
+/**
+ * @param {string} tokenName
+ * @param {string} x
+ * @param {string} y
+ * @param {string} [id]
+ * @returns {HTMLElement}
+ */
 export const createToken = (tokenName, x, y, id) => {
     const tokenElement = document.createElement("div");
 
-    const innerElement = document
-        .querySelector(`#${tokenName}`)
-        .cloneNode(true);
+    const templateEl = /** @type {HTMLElement} */ (document.querySelector(`#${tokenName}`));
+    const innerElement = /** @type {HTMLElement} */ (templateEl.cloneNode(true));
     innerElement.style.position = "absolute";
     innerElement.style.transform +=
         "translate(-50%, -50%) translate(-10px, -10px)";
@@ -19,20 +25,21 @@ export const createToken = (tokenName, x, y, id) => {
     tokenElement.style.top = y;
     tokenElement.addEventListener("mousedown", grabCard(tokenElement));
     tokenElement.addEventListener("grab", (e) => {
+        const ce = /** @type {CustomEvent} */ (e);
         putElementTop(tokenElement);
-        tokenElement.style.left = `${e.detail.targetX}px`;
-        tokenElement.style.top = `${e.detail.targetY}px`;
+        tokenElement.style.left = `${ce.detail.targetX}px`;
+        tokenElement.style.top = `${ce.detail.targetY}px`;
     });
     tokenElement.addEventListener("move", (e) => {
-        tryActivateBin(e);
+        tryActivateBin(/** @type {CustomEvent} */ (e));
     });
     tokenElement.addEventListener("ungrab", (e) => {
         putElementTop(tokenElement);
         snapToGrid(tokenElement, 15);
         const tokenRect = tokenElement.getBoundingClientRect();
 
-        const tokenBin = document.querySelector("#token-bin");
-        if (isPointWithinElement(tokenRect.x, tokenRect.y, tokenBin)) {
+        const tokenBin = /** @type {HTMLElement | null} */ (document.querySelector("#token-bin"));
+        if (tokenBin && isPointWithinElement(tokenRect.x, tokenRect.y, tokenBin)) {
             tokenElement.remove();
             tokenBin.classList.remove("token-bin-active");
         } else {
@@ -60,19 +67,22 @@ export const createToken = (tokenName, x, y, id) => {
                 flipToken(tokenElement, key, value);
             });
         });
-    tokenElement.addEventListener("auxclick", (e) => {
+    tokenElement.addEventListener("auxclick", (/** @type {MouseEvent} */ e) => {
         e.preventDefault();
         e.stopPropagation();
 
         if (e.button === 1) {
-            const lastTokenInStack =
-                tokenElement.querySelector("div:only-child").parentElement;
-            lastTokenInStack.appendChild(
-                createToken(tokenElement.firstElementChild.id, "0px", "15px"),
-            );
+            const onlyChild = tokenElement.querySelector("div:only-child");
+            const lastTokenInStack = onlyChild?.parentElement;
+            const firstChildId = /** @type {HTMLElement | null} */ (tokenElement.firstElementChild)?.id;
+            if (lastTokenInStack && firstChildId) {
+                lastTokenInStack.appendChild(
+                    createToken(firstChildId, "0px", "15px"),
+                );
+            }
         }
     });
-    document.querySelector("#card-layer").appendChild(tokenElement);
+    /** @type {HTMLElement} */ (document.querySelector("#card-layer")).appendChild(tokenElement);
     sendCreateMessage("token", tokenElement.id, [
         tokenName,
         x,
@@ -82,8 +92,12 @@ export const createToken = (tokenName, x, y, id) => {
     return tokenElement;
 };
 
+/**
+ * @param {CustomEvent} moveEvent
+ */
 function tryActivateBin(moveEvent) {
-    const tokenBin = document.querySelector("#token-bin");
+    const tokenBin = /** @type {HTMLElement | null} */ (document.querySelector("#token-bin"));
+    if (!tokenBin) return;
     if (
         isPointWithinElement(
             moveEvent.detail.targetX,
@@ -97,6 +111,10 @@ function tryActivateBin(moveEvent) {
     }
 }
 
+/**
+ * @param {HTMLElement} tokenElement
+ * @param {DOMRect} tokenRect
+ */
 function tryPutTokenOnCard(tokenElement, tokenRect) {
     const cards = [...document.querySelectorAll(".game-card")];
     // biome-ignore lint/complexity/noForEach: iterating DOM spread array; forEach is idiomatic here
@@ -123,6 +141,10 @@ function tryPutTokenOnCard(tokenElement, tokenRect) {
     });
 }
 
+/**
+ * @param {HTMLElement} tokenElement
+ * @param {DOMRect} tokenRect
+ */
 function tryPutTokenOnToken(tokenElement, tokenRect) {
     const tokens = [...document.querySelectorAll(".token")].filter(
         (t) => t.id !== tokenElement.id && !tokenElement.contains(t),
@@ -143,22 +165,30 @@ function tryPutTokenOnToken(tokenElement, tokenRect) {
     });
 }
 
+/**
+ * @param {HTMLElement} tokenElement
+ * @param {string} key
+ * @param {string} value
+ */
 function flipToken(tokenElement, key, value) {
+    const firstChild = /** @type {HTMLElement | null} */ (tokenElement.firstElementChild);
     const newTokenName =
-        tokenElement.firstElementChild.id === key
+        firstChild?.id === key
             ? value
-            : tokenElement.firstElementChild.id === value
+            : firstChild?.id === value
               ? key
-              : tokenElement.firstElementChild.id;
-    const newInnerElement = document
-        .querySelector(`#${newTokenName}`)
-        .cloneNode(true);
+              : firstChild?.id ?? key;
+    const newInnerElement = /** @type {HTMLElement} */ (/** @type {HTMLElement} */ (document
+        .querySelector(`#${newTokenName}`))
+        .cloneNode(true));
     newInnerElement.style.position = "absolute";
     newInnerElement.style.transform +=
         "translate(-50%, -50%) translate(-10px, -10px)";
-    tokenElement.replaceChild(newInnerElement, tokenElement.firstElementChild);
+    if (firstChild) {
+        tokenElement.replaceChild(newInnerElement, firstChild);
+    }
 
-    const stactedToken = tokenElement.querySelector(".token");
+    const stactedToken = /** @type {HTMLElement | null} */ (tokenElement.querySelector(".token"));
     if (stactedToken) {
         flipToken(stactedToken, key, value);
     }
@@ -177,15 +207,16 @@ export const setupTokenSpawning = () => {
     ].forEach((tokenName) => {
         document
             .querySelector(`#${tokenName}`)
-            .addEventListener("mousedown", (e) => {
-                e.preventDefault();
+            ?.addEventListener("mousedown", (e) => {
+                const me = /** @type {MouseEvent} */ (e);
+                me.preventDefault();
 
                 const tokenElement = createToken(
                     tokenName,
-                    `${e.clientX}px`,
-                    `${e.clientY}px`,
+                    `${me.clientX}px`,
+                    `${me.clientY}px`,
                 );
-                grabCard(tokenElement)(e);
+                grabCard(tokenElement)(me);
             });
     });
 };

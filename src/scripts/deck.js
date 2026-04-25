@@ -4,6 +4,11 @@ import { grabCard } from "./grab.js";
 import { sendCreateMessage } from "./p2p.js";
 import { shuffle } from "./utils.js";
 
+/**
+ * @param {string} deckListString
+ * @param {import('./types.ts').CardInfo[]} allCards
+ * @returns {{ matched: import('./types.ts').CardInfo[], failed: string[] }}
+ */
 export const parseDeckList = (deckListString, allCards) => {
     const names = deckListString
         .trim()
@@ -12,13 +17,13 @@ export const parseDeckList = (deckListString, allCards) => {
             const trimmed = entry.trim();
             if (!trimmed) return [];
             const nameParts = trimmed.split(" ");
-            const number = Number.parseInt(nameParts.shift().replace("x", ""));
+            const number = Number.parseInt((nameParts.shift() ?? "").replace("x", ""));
             if (!Number.isInteger(number) || number < 1) return [];
             const name = nameParts.join(" ");
             return Array.from({ length: number }, () => name);
         });
 
-    const matched = [];
+    const matched = /** @type {import('./types.ts').CardInfo[]} */ ([]);
     const failedSet = new Set();
 
     for (const cardName of names) {
@@ -33,6 +38,13 @@ export const parseDeckList = (deckListString, allCards) => {
     return { matched, failed: Array.from(failedSet) };
 };
 
+/**
+ * @param {string} deckList
+ * @param {string} id
+ * @param {string} x
+ * @param {string} y
+ * @returns {HTMLElement}
+ */
 export const createDeck = (deckList, id, x, y) => {
     const { matched, failed } = parseDeckList(deckList, window.allCards);
     const deck = matched;
@@ -48,7 +60,7 @@ export const createDeck = (deckList, id, x, y) => {
     <div class="deck-card-back">
         <img width="190" height="265" src="${cardBackUrl}">
     </div>`;
-    document.querySelector("#card-layer").appendChild(deckElement);
+    /** @type {HTMLElement} */ (document.querySelector("#card-layer")).appendChild(deckElement);
     snapOutOfHandArea(deckElement);
 
     if (failed.length > 0) {
@@ -67,7 +79,7 @@ export const createDeck = (deckList, id, x, y) => {
         }
         errorElement.appendChild(list);
 
-        document.querySelector("#card-layer").appendChild(errorElement);
+        /** @type {HTMLElement} */ (document.querySelector("#card-layer")).appendChild(errorElement);
     }
 
     deckElement.addEventListener("mousedown", (e) => {
@@ -76,14 +88,14 @@ export const createDeck = (deckList, id, x, y) => {
         if (deck.length) {
             const deckRect = deckElement.getBoundingClientRect();
             const cardElement = createCard(
-                deck.pop(),
+                /** @type {import('./types.ts').CardInfo} */ (deck.pop()),
                 `${deckRect.x}px`,
                 `${deckRect.y}px`,
             );
             grabCard(cardElement)(e);
 
             if (!deck.length) {
-                deckElement.firstElementChild.classList.add("red-tint");
+                deckElement.firstElementChild?.classList.add("red-tint");
                 deckElement.title = "no cards left";
             } else {
                 deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`;
@@ -91,27 +103,27 @@ export const createDeck = (deckList, id, x, y) => {
         }
     });
     deckElement.addEventListener("puttop", (e) => {
-        const cardInfo = cardElementToCardInfo(e.detail.card);
+        const cardInfo = cardElementToCardInfo(/** @type {CustomEvent} */ (e).detail.card);
         deck.push(cardInfo);
 
-        deckElement.firstElementChild.classList.remove("red-tint");
+        deckElement.firstElementChild?.classList.remove("red-tint");
         deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`;
     });
 
     deckElement.addEventListener("putbottom", (e) => {
-        const cardInfo = cardElementToCardInfo(e.detail.card);
+        const cardInfo = cardElementToCardInfo(/** @type {CustomEvent} */ (e).detail.card);
         deck.unshift(cardInfo);
 
-        deckElement.firstElementChild.classList.remove("red-tint");
+        deckElement.firstElementChild?.classList.remove("red-tint");
         deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`;
     });
 
     deckElement.addEventListener("shufflein", (e) => {
-        const cardInfo = cardElementToCardInfo(e.detail.card);
+        const cardInfo = cardElementToCardInfo(/** @type {CustomEvent} */ (e).detail.card);
         deck.push(cardInfo);
         shuffle(deck);
 
-        deckElement.firstElementChild.classList.remove("red-tint");
+        deckElement.firstElementChild?.classList.remove("red-tint");
         deckElement.title = `${deck.length} card${deck.length > 1 ? "s" : ""}`;
     });
 
@@ -129,10 +141,10 @@ export const createDeck = (deckList, id, x, y) => {
  */
 const cardElementToCardInfo = (cardElement) => {
     return {
-        title: cardElement.getAttribute("data-title"),
-        side_code: cardElement.getAttribute("data-side"),
-        faction_code: cardElement.getAttribute("data-faction"),
-        type_code: cardElement.getAttribute("data-type"),
-        image: cardElement.querySelector(".card-front img").src,
+        title: cardElement.getAttribute("data-title") ?? "",
+        side_code: cardElement.getAttribute("data-side") ?? "",
+        faction_code: cardElement.getAttribute("data-faction") ?? "",
+        type_code: cardElement.getAttribute("data-type") ?? "",
+        image: /** @type {HTMLImageElement} */ (cardElement.querySelector(".card-front img")).src,
     };
 };
