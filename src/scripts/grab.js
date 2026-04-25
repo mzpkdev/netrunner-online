@@ -1,6 +1,10 @@
 import { sendGrabMessage, sendMoveMessage, sendUngrabMessage } from "./p2p.js";
 
+/**
+ * @param {HTMLElement} element
+ */
 export const grabCard = (element) => {
+    /** @param {MouseEvent} e */
     const grab = (e) => {
         if (e.button === 0) {
             e.preventDefault();
@@ -12,12 +16,9 @@ export const grabCard = (element) => {
 
             const thisMove = move(offsetX, offsetY);
             const thisUngrab = ungrab(thisMove);
-            document
-                .querySelector("body")
-                .addEventListener("mousemove", thisMove);
-            document
-                .querySelector("body")
-                .addEventListener("mouseup", thisUngrab);
+            const body = /** @type {HTMLElement} */ (document.querySelector("body"));
+            body.addEventListener("mousemove", thisMove);
+            body.addEventListener("mouseup", thisUngrab);
 
             element.dispatchEvent(
                 new CustomEvent("grab", {
@@ -28,6 +29,11 @@ export const grabCard = (element) => {
         }
     };
 
+    /**
+     * @param {number} offsetX
+     * @param {number} offsetY
+     * @returns {(e: MouseEvent) => void}
+     */
     const move = (offsetX, offsetY) => (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -46,16 +52,17 @@ export const grabCard = (element) => {
         sendMoveMessage(element.id, e.clientX + offsetX, e.clientY + offsetY);
     };
 
+    /**
+     * @param {(e: MouseEvent) => void} thisMove
+     */
     const ungrab = (thisMove) => {
+        /** @param {MouseEvent} e */
         const thisUngrab = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            document
-                .querySelector("body")
-                .removeEventListener("mousemove", thisMove);
-            document
-                .querySelector("body")
-                .removeEventListener("mouseup", thisUngrab);
+            const body = /** @type {HTMLElement} */ (document.querySelector("body"));
+            body.removeEventListener("mousemove", thisMove);
+            body.removeEventListener("mouseup", thisUngrab);
 
             const elementRect = element.getBoundingClientRect();
             element.dispatchEvent(

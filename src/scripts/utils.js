@@ -13,6 +13,9 @@ export async function fetchAllCards() {
     }
 }
 
+/**
+ * @param {any[]} array
+ */
 export function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -20,6 +23,10 @@ export function shuffle(array) {
     }
 }
 
+/**
+ * @param {HTMLElement} element
+ * @param {number} [grid]
+ */
 export function snapToGrid(element, grid = 25) {
     const left = Math.round(element.getBoundingClientRect().x / grid) * grid;
     const top = Math.round(element.getBoundingClientRect().y / grid) * grid;
@@ -27,17 +34,33 @@ export function snapToGrid(element, grid = 25) {
     element.style.top = `${top}px`;
 }
 
+/**
+ * @param {number} x
+ * @param {number} y
+ * @param {Element | null | undefined} element
+ * @returns {boolean}
+ */
 export function isPointWithinElement(x, y, element) {
+    if (!element) return false;
     const rect = element.getBoundingClientRect();
     return (
         x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
     );
 }
 
+/**
+ * @param {Function} func
+ * @param {number} wait
+ * @param {{ leading?: boolean, trailing?: boolean }} [options]
+ */
 export function throttle(func, wait, options) {
+    /** @type {ReturnType<typeof setTimeout> | null | undefined} */
     let timeout;
+    /** @type {any} */
     let context;
+    /** @type {any} */
     let args;
+    /** @type {any} */
     let result;
     let previous = 0;
     // biome-ignore lint/style/noParameterAssign: throttle uses options as a local default; restructuring the closure would break deferred invocation
@@ -50,12 +73,13 @@ export function throttle(func, wait, options) {
         if (!timeout) context = args = null;
     };
 
-    const throttled = function () {
+    // biome-ignore lint/style/noArguments: throttle captures call arguments for deferred apply; rest params cannot replace arguments here without restructuring the closure
+    const throttled = /** @this {any} */ function () {
         const _now = Date.now();
         if (!previous && options.leading === false) previous = _now;
         const remaining = wait - (_now - previous);
+        // @ts-ignore -- 'this' is intentionally dynamic; type depends on call site
         context = this;
-        // biome-ignore lint/style/noArguments: throttle captures call arguments for deferred apply; rest params cannot replace arguments here without restructuring the closure
         args = arguments;
         if (remaining <= 0 || remaining > wait) {
             if (timeout) {
@@ -72,26 +96,37 @@ export function throttle(func, wait, options) {
     };
 
     throttled.cancel = () => {
-        clearTimeout(timeout);
+        clearTimeout(/** @type {any} */ (timeout));
         previous = 0;
         timeout = context = args = null;
     };
     return throttled;
 }
 
+/**
+ * @param {HTMLElement} element
+ */
 export const putElementBottom = (element) => {
-    const cardLayer = document.querySelector("#card-layer");
+    const cardLayer = /** @type {HTMLElement} */ (document.querySelector("#card-layer"));
     cardLayer.insertBefore(element, cardLayer.firstElementChild);
 };
 
+/**
+ * @param {HTMLElement} element
+ */
 export const putElementTop = (element) => {
-    const cardLayer = document.querySelector("#card-layer");
+    const cardLayer = /** @type {HTMLElement} */ (document.querySelector("#card-layer"));
     if (cardLayer.lastElementChild !== element) {
         cardLayer.appendChild(element);
         element.click();
     }
 };
 
+/**
+ * @param {HTMLElement} element
+ * @param {DOMRect} documentRect
+ * @returns {HTMLElement}
+ */
 export const flipElement = (element, documentRect) => {
     const elementRect = element.getBoundingClientRect();
     element.style.left = `${documentRect.width - elementRect.x}px`;

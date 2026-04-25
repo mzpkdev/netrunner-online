@@ -7,10 +7,16 @@ import { flipElement, snapToGrid, throttle } from "./utils.js";
 window.sendMessage = () => {};
 window.sendMessageImmediate = () => {};
 
+/** @type {ReturnType<typeof setInterval> | null} */
 let _heartbeatIntervalId = null;
 let _missedPings = 0;
 let _heartbeatBannerVisible = false;
 
+/**
+ * @param {string} entity
+ * @param {string} id
+ * @param {any[]} params
+ */
 export function sendCreateMessage(entity, id, params) {
     window.sendMessage({
         perspective: window.playerSide,
@@ -21,6 +27,11 @@ export function sendCreateMessage(entity, id, params) {
     });
 }
 
+/**
+ * @param {string} id
+ * @param {number} x
+ * @param {number} y
+ */
 export function sendGrabMessage(id, x, y) {
     window.sendMessage({
         perspective: window.playerSide,
@@ -30,6 +41,11 @@ export function sendGrabMessage(id, x, y) {
     });
 }
 
+/**
+ * @param {string} id
+ * @param {number} x
+ * @param {number} y
+ */
 export function sendMoveMessage(id, x, y) {
     window.sendMessage({
         perspective: window.playerSide,
@@ -39,6 +55,11 @@ export function sendMoveMessage(id, x, y) {
     });
 }
 
+/**
+ * @param {string} id
+ * @param {number} x
+ * @param {number} y
+ */
 export function sendUngrabMessage(id, x, y) {
     window.sendMessage({
         perspective: window.playerSide,
@@ -48,6 +69,9 @@ export function sendUngrabMessage(id, x, y) {
     });
 }
 
+/**
+ * @param {string} id
+ */
 export function sendDeleteMessage(id) {
     window.sendMessageImmediate({
         perspective: window.playerSide,
@@ -56,6 +80,10 @@ export function sendDeleteMessage(id) {
     });
 }
 
+/**
+ * @param {string} id
+ * @param {boolean} flipped
+ */
 export function sendFlipMessage(id, flipped) {
     window.sendMessageImmediate({
         perspective: window.playerSide,
@@ -65,6 +93,10 @@ export function sendFlipMessage(id, flipped) {
     });
 }
 
+/**
+ * @param {string} id
+ * @param {boolean} rotated
+ */
 export function sendRotateMessage(id, rotated) {
     window.sendMessageImmediate({
         perspective: window.playerSide,
@@ -86,6 +118,7 @@ export function receiveMessage(message) {
         );
         return;
     }
+    /** @type {HTMLElement | null} */
     let element = null;
     switch (message.messageType) {
         case "create-element":
@@ -99,13 +132,12 @@ export function receiveMessage(message) {
             switch (message.entityType) {
                 case "deck":
                     if (!document.querySelector(`#${message.entityId}`)) {
+                        // @ts-ignore -- content is a runtime-typed array; spread to positional params is safe here
                         element = createDeck(...message.content);
                         if (message.perspective !== window.playerSide) {
                             flipElement(
                                 element,
-                                document
-                                    .querySelector("body")
-                                    .getBoundingClientRect(),
+                                /** @type {HTMLElement} */ (document.querySelector("body")).getBoundingClientRect(),
                             );
                         }
                         snapToGrid(element);
@@ -114,13 +146,12 @@ export function receiveMessage(message) {
 
                 case "card":
                     if (!document.querySelector(`#${message.entityId}`)) {
+                        // @ts-ignore -- content is a runtime-typed array; spread to positional params is safe here
                         element = createCard(...message.content);
                         if (message.perspective !== window.playerSide) {
                             flipElement(
                                 element,
-                                document
-                                    .querySelector("body")
-                                    .getBoundingClientRect(),
+                                /** @type {HTMLElement} */ (document.querySelector("body")).getBoundingClientRect(),
                             );
                         }
                         snapToGrid(element);
@@ -129,13 +160,12 @@ export function receiveMessage(message) {
 
                 case "token":
                     if (!document.querySelector(`#${message.entityId}`)) {
+                        // @ts-ignore -- content is a runtime-typed array; spread to positional params is safe here
                         element = createToken(...message.content);
                         if (message.perspective !== window.playerSide) {
                             flipElement(
                                 element,
-                                document
-                                    .querySelector("body")
-                                    .getBoundingClientRect(),
+                                /** @type {HTMLElement} */ (document.querySelector("body")).getBoundingClientRect(),
                             );
                         }
                         snapToGrid(element);
@@ -152,7 +182,7 @@ export function receiveMessage(message) {
             break;
 
         case "grab-element":
-            element = document.querySelector(`#${message.entityId}`);
+            element = /** @type {HTMLElement | null} */ (document.querySelector(`#${message.entityId}`));
             if (!element) {
                 console.warn(
                     `receiveMessage: grab-element ignored — no element with id "${message.entityId}"`,
@@ -175,7 +205,7 @@ export function receiveMessage(message) {
             if (message.perspective !== window.playerSide) {
                 flipElement(
                     element,
-                    document.querySelector("body").getBoundingClientRect(),
+                    /** @type {HTMLElement} */ (document.querySelector("body")).getBoundingClientRect(),
                 );
             }
             element.dispatchEvent(
@@ -189,7 +219,7 @@ export function receiveMessage(message) {
             break;
 
         case "move-element":
-            element = document.querySelector(`#${message.entityId}`);
+            element = /** @type {HTMLElement | null} */ (document.querySelector(`#${message.entityId}`));
             if (!element) {
                 console.warn(
                     `receiveMessage: move-element ignored — no element with id "${message.entityId}"`,
@@ -212,7 +242,7 @@ export function receiveMessage(message) {
             if (message.perspective !== window.playerSide) {
                 flipElement(
                     element,
-                    document.querySelector("body").getBoundingClientRect(),
+                    /** @type {HTMLElement} */ (document.querySelector("body")).getBoundingClientRect(),
                 );
             }
             element.dispatchEvent(
@@ -226,7 +256,7 @@ export function receiveMessage(message) {
             break;
 
         case "ungrab-element":
-            element = document.querySelector(`#${message.entityId}`);
+            element = /** @type {HTMLElement | null} */ (document.querySelector(`#${message.entityId}`));
             if (!element) {
                 console.warn(
                     `receiveMessage: ungrab-element ignored — no element with id "${message.entityId}"`,
@@ -249,7 +279,7 @@ export function receiveMessage(message) {
             if (message.perspective !== window.playerSide) {
                 flipElement(
                     element,
-                    document.querySelector("body").getBoundingClientRect(),
+                    /** @type {HTMLElement} */ (document.querySelector("body")).getBoundingClientRect(),
                 );
             }
             element.dispatchEvent(
@@ -263,7 +293,7 @@ export function receiveMessage(message) {
             break;
 
         case "flip-element":
-            element = document.querySelector(`#${message.entityId}`);
+            element = /** @type {HTMLElement | null} */ (document.querySelector(`#${message.entityId}`));
             if (!element) {
                 console.warn(
                     `receiveMessage: flip-element ignored — no element with id "${message.entityId}"`,
@@ -274,7 +304,7 @@ export function receiveMessage(message) {
             break;
 
         case "rotate-element":
-            element = document.querySelector(`#${message.entityId}`);
+            element = /** @type {HTMLElement | null} */ (document.querySelector(`#${message.entityId}`));
             if (!element) {
                 console.warn(
                     `receiveMessage: rotate-element ignored — no element with id "${message.entityId}"`,
@@ -285,7 +315,7 @@ export function receiveMessage(message) {
             break;
 
         case "delete-element":
-            element = document.querySelector(`#${message.entityId}`);
+            element = /** @type {HTMLElement | null} */ (document.querySelector(`#${message.entityId}`));
             if (!element) {
                 console.warn(
                     `receiveMessage: delete-element ignored — no element with id "${message.entityId}"`,
@@ -298,7 +328,7 @@ export function receiveMessage(message) {
         case "heartbeat":
             _missedPings = 0;
             if (_heartbeatBannerVisible) {
-                const statusEl = document.querySelector("#p2p-status");
+                const statusEl = /** @type {HTMLElement | null} */ (document.querySelector("#p2p-status"));
                 if (statusEl) statusEl.style.display = "none";
                 _heartbeatBannerVisible = false;
             }
@@ -306,18 +336,22 @@ export function receiveMessage(message) {
 
         default:
             console.warn(
-                `receiveMessage: unknown messageType "${message.messageType}"`,
+                `receiveMessage: unknown messageType "${/** @type {any} */ (message).messageType}"`,
                 message,
             );
             break;
     }
 }
 
+/**
+ * @param {string} message
+ * @param {{ bg?: string, color?: string, border?: string }} [style]
+ */
 function showP2PStatus(
     message,
     { bg = "#856404", color = "#fff3cd", border = "#ffc107" } = {},
 ) {
-    const el = document.querySelector("#p2p-status");
+    const el = /** @type {HTMLElement | null} */ (document.querySelector("#p2p-status"));
     if (!el) return;
     el.textContent = message;
     el.style.backgroundColor = bg;
@@ -326,6 +360,10 @@ function showP2PStatus(
     el.style.display = "block";
 }
 
+/**
+ * @param {any} connection
+ * @returns {ReturnType<typeof setInterval>}
+ */
 export function setupHeartbeat(connection) {
     _missedPings = 0;
     _heartbeatBannerVisible = false;
@@ -378,26 +416,26 @@ export const setupP2P = () => {
         config: { iceServers: getIceServers() },
     });
 
-    peer.on("open", (id) => {
-        const yourHostId = document.querySelector("#your-host-id");
-        yourHostId.value = id;
+    peer.on("open", (/** @type {any} */ id) => {
+        const yourHostId = /** @type {HTMLInputElement | null} */ (document.querySelector("#your-host-id"));
+        if (yourHostId) yourHostId.value = id;
         window.location.hash = id;
 
-        const opponentHostId = document.querySelector("#opponent-host-id");
-        opponentHostId.value = "";
+        const opponentHostId = /** @type {HTMLInputElement | null} */ (document.querySelector("#opponent-host-id"));
+        if (opponentHostId) opponentHostId.value = "";
 
-        document.querySelector("#host-game").disabled = false;
-        document.querySelector("#join-game").disabled = false;
+        /** @type {HTMLButtonElement} */ (document.querySelector("#host-game")).disabled = false;
+        /** @type {HTMLButtonElement} */ (document.querySelector("#join-game")).disabled = false;
     });
 
-    peer.on("connection", (connection) => {
+    peer.on("connection", (/** @type {any} */ connection) => {
         setupP2PConnection(connection);
-        document.querySelector("#start-game-panel").remove();
+        document.querySelector("#start-game-panel")?.remove();
         window.playerSide = "corp";
-        document.querySelector("#open-player-panel").click();
+        /** @type {HTMLElement} */ (document.querySelector("#open-player-panel")).click();
     });
 
-    peer.on("error", (err) => {
+    peer.on("error", (/** @type {any} */ err) => {
         console.error(`PeerJS error [${err.type}]:`, err);
         showP2PStatus(`Connection error: ${err.type}`, {
             bg: "#721c24",
@@ -406,14 +444,15 @@ export const setupP2P = () => {
         });
     });
 
+    /** @param {any} connection */
     const setupP2PConnection = (connection) => {
         window.sendMessage = throttle(
-            (message) => connection.send(message),
+            (/** @type {any} */ message) => connection.send(message),
             200,
         );
-        window.sendMessageImmediate = (message) => connection.send(message);
+        window.sendMessageImmediate = (/** @type {any} */ message) => connection.send(message);
 
-        connection.on("data", (message) => {
+        connection.on("data", (/** @type {any} */ message) => {
             console.log("Peer:", message);
             receiveMessage(message);
         });
@@ -430,25 +469,25 @@ export const setupP2P = () => {
         });
     };
 
-    document.querySelector("#opponent-host-id").focus();
+    /** @type {HTMLInputElement} */ (document.querySelector("#opponent-host-id")).focus();
 
-    document.querySelector("#host-game").addEventListener("click", (e) => {
-        const yourHostId = document.querySelector("#your-host-id");
+    document.querySelector("#host-game")?.addEventListener("click", (e) => {
+        const yourHostId = /** @type {HTMLInputElement} */ (document.querySelector("#your-host-id"));
         yourHostId.select();
         navigator.clipboard.writeText(yourHostId.value);
     });
 
-    document.querySelector("#join-game").addEventListener("click", (e) => {
-        const opponentHostId = document.querySelector("#opponent-host-id");
+    document.querySelector("#join-game")?.addEventListener("click", (e) => {
+        const opponentHostId = /** @type {HTMLInputElement} */ (document.querySelector("#opponent-host-id"));
         const connection = peer.connect(opponentHostId.value);
         setupP2PConnection(connection);
-        document.querySelector("#start-game-panel").remove();
+        document.querySelector("#start-game-panel")?.remove();
         window.playerSide = "runner";
-        document.querySelector("#open-player-panel").click();
+        /** @type {HTMLElement} */ (document.querySelector("#open-player-panel")).click();
     });
 
-    document.querySelector("#play-solo").addEventListener("click", (e) => {
-        document.querySelector("#start-game-panel").remove();
+    document.querySelector("#play-solo")?.addEventListener("click", (e) => {
+        document.querySelector("#start-game-panel")?.remove();
         window.playerSide = "corp";
         setupGame();
     });

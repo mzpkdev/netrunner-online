@@ -7,22 +7,21 @@ import { setupTokenSpawning } from "./token.js";
 import { fetchAllCards } from "./utils.js";
 
 export const setupCorp = () => {
-    const corpDeckLocation =
-        window.playerSide === "corp" ? ["85vw", "75vh"] : ["15vw", "25vh"];
-    const corpIdentityLocation =
-        window.playerSide === "corp" ? ["75vw", "75vh"] : ["25vw", "25vh"];
+    const [cdx, cdy] = window.playerSide === "corp" ? ["85vw", "75vh"] : ["15vw", "25vh"];
+    const [cix, ciy] = window.playerSide === "corp" ? ["75vw", "75vh"] : ["25vw", "25vh"];
 
     createDeck(
-        document.querySelector("#corp-deck-list").value,
+        /** @type {HTMLInputElement} */ (document.querySelector("#corp-deck-list")).value,
         "corp-deck",
-        ...corpDeckLocation,
+        cdx,
+        cdy,
     );
-    const corpIdentity = document.querySelector("#corp-identity").value.trim();
-    const corpIdentityCard = allCards.find(
-        (cardInfo) => cardInfo.title === corpIdentity,
+    const corpIdentity = /** @type {HTMLInputElement} */ (document.querySelector("#corp-identity")).value.trim();
+    const corpIdentityCard = window.allCards.find(
+        (/** @type {import('./types.ts').CardInfo} */ cardInfo) => cardInfo.title === corpIdentity,
     );
     if (corpIdentityCard) {
-        createCard(corpIdentityCard, ...corpIdentityLocation);
+        createCard(corpIdentityCard, cix, ciy);
     } else {
         const error = document.createElement("p");
         error.id = "corp-identity-error";
@@ -32,24 +31,23 @@ export const setupCorp = () => {
 };
 
 export const setupRunner = () => {
-    const runnerDeckLocation =
-        window.playerSide === "corp" ? ["15vw", "25vh"] : ["85vw", "75vh"];
-    const runnerIdentityLocation =
-        window.playerSide === "corp" ? ["25vw", "25vh"] : ["75vw", "75vh"];
+    const [rdx, rdy] = window.playerSide === "corp" ? ["15vw", "25vh"] : ["85vw", "75vh"];
+    const [rix, riy] = window.playerSide === "corp" ? ["25vw", "25vh"] : ["75vw", "75vh"];
 
     createDeck(
-        document.querySelector("#runner-deck-list").value,
+        /** @type {HTMLInputElement} */ (document.querySelector("#runner-deck-list")).value,
         "runner-deck",
-        ...runnerDeckLocation,
+        rdx,
+        rdy,
     );
-    const runnerIdentity = document
-        .querySelector("#runner-identity")
+    const runnerIdentity = /** @type {HTMLInputElement} */ (document
+        .querySelector("#runner-identity"))
         .value.trim();
-    const runnerIdentityCard = allCards.find(
-        (cardInfo) => cardInfo.title === runnerIdentity,
+    const runnerIdentityCard = window.allCards.find(
+        (/** @type {import('./types.ts').CardInfo} */ cardInfo) => cardInfo.title === runnerIdentity,
     );
     if (runnerIdentityCard) {
-        createCard(runnerIdentityCard, ...runnerIdentityLocation);
+        createCard(runnerIdentityCard, rix, riy);
     } else {
         const error = document.createElement("p");
         error.id = "runner-identity-error";
@@ -66,7 +64,7 @@ export const setupGame = () => {
 export const main = async () => {
     try {
         window.allCards = await fetchAllCards().then((cards) =>
-            cards.data.map((cardIfo) => {
+            cards.data.map((/** @type {import('./types.ts').CardInfo} */ cardIfo) => {
                 cardIfo.image = `https://card-images.netrunnerdb.com/v2/large/${cardIfo.code}.jpg`;
                 return cardIfo;
             }),
@@ -87,11 +85,13 @@ export const main = async () => {
     });
 
     document.addEventListener("click", (e) => {
-        document.querySelector(".dropdown-menu").style.display = "none";
+        const menu = /** @type {HTMLElement | null} */ (document.querySelector(".dropdown-menu"));
+        if (menu) menu.style.display = "none";
     });
 
     document.addEventListener("auxclick", (e) => {
-        document.querySelector(".dropdown-menu").style.display = "none";
+        const menu = /** @type {HTMLElement | null} */ (document.querySelector(".dropdown-menu"));
+        if (menu) menu.style.display = "none";
     });
 
     setupKeyboardShortcuts();

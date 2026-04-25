@@ -1,7 +1,11 @@
 import { sendDeleteMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
 
+/** @type {HTMLElement | null} */
 let selectedCard = null;
 
+/**
+ * @param {HTMLElement} cardElement
+ */
 export const selectCard = (cardElement) => {
     if (selectedCard && selectedCard !== cardElement) {
         selectedCard.classList.remove("selected");
@@ -55,17 +59,17 @@ export const setupKeyboardShortcuts = () => {
                 deselectCard();
                 break;
             case "ArrowRight": {
-                const cards = Array.from(document.querySelectorAll(".game-card"));
+                const cards = /** @type {HTMLElement[]} */ (Array.from(document.querySelectorAll(".game-card")));
                 if (cards.length === 0) break;
-                const idx = cards.indexOf(document.activeElement);
+                const idx = cards.indexOf(/** @type {HTMLElement} */ (document.activeElement));
                 const next = (idx === -1 || idx === cards.length - 1) ? 0 : idx + 1;
                 cards[next].focus();
                 break;
             }
             case "ArrowLeft": {
-                const cards = Array.from(document.querySelectorAll(".game-card"));
+                const cards = /** @type {HTMLElement[]} */ (Array.from(document.querySelectorAll(".game-card")));
                 if (cards.length === 0) break;
-                const idx = cards.indexOf(document.activeElement);
+                const idx = cards.indexOf(/** @type {HTMLElement} */ (document.activeElement));
                 const prev = idx <= 0 ? cards.length - 1 : idx - 1;
                 cards[prev].focus();
                 break;

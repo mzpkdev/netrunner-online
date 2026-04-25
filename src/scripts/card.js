@@ -38,7 +38,7 @@ export const createCard = (cardInfo, x, y, id) => {
         <img width="190" height="265" src="${cardInfo.image}">
     </div>
     `;
-    document.querySelector("#card-layer").appendChild(cardElement);
+    /** @type {HTMLElement} */ (document.querySelector("#card-layer")).appendChild(cardElement);
 
     cardElement.addEventListener("mousedown", grabCard(cardElement));
     cardElement.addEventListener("dblclick", flipCard(cardElement));
@@ -85,6 +85,9 @@ export const createCard = (cardInfo, x, y, id) => {
     return cardElement;
 };
 
+/**
+ * @param {HTMLElement} element
+ */
 const flipCard = (element) => {
     return () => {
         element.classList.toggle("flipped");
@@ -92,6 +95,10 @@ const flipCard = (element) => {
     };
 };
 
+/**
+ * @param {HTMLElement} element
+ * @returns {(e: MouseEvent) => void}
+ */
 const putCardUnder = (element) => {
     return (e) => {
         e.preventDefault();
@@ -102,12 +109,16 @@ const putCardUnder = (element) => {
     };
 };
 
+/**
+ * @param {HTMLElement} element
+ * @returns {(e: MouseEvent) => void}
+ */
 const cardContextMenu = (element) => {
     return (e) => {
         e.preventDefault();
-        const contextMenu = document.querySelector(".dropdown-menu");
-        const newContextMenu = contextMenu.cloneNode(true);
-        contextMenu.parentNode.replaceChild(newContextMenu, contextMenu);
+        const contextMenu = /** @type {HTMLElement} */ (document.querySelector(".dropdown-menu"));
+        const newContextMenu = /** @type {HTMLElement} */ (contextMenu.cloneNode(true));
+        contextMenu.parentNode?.replaceChild(newContextMenu, contextMenu);
 
         newContextMenu.style.display = "block";
         newContextMenu.style.left = `${e.clientX}px`;
@@ -115,36 +126,42 @@ const cardContextMenu = (element) => {
         newContextMenu.scrollIntoView();
         newContextMenu
             .querySelector("#context-menu-flip")
-            .addEventListener("click", flipCard(element));
+            ?.addEventListener("click", flipCard(element));
         newContextMenu
             .querySelector("#context-menu-put-under")
-            .addEventListener("click", () => putElementBottom(element));
+            ?.addEventListener("click", () => putElementBottom(element));
         newContextMenu
             .querySelector("#context-menu-rotate")
-            .addEventListener("click", () => {
+            ?.addEventListener("click", () => {
                 element.classList.toggle("rotated");
                 sendRotateMessage(element.id, element.classList.contains("rotated"));
             });
     };
 };
 
+/**
+ * @param {HTMLElement} cardElement
+ */
 export const updateCardTooltipPosition = (cardElement) => {
     const y = cardElement.getBoundingClientRect().y;
     if (y < 500) {
         cardElement
             .querySelector(".game-card-tooltip")
-            .classList.add("force-in-view");
+            ?.classList.add("force-in-view");
     } else {
         cardElement
             .querySelector(".game-card-tooltip")
-            .classList.remove("force-in-view");
+            ?.classList.remove("force-in-view");
     }
 };
 
+/**
+ * @param {HTMLElement} cardElement
+ */
 export const updateCardHoverArea = (cardElement) => {
     const cardRect = cardElement.getBoundingClientRect();
     const handHeight =
-        document.querySelector("#your-hand").getBoundingClientRect().height -
+        /** @type {HTMLElement} */ (document.querySelector("#your-hand")).getBoundingClientRect().height -
         10; //protection from play by grid snapping
     const decks = [...document.querySelectorAll(".deck")];
 
@@ -170,10 +187,13 @@ export const updateCardHoverArea = (cardElement) => {
     }
 };
 
+/**
+ * @param {HTMLElement} cardElement
+ */
 export const updateCardArea = (cardElement) => {
     const cardRect = cardElement.getBoundingClientRect();
     const handHeight =
-        document.querySelector("#your-hand").getBoundingClientRect().height -
+        /** @type {HTMLElement} */ (document.querySelector("#your-hand")).getBoundingClientRect().height -
         10; //protection from play by grid snapping
     const decks = [...document.querySelectorAll(".deck")];
 
@@ -199,9 +219,12 @@ export const updateCardArea = (cardElement) => {
     }
 };
 
+/**
+ * @param {HTMLElement} cardElement
+ */
 export const snapOutOfHandArea = (cardElement) => {
-    const yourHandY = document
-        .querySelector("#your-hand")
+    const yourHandY = /** @type {HTMLElement} */ (document
+        .querySelector("#your-hand"))
         .getBoundingClientRect().y;
     const cardY = cardElement.getBoundingClientRect().y;
     if (yourHandY - cardY < 75) {
@@ -210,14 +233,20 @@ export const snapOutOfHandArea = (cardElement) => {
     snapToGrid(cardElement);
 };
 
+/**
+ * @param {HTMLElement} cardElement
+ */
 const snapIntoHandArea = (cardElement) => {
-    const yourHandRect = document
-        .querySelector("#your-hand")
+    const yourHandRect = /** @type {HTMLElement} */ (document
+        .querySelector("#your-hand"))
         .getBoundingClientRect();
     cardElement.style.top = `${yourHandRect.y + yourHandRect.height / 2}px`;
     snapToGrid(cardElement);
 };
 
+/**
+ * @param {HTMLElement} cardElement
+ */
 export const handleCardBehavior = (cardElement) => {
     const cardLocation = cardElement.getAttribute("data-location");
 
@@ -280,6 +309,12 @@ export const handleCardBehavior = (cardElement) => {
     }
 };
 
+/**
+ * @param {HTMLElement} cardElement
+ * @param {boolean} frontVisible
+ * @param {boolean} backVisible
+ * @param {boolean} tooltipVisible
+ */
 function cardVisibility(
     cardElement,
     frontVisible,
@@ -287,20 +322,20 @@ function cardVisibility(
     tooltipVisible,
 ) {
     if (frontVisible) {
-        cardElement.querySelector(".card-front").classList.remove("hidden");
+        cardElement.querySelector(".card-front")?.classList.remove("hidden");
     } else {
-        cardElement.querySelector(".card-front").classList.add("hidden");
+        cardElement.querySelector(".card-front")?.classList.add("hidden");
     }
     if (backVisible) {
-        cardElement.querySelector(".card-back").classList.remove("hidden");
+        cardElement.querySelector(".card-back")?.classList.remove("hidden");
     } else {
-        cardElement.querySelector(".card-back").classList.add("hidden");
+        cardElement.querySelector(".card-back")?.classList.add("hidden");
     }
     if (tooltipVisible) {
         cardElement
             .querySelector(".game-card-tooltip")
-            .classList.remove("hidden");
+            ?.classList.remove("hidden");
     } else {
-        cardElement.querySelector(".game-card-tooltip").classList.add("hidden");
+        cardElement.querySelector(".game-card-tooltip")?.classList.add("hidden");
     }
 }
