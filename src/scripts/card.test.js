@@ -67,6 +67,20 @@ describe("createCard", () => {
         expect(src).toBeTruthy();
         expect(src).not.toContain("gstatic.com");
     });
+
+    it("treats a malicious image value as a literal src without injecting extra DOM nodes", () => {
+        const maliciousInfo = {
+            ...cardInfo,
+            image: '"><img src=x onerror=alert(1)>',
+        };
+        const el = createCard(maliciousInfo, "0px", "0px", "xss-test");
+        // Each wrapper section must contain exactly one img element — no injected nodes.
+        expect(el.querySelectorAll(".card-front img")).toHaveLength(1);
+        expect(el.querySelectorAll(".card-back img")).toHaveLength(1);
+        expect(el.querySelectorAll(".game-card-tooltip img")).toHaveLength(1);
+        // No element anywhere in the card must carry an onerror attribute.
+        expect(el.querySelectorAll("[onerror]")).toHaveLength(0);
+    });
 });
 
 // ---------------------------------------------------------------------------

@@ -27,17 +27,33 @@ export const createCard = (cardInfo, x, y, id) => {
     cardElement.style = `left: ${x}; top: ${y};`;
     cardElement.classList.add("game-card");
     cardElement.setAttribute("tabindex", "0");
-    cardElement.innerHTML = `
-    <div class="card-front">
-        <img width="190" height="265" src="${cardInfo.image}">
-    </div>
-    <div class="card-back">
-        <img width="190" height="265" src="${cardBackUrl}">
-    </div>
-    <div class="game-card-tooltip">
-        <img width="190" height="265" src="${cardInfo.image}">
-    </div>
-    `;
+    const cardFront = document.createElement("div");
+    cardFront.classList.add("card-front");
+    const cardFrontImg = document.createElement("img");
+    cardFrontImg.setAttribute("width", "190");
+    cardFrontImg.setAttribute("height", "265");
+    cardFrontImg.setAttribute("src", cardInfo.image);
+    cardFront.appendChild(cardFrontImg);
+
+    const cardBack = document.createElement("div");
+    cardBack.classList.add("card-back");
+    const cardBackImg = document.createElement("img");
+    cardBackImg.setAttribute("width", "190");
+    cardBackImg.setAttribute("height", "265");
+    cardBackImg.setAttribute("src", cardBackUrl);
+    cardBack.appendChild(cardBackImg);
+
+    const tooltip = document.createElement("div");
+    tooltip.classList.add("game-card-tooltip");
+    const tooltipImg = document.createElement("img");
+    tooltipImg.setAttribute("width", "190");
+    tooltipImg.setAttribute("height", "265");
+    tooltipImg.setAttribute("src", cardInfo.image);
+    tooltip.appendChild(tooltipImg);
+
+    cardElement.appendChild(cardFront);
+    cardElement.appendChild(cardBack);
+    cardElement.appendChild(tooltip);
     document.querySelector("#card-layer").appendChild(cardElement);
 
     cardElement.addEventListener("mousedown", grabCard(cardElement));
