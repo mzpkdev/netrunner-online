@@ -68,6 +68,13 @@ describe("createCard", () => {
         expect(src).not.toContain("gstatic.com");
     });
 
+    it("renders the card-front img src equal to cardInfo.image", () => {
+        const el = createCard(cardInfo, "0px", "0px", "front-src-test");
+        expect(el.querySelector(".card-front img").getAttribute("src")).toBe(
+            cardInfo.image,
+        );
+    });
+
     it("treats a malicious image value as a literal src without injecting extra DOM nodes", () => {
         const maliciousInfo = {
             ...cardInfo,
@@ -80,6 +87,13 @@ describe("createCard", () => {
         expect(el.querySelectorAll(".game-card-tooltip img")).toHaveLength(1);
         // No element anywhere in the card must carry an onerror attribute.
         expect(el.querySelectorAll("[onerror]")).toHaveLength(0);
+        // The malicious string must be stored as a literal attribute value, not parsed as HTML.
+        expect(
+            el.querySelector(".card-front img").getAttribute("src"),
+        ).toBe(maliciousInfo.image);
+        expect(
+            el.querySelector(".game-card-tooltip img").getAttribute("src"),
+        ).toBe(maliciousInfo.image);
     });
 });
 
