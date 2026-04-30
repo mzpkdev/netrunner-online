@@ -6,8 +6,8 @@ import { shuffle } from "./utils.js";
 
 /**
  * @param {string} deckListString
- * @param {import('./types.ts').CardInfo[]} allCards
- * @returns {{ matched: import('./types.ts').CardInfo[], failed: string[] }}
+ * @param {import('./card.js').CardInfo[]} allCards
+ * @returns {{ matched: import('./card.js').CardInfo[], failed: string[] }}
  */
 export const parseDeckList = (deckListString, allCards) => {
     const names = deckListString
@@ -23,7 +23,7 @@ export const parseDeckList = (deckListString, allCards) => {
             return Array.from({ length: number }, () => name);
         });
 
-    const matched = /** @type {import('./types.ts').CardInfo[]} */ ([]);
+    const matched = /** @type {import('./card.js').CardInfo[]} */ ([]);
     const failedSet = new Set();
 
     for (const cardName of names) {
@@ -88,7 +88,7 @@ export const createDeck = (deckList, id, x, y) => {
         if (deck.length) {
             const deckRect = deckElement.getBoundingClientRect();
             const cardElement = createCard(
-                /** @type {import('./types.ts').CardInfo} */ (deck.pop()),
+                /** @type {import('./card.js').CardInfo} */ (deck.pop()),
                 `${deckRect.x}px`,
                 `${deckRect.y}px`,
             );
@@ -137,7 +137,7 @@ export const createDeck = (deckList, id, x, y) => {
 
 /**
  * @param {Element} cardElement
- * @returns {import('./types.ts').CardInfo}
+ * @returns {import('./card.js').CardInfo}
  */
 const cardElementToCardInfo = (cardElement) => {
     return {

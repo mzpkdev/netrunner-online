@@ -10,7 +10,11 @@ import {
 } from "./utils.js";
 
 /**
- * @param {import('./types.ts').CardInfo} cardInfo
+ * @typedef {{ title: string, side_code: string, faction_code: string, type_code: string, image: string, code?: string }} CardInfo
+ */
+
+/**
+ * @param {CardInfo} cardInfo
  * @param {string} x
  * @param {string} y
  * @param {string} [id]

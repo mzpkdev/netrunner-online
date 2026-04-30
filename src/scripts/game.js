@@ -18,7 +18,7 @@ export const setupCorp = () => {
     );
     const corpIdentity = /** @type {HTMLInputElement} */ (document.querySelector("#corp-identity")).value.trim();
     const corpIdentityCard = window.allCards.find(
-        (/** @type {import('./types.ts').CardInfo} */ cardInfo) => cardInfo.title === corpIdentity,
+        (/** @type {import('./card.js').CardInfo} */ cardInfo) => cardInfo.title === corpIdentity,
     );
     if (corpIdentityCard) {
         createCard(corpIdentityCard, cix, ciy);
@@ -44,7 +44,7 @@ export const setupRunner = () => {
         .querySelector("#runner-identity"))
         .value.trim();
     const runnerIdentityCard = window.allCards.find(
-        (/** @type {import('./types.ts').CardInfo} */ cardInfo) => cardInfo.title === runnerIdentity,
+        (/** @type {import('./card.js').CardInfo} */ cardInfo) => cardInfo.title === runnerIdentity,
     );
     if (runnerIdentityCard) {
         createCard(runnerIdentityCard, rix, riy);
@@ -64,7 +64,7 @@ export const setupGame = () => {
 export const main = async () => {
     try {
         window.allCards = await fetchAllCards().then((cards) =>
-            cards.data.map((/** @type {import('./types.ts').CardInfo} */ cardIfo) => {
+            cards.data.map((/** @type {import('./card.js').CardInfo} */ cardIfo) => {
                 cardIfo.image = `https://card-images.netrunnerdb.com/v2/large/${cardIfo.code}.jpg`;
                 return cardIfo;
             }),

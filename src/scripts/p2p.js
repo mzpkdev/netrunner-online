@@ -107,7 +107,7 @@ export function sendRotateMessage(id, rotated) {
 }
 
 /**
- * @param {import('./types.ts').P2PMessage} message
+ * @param {object} message
  * @returns {void}
  */
 export function receiveMessage(message) {
