@@ -107,7 +107,7 @@ export function sendRotateMessage(id, rotated) {
 }
 
 /**
- * @param {object} message
+ * @param {any} message
  * @returns {void}
  */
 export function receiveMessage(message) {
