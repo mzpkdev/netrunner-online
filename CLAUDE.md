@@ -26,7 +26,10 @@ CSS (custom properties + gradients + mix-blend-mode) with minimal JS for trackin
 | `npm run format`    | Format all files with Biome (writes changes)       |
 | `npm run check`     | Biome lint + format with auto-fix (writes changes) |
 | `npm run typecheck` | Type-check with `tsc --noEmit`                     |
+| `npm run verify`    | Run typecheck, lint+format check, and unit tests   |
 | `npm run e2e`       | Run Playwright E2E tests (headless)                |
+
+`npm run verify` is the composite fast-validation gate. It intentionally excludes `npm run e2e` because Playwright tests require a running dev server (`npm run serve`) and are too slow for a pre-commit pass. Run `npm run e2e` separately after starting the dev server.
 
 Config files live at the repo root: `tsconfig.json`, `biome.json`, `vitest.config.js`, `playwright.config.js`. All start
 permissive and tighten over time per `spec/TECHNICAL_VISION.md`. E2E tests live in `e2e/`.

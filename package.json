@@ -12,7 +12,7 @@
         "format": "biome format --write .",
         "check": "biome check --write .",
         "typecheck": "tsc",
-        "verify": "npm run typecheck && npm run lint && npm test",
+        "verify": "npm run typecheck && npm run lint:ci && npm test",
         "e2e": "playwright test"
     },
     "devDependencies": {
