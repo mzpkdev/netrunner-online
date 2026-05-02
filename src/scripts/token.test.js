@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createToken, setupTokenSpawning } from "./token.js";
+import { sendDeleteMessage } from "./p2p.js";
 import { isPointWithinElement } from "./utils.js";
 
 vi.mock("./grab.js", () => ({ grabCard: vi.fn(() => () => {}) }));
-vi.mock("./p2p.js", () => ({ sendCreateMessage: vi.fn() }));
+vi.mock("./p2p.js", () => ({ sendCreateMessage: vi.fn(), sendDeleteMessage: vi.fn() }));
 vi.mock("./utils.js", () => ({
     putElementTop: vi.fn(),
     isPointWithinElement: vi.fn(() => false),
@@ -113,6 +114,38 @@ describe("tryPutTokenOnCard", () => {
         token.dispatchEvent(new Event("ungrab"));
 
         expect(card.contains(token)).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// token bin — sendDeleteMessage on ungrab over bin
+// ---------------------------------------------------------------------------
+describe("token bin deletion", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        setupTokenDOM();
+    });
+
+    it("calls sendDeleteMessage with the token id when isPointWithinElement returns true for the bin", () => {
+        const token = createToken("credit", "0px", "0px", "bin-token");
+
+        // ungrab handler: first isPointWithinElement call is the token-bin check → true
+        isPointWithinElement.mockReturnValueOnce(true);
+
+        token.dispatchEvent(new Event("ungrab"));
+
+        expect(sendDeleteMessage).toHaveBeenCalledWith("bin-token");
+    });
+
+    it("does not call sendDeleteMessage when the token is not over the bin", () => {
+        const token = createToken("credit", "0px", "0px", "no-bin-token");
+
+        // isPointWithinElement returns false for the bin
+        isPointWithinElement.mockReturnValue(false);
+
+        token.dispatchEvent(new Event("ungrab"));
+
+        expect(sendDeleteMessage).not.toHaveBeenCalled();
     });
 });
 
