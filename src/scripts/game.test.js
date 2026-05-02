@@ -158,10 +158,20 @@ describe("setupRunner", () => {
 // main
 // ---------------------------------------------------------------------------
 describe("main", () => {
+    let addEventListenerSpy;
+
     beforeEach(() => {
         vi.clearAllMocks();
         document.body.innerHTML = '<div class="dropdown-menu"></div>';
         window.allCards = undefined;
+        addEventListenerSpy = vi.spyOn(document, "addEventListener");
+    });
+
+    afterEach(() => {
+        for (const [type, listener] of addEventListenerSpy.mock.calls) {
+            document.removeEventListener(type, listener);
+        }
+        addEventListenerSpy.mockRestore();
     });
 
     it("appends a #fetch-error element with the expected message and does not call setup functions when fetchAllCards rejects", async () => {
@@ -204,5 +214,38 @@ describe("main", () => {
         expect(window.allCards[1].image).toBe(
             "https://card-images.netrunnerdb.com/v2/large/02002.jpg",
         );
+    });
+
+    it("sets .dropdown-menu display to none when a click event is dispatched on document", async () => {
+        fetchAllCards.mockResolvedValue({
+            data: [{ code: "01001", title: "Hedge Fund" }],
+        });
+        await main();
+        const menu = document.querySelector(".dropdown-menu");
+        menu.style.display = "block";
+        document.dispatchEvent(new Event("click"));
+        expect(menu.style.display).toBe("none");
+    });
+
+    it("sets .dropdown-menu display to none when an auxclick event is dispatched on document", async () => {
+        fetchAllCards.mockResolvedValue({
+            data: [{ code: "01001", title: "Hedge Fund" }],
+        });
+        await main();
+        const menu = document.querySelector(".dropdown-menu");
+        menu.style.display = "block";
+        document.dispatchEvent(new Event("auxclick"));
+        expect(menu.style.display).toBe("none");
+    });
+
+    it("calls preventDefault when a middle mouse button mousedown event is dispatched on document", async () => {
+        fetchAllCards.mockResolvedValue({
+            data: [{ code: "01001", title: "Hedge Fund" }],
+        });
+        await main();
+        const event = new MouseEvent("mousedown", { button: 1 });
+        vi.spyOn(event, "preventDefault");
+        document.dispatchEvent(event);
+        expect(event.preventDefault).toHaveBeenCalled();
     });
 });
