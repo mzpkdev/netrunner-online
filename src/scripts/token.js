@@ -1,5 +1,5 @@
 import { grabCard } from "./grab.js";
-import { sendCreateMessage } from "./p2p.js";
+import { sendCreateMessage, sendDeleteMessage } from "./p2p.js";
 import { isPointWithinElement, putElementTop, snapToGrid } from "./utils.js";
 
 export const createToken = (tokenName, x, y, id) => {
@@ -33,6 +33,7 @@ export const createToken = (tokenName, x, y, id) => {
 
         const tokenBin = document.querySelector("#token-bin");
         if (isPointWithinElement(tokenRect.x, tokenRect.y, tokenBin)) {
+            sendDeleteMessage(tokenElement.id);
             tokenElement.remove();
             tokenBin.classList.remove("token-bin-active");
         } else {
