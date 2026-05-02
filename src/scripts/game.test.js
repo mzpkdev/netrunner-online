@@ -2,7 +2,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCard } from "./card.js";
 import { createDeck } from "./deck.js";
-import { setupCorp, setupRunner } from "./game.js";
+import { main, setupCorp, setupRunner } from "./game.js";
+import { setupKeyboardShortcuts } from "./keyboard.js";
+import { setupP2P } from "./p2p.js";
+import { setupSidePanels } from "./sidePanels.js";
+import { setupTokenSpawning } from "./token.js";
+import { fetchAllCards } from "./utils.js";
 
 vi.mock("./p2p.js", () => ({ setupP2P: vi.fn() }));
 vi.mock("./utils.js", () => ({ fetchAllCards: vi.fn() }));
@@ -145,6 +150,59 @@ describe("setupRunner", () => {
             "runner-deck",
             "15vw",
             "25vh",
+        );
+    });
+});
+
+// ---------------------------------------------------------------------------
+// main
+// ---------------------------------------------------------------------------
+describe("main", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        document.body.innerHTML = '<div class="dropdown-menu"></div>';
+        window.allCards = undefined;
+    });
+
+    it("appends a #fetch-error element with the expected message and does not call setup functions when fetchAllCards rejects", async () => {
+        fetchAllCards.mockRejectedValue(new Error("Network failure"));
+        await main();
+        const errorEl = document.querySelector("#fetch-error");
+        expect(errorEl).not.toBeNull();
+        expect(errorEl.textContent).toBe(
+            "Card data unavailable. Check your connection and reload.",
+        );
+        expect(setupP2P).not.toHaveBeenCalled();
+        expect(setupKeyboardShortcuts).not.toHaveBeenCalled();
+        expect(setupSidePanels).not.toHaveBeenCalled();
+        expect(setupTokenSpawning).not.toHaveBeenCalled();
+    });
+
+    it("populates window.allCards and calls all four setup functions when fetchAllCards resolves", async () => {
+        fetchAllCards.mockResolvedValue({
+            data: [{ code: "01001", title: "Hedge Fund" }],
+        });
+        await main();
+        expect(window.allCards).toBeDefined();
+        expect(setupKeyboardShortcuts).toHaveBeenCalledOnce();
+        expect(setupP2P).toHaveBeenCalledOnce();
+        expect(setupSidePanels).toHaveBeenCalledOnce();
+        expect(setupTokenSpawning).toHaveBeenCalledOnce();
+    });
+
+    it("maps each card entry to include an image URL derived from card.code", async () => {
+        fetchAllCards.mockResolvedValue({
+            data: [
+                { code: "01001", title: "Hedge Fund" },
+                { code: "02002", title: "Sure Gamble" },
+            ],
+        });
+        await main();
+        expect(window.allCards[0].image).toBe(
+            "https://card-images.netrunnerdb.com/v2/large/01001.jpg",
+        );
+        expect(window.allCards[1].image).toBe(
+            "https://card-images.netrunnerdb.com/v2/large/02002.jpg",
         );
     });
 });
