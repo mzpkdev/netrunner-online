@@ -135,6 +135,7 @@ describe("token bin deletion", () => {
         token.dispatchEvent(new Event("ungrab"));
 
         expect(sendDeleteMessage).toHaveBeenCalledWith("bin-token");
+        expect(document.querySelector("#bin-token")).toBeNull();
     });
 
     it("does not call sendDeleteMessage when the token is not over the bin", () => {
@@ -146,6 +147,7 @@ describe("token bin deletion", () => {
         token.dispatchEvent(new Event("ungrab"));
 
         expect(sendDeleteMessage).not.toHaveBeenCalled();
+        expect(document.querySelector("#no-bin-token")).not.toBeNull();
     });
 });
 
