@@ -890,6 +890,18 @@ describe("receiveMessage create-element content shape validation", () => {
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
+    it("rejects card content when content[0] is null", () => {
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "card",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: [null, "100px", "200px"],
+        });
+        expect(createCard).not.toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
     it("rejects card content when content[0].title is not a string", () => {
         receiveMessage({
             messageType: "create-element",
