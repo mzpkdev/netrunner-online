@@ -1,7 +1,7 @@
 import cardBackUrl from "../assets/card-back.jpg";
 import { grabCard } from "./grab.js";
 import { selectCard } from "./keyboard.js";
-import { sendCreateMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
+import { sendCreateMessage, sendDeleteMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
 import {
     isPointWithinElement,
     putElementBottom,
@@ -91,6 +91,7 @@ export const createCard = (cardInfo, x, y, id) => {
                 detail: { card: cardElement },
             });
             targetDeck.dispatchEvent(putTop);
+            sendDeleteMessage(cardElement.id);
             cardElement.remove();
         }
     });

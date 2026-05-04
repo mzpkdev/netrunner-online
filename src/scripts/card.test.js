@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCard, handleCardBehavior, snapOutOfHandArea } from "./card.js";
-import { sendFlipMessage, sendRotateMessage } from "./p2p.js";
+import { sendDeleteMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
+import { isPointWithinElement } from "./utils.js";
 
 vi.mock("./p2p.js", () => ({
     sendCreateMessage: vi.fn(),
+    sendDeleteMessage: vi.fn(),
     sendFlipMessage: vi.fn(),
     sendRotateMessage: vi.fn(),
 }));
@@ -277,5 +279,42 @@ describe("createCard context-menu-rotate handler", () => {
             .querySelector("#context-menu-rotate")
             .dispatchEvent(new MouseEvent("click", { bubbles: true }));
         expect(sendRotateMessage).toHaveBeenLastCalledWith("rotate-ctx-test-2", false);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// createCard — ungrab handler sends delete message when dropped on a deck
+// ---------------------------------------------------------------------------
+describe("createCard ungrab handler — deck drop", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        setupDOM();
+        isPointWithinElement.mockReturnValue(false);
+    });
+
+    it("calls sendDeleteMessage with the card id when ungrab lands on a deck element", () => {
+        const deck = document.createElement("div");
+        deck.classList.add("deck");
+        const deckChild = document.createElement("div");
+        deck.appendChild(deckChild);
+        document.body.appendChild(deck);
+
+        const el = createCard(cardInfo, "10px", "20px", "ungrab-deck-test");
+        vi.clearAllMocks();
+
+        isPointWithinElement.mockReturnValue(true);
+        el.dispatchEvent(new CustomEvent("ungrab"));
+
+        expect(sendDeleteMessage).toHaveBeenCalledWith("ungrab-deck-test");
+    });
+
+    it("does not call sendDeleteMessage when ungrab does not land on a deck element", () => {
+        const el = createCard(cardInfo, "10px", "20px", "ungrab-no-deck-test");
+        vi.clearAllMocks();
+
+        isPointWithinElement.mockReturnValue(false);
+        el.dispatchEvent(new CustomEvent("ungrab"));
+
+        expect(sendDeleteMessage).not.toHaveBeenCalled();
     });
 });
