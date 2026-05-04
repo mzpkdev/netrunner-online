@@ -96,8 +96,25 @@ export function receiveMessage(message) {
                 );
                 break;
             }
+            if (!Array.isArray(message.content)) {
+                console.warn(
+                    "receiveMessage: create-element ignored — content is not an array",
+                    message,
+                );
+                break;
+            }
             switch (message.entityType) {
                 case "deck":
+                    if (
+                        message.content.length < 4 ||
+                        typeof message.content[0] !== "string"
+                    ) {
+                        console.warn(
+                            "receiveMessage: create-element (deck) ignored — content shape is invalid",
+                            message,
+                        );
+                        break;
+                    }
                     if (!document.querySelector(`#${message.entityId}`)) {
                         element = createDeck(...message.content);
                         if (message.perspective !== window.playerSide) {
@@ -113,6 +130,18 @@ export function receiveMessage(message) {
                     break;
 
                 case "card":
+                    if (
+                        message.content.length < 3 ||
+                        typeof message.content[0] !== "object" ||
+                        message.content[0] === null ||
+                        typeof message.content[0].title !== "string"
+                    ) {
+                        console.warn(
+                            "receiveMessage: create-element (card) ignored — content shape is invalid",
+                            message,
+                        );
+                        break;
+                    }
                     if (!document.querySelector(`#${message.entityId}`)) {
                         element = createCard(...message.content);
                         if (message.perspective !== window.playerSide) {
@@ -128,6 +157,16 @@ export function receiveMessage(message) {
                     break;
 
                 case "token":
+                    if (
+                        message.content.length < 3 ||
+                        typeof message.content[0] !== "string"
+                    ) {
+                        console.warn(
+                            "receiveMessage: create-element (token) ignored — content shape is invalid",
+                            message,
+                        );
+                        break;
+                    }
                     if (!document.querySelector(`#${message.entityId}`)) {
                         element = createToken(...message.content);
                         if (message.perspective !== window.playerSide) {
