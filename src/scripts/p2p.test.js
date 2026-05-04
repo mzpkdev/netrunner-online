@@ -212,9 +212,9 @@ describe("receiveMessage create-element", () => {
             entityType: "card",
             entityId: "new-entity",
             perspective: "corp",
-            content: ["arg1", "arg2"],
+            content: [{ title: "Test Card" }, "100px", "200px"],
         });
-        expect(createCard).toHaveBeenCalledWith("arg1", "arg2");
+        expect(createCard).toHaveBeenCalledWith({ title: "Test Card" }, "100px", "200px");
     });
 
     it("calls createDeck with spread content for entityType deck", () => {
@@ -224,9 +224,9 @@ describe("receiveMessage create-element", () => {
             entityType: "deck",
             entityId: "new-entity",
             perspective: "corp",
-            content: ["arg1", "arg2"],
+            content: ["deckList", "deck-id", "100px", "200px"],
         });
-        expect(createDeck).toHaveBeenCalledWith("arg1", "arg2");
+        expect(createDeck).toHaveBeenCalledWith("deckList", "deck-id", "100px", "200px");
     });
 
     it("calls createToken with spread content for entityType token", () => {
@@ -236,9 +236,9 @@ describe("receiveMessage create-element", () => {
             entityType: "token",
             entityId: "new-entity",
             perspective: "corp",
-            content: ["arg1", "arg2"],
+            content: ["tokenName", "100px", "200px"],
         });
-        expect(createToken).toHaveBeenCalledWith("arg1", "arg2");
+        expect(createToken).toHaveBeenCalledWith("tokenName", "100px", "200px");
     });
 
     it("skips createCard when the entity ID already exists in the DOM", () => {
@@ -248,7 +248,7 @@ describe("receiveMessage create-element", () => {
             entityType: "card",
             entityId: "new-entity",
             perspective: "corp",
-            content: [],
+            content: [{ title: "Test Card" }, "100px", "200px"],
         });
         expect(createCard).not.toHaveBeenCalled();
     });
@@ -260,7 +260,7 @@ describe("receiveMessage create-element", () => {
             entityType: "card",
             entityId: "new-entity",
             perspective: "runner",
-            content: [],
+            content: [{ title: "Test Card" }, "100px", "200px"],
         });
         expect(flipElement).toHaveBeenCalledWith(
             fakeElement,
@@ -275,7 +275,7 @@ describe("receiveMessage create-element", () => {
             entityType: "card",
             entityId: "new-entity",
             perspective: "corp",
-            content: [],
+            content: [{ title: "Test Card" }, "100px", "200px"],
         });
         expect(snapToGrid).toHaveBeenCalledWith(fakeElement);
     });
@@ -287,7 +287,7 @@ describe("receiveMessage create-element", () => {
             entityType: "deck",
             entityId: "new-entity",
             perspective: "corp",
-            content: [],
+            content: ["deckList", "deck-id", "100px", "200px"],
         });
         expect(createDeck).not.toHaveBeenCalled();
     });
@@ -299,7 +299,7 @@ describe("receiveMessage create-element", () => {
             entityType: "token",
             entityId: "new-entity",
             perspective: "corp",
-            content: [],
+            content: ["tokenName", "100px", "200px"],
         });
         expect(createToken).not.toHaveBeenCalled();
     });
@@ -311,7 +311,7 @@ describe("receiveMessage create-element", () => {
             entityType: "deck",
             entityId: "new-entity",
             perspective: "runner",
-            content: [],
+            content: ["deckList", "deck-id", "100px", "200px"],
         });
         expect(flipElement).toHaveBeenCalledWith(
             fakeElement,
@@ -326,7 +326,7 @@ describe("receiveMessage create-element", () => {
             entityType: "token",
             entityId: "new-entity",
             perspective: "corp",
-            content: [],
+            content: ["tokenName", "100px", "200px"],
         });
         expect(snapToGrid).toHaveBeenCalledWith(fakeElement);
     });
@@ -840,5 +840,113 @@ describe("heartbeat", () => {
         teardownHeartbeat();
         vi.advanceTimersByTime(15000);
         expect(statusEl.style.display).not.toBe("block");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// receiveMessage — create-element content shape validation
+// ---------------------------------------------------------------------------
+describe("receiveMessage create-element content shape validation", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        window.playerSide = "corp";
+        vi.clearAllMocks();
+        vi.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    it("rejects and warns when content is not an array", () => {
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "card",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: { title: "not an array" },
+        });
+        expect(createCard).not.toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("rejects card content when length is less than 3", () => {
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "card",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: [{ title: "Short" }, "100px"],
+        });
+        expect(createCard).not.toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("rejects card content when content[0] is not an object", () => {
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "card",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: ["not-an-object", "100px", "200px"],
+        });
+        expect(createCard).not.toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("rejects card content when content[0].title is not a string", () => {
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "card",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: [{ title: 42 }, "100px", "200px"],
+        });
+        expect(createCard).not.toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("rejects deck content when length is less than 4", () => {
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "deck",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: ["deckList", "id"],
+        });
+        expect(createDeck).not.toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("rejects deck content when content[0] is not a string", () => {
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "deck",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: [42, "id", "100px", "200px"],
+        });
+        expect(createDeck).not.toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("rejects token content when length is less than 3", () => {
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "token",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: ["tokenName"],
+        });
+        expect(createToken).not.toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalledOnce();
+    });
+
+    it("rejects token content when content[0] is not a string", () => {
+        receiveMessage({
+            messageType: "create-element",
+            entityType: "token",
+            entityId: "new-entity",
+            perspective: "corp",
+            content: [42, "100px", "200px"],
+        });
+        expect(createToken).not.toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalledOnce();
     });
 });
