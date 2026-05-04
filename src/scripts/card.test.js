@@ -302,10 +302,15 @@ describe("createCard ungrab handler — deck drop", () => {
         const el = createCard(cardInfo, "10px", "20px", "ungrab-deck-test");
         vi.clearAllMocks();
 
+        const deckSpy = vi.spyOn(deck, "dispatchEvent");
         isPointWithinElement.mockReturnValue(true);
         el.dispatchEvent(new CustomEvent("ungrab"));
 
+        expect(deckSpy).toHaveBeenCalledWith(
+            expect.objectContaining({ type: "puttop" }),
+        );
         expect(sendDeleteMessage).toHaveBeenCalledWith("ungrab-deck-test");
+        expect(document.contains(el)).toBe(false);
     });
 
     it("does not call sendDeleteMessage when ungrab does not land on a deck element", () => {
