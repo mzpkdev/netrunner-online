@@ -38,7 +38,7 @@ const apiFixture = {
 
 test("page loads", async ({ page }) => {
     await page.goto("/");
-    await page.waitForFunction(() => typeof window.Peer !== "undefined");
+    await page.waitForFunction(() => typeof window.Peer !== "undefined", { timeout: 10000 });
     await expect(page).toHaveTitle(/netrunner/i);
 });
 
@@ -59,7 +59,7 @@ test.describe("solo play flow", () => {
 
         // Wait for main() to complete — window.allCards is assigned after the
         // API response resolves and before setupP2P() attaches click handlers
-        await page.waitForFunction(() => typeof window.allCards !== "undefined");
+        await page.waitForFunction(() => typeof window.allCards !== "undefined", { timeout: 10000 });
 
         // Overwrite the deck lists with cards present in the fixture
         await page.evaluate(() => {
