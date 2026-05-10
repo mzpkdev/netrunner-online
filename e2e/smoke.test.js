@@ -38,6 +38,7 @@ const apiFixture = {
 
 test("page loads", async ({ page }) => {
     await page.goto("/");
+    await page.waitForFunction(() => typeof window.Peer !== "undefined");
     await expect(page).toHaveTitle(/netrunner/i);
 });
 
