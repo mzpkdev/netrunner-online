@@ -24,7 +24,7 @@ export const createCard = (cardInfo, x, y, id) => {
     cardElement.setAttribute("data-type", cardInfo.type_code);
     cardElement.setAttribute("data-location", "deck");
     cardElement.setAttribute("id", id ? id : `card-${crypto.randomUUID()}`);
-    cardElement.style = `left: ${x}; top: ${y};`;
+    cardElement.style.cssText = `left: ${x}; top: ${y};`;
     cardElement.classList.add("game-card");
     cardElement.setAttribute("tabindex", "0");
     const cardFront = document.createElement("div");
@@ -123,7 +123,7 @@ const cardContextMenu = (element) => {
     return (e) => {
         e.preventDefault();
         const contextMenu = document.querySelector(".dropdown-menu");
-        const newContextMenu = contextMenu.cloneNode(true);
+        const newContextMenu = /** @type {HTMLElement} */ (contextMenu.cloneNode(true));
         contextMenu.parentNode.replaceChild(newContextMenu, contextMenu);
 
         newContextMenu.style.display = "block";
