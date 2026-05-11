@@ -15,14 +15,15 @@ export const setupCorp = () => {
     createDeck(
         document.querySelector("#corp-deck-list").value,
         "corp-deck",
-        ...corpDeckLocation,
+        corpDeckLocation[0],
+        corpDeckLocation[1],
     );
     const corpIdentity = document.querySelector("#corp-identity").value.trim();
-    const corpIdentityCard = allCards.find(
+    const corpIdentityCard = window.allCards.find(
         (cardInfo) => cardInfo.title === corpIdentity,
     );
     if (corpIdentityCard) {
-        createCard(corpIdentityCard, ...corpIdentityLocation);
+        createCard(corpIdentityCard, corpIdentityLocation[0], corpIdentityLocation[1]);
     } else {
         const error = document.createElement("p");
         error.id = "corp-identity-error";
@@ -40,16 +41,17 @@ export const setupRunner = () => {
     createDeck(
         document.querySelector("#runner-deck-list").value,
         "runner-deck",
-        ...runnerDeckLocation,
+        runnerDeckLocation[0],
+        runnerDeckLocation[1],
     );
     const runnerIdentity = document
         .querySelector("#runner-identity")
         .value.trim();
-    const runnerIdentityCard = allCards.find(
+    const runnerIdentityCard = window.allCards.find(
         (cardInfo) => cardInfo.title === runnerIdentity,
     );
     if (runnerIdentityCard) {
-        createCard(runnerIdentityCard, ...runnerIdentityLocation);
+        createCard(runnerIdentityCard, runnerIdentityLocation[0], runnerIdentityLocation[1]);
     } else {
         const error = document.createElement("p");
         error.id = "runner-identity-error";

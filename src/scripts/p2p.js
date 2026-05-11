@@ -134,7 +134,7 @@ export function receiveMessage(message) {
                         message.content.length < 3 ||
                         typeof message.content[0] !== "object" ||
                         message.content[0] === null ||
-                        typeof message.content[0].title !== "string"
+                        typeof (/** @type {any} */ (message.content[0])).title !== "string"
                     ) {
                         console.warn(
                             "receiveMessage: create-element (card) ignored — content shape is invalid",
@@ -143,7 +143,7 @@ export function receiveMessage(message) {
                         break;
                     }
                     if (!document.querySelector(`#${message.entityId}`)) {
-                        element = createCard(...message.content);
+                        element = createCard(.../** @type {[any, any, any, any?]} */ (message.content));
                         if (message.perspective !== window.playerSide) {
                             flipElement(
                                 element,
@@ -345,7 +345,7 @@ export function receiveMessage(message) {
 
         default:
             console.warn(
-                `receiveMessage: unknown messageType "${message.messageType}"`,
+                `receiveMessage: unknown messageType "${/** @type {any} */ (message).messageType}"`,
                 message,
             );
             break;

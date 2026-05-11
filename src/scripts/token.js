@@ -5,9 +5,9 @@ import { isPointWithinElement, putElementTop, snapToGrid } from "./utils.js";
 export const createToken = (tokenName, x, y, id) => {
     const tokenElement = document.createElement("div");
 
-    const innerElement = document
+    const innerElement = /** @type {HTMLElement} */ (document
         .querySelector(`#${tokenName}`)
-        .cloneNode(true);
+        .cloneNode(true));
     innerElement.style.position = "absolute";
     innerElement.style.transform +=
         "translate(-50%, -50%) translate(-10px, -10px)";
@@ -151,9 +151,9 @@ function flipToken(tokenElement, key, value) {
             : tokenElement.firstElementChild.id === value
               ? key
               : tokenElement.firstElementChild.id;
-    const newInnerElement = document
+    const newInnerElement = /** @type {HTMLElement} */ (document
         .querySelector(`#${newTokenName}`)
-        .cloneNode(true);
+        .cloneNode(true));
     newInnerElement.style.position = "absolute";
     newInnerElement.style.transform +=
         "translate(-50%, -50%) translate(-10px, -10px)";
