@@ -216,12 +216,13 @@ test.describe("p2p two-player flow", () => {
             timeout: 5000,
         });
 
-        // Host loads the corp deck.  The player-panel is an offcanvas element;
-        // force:true bypasses the visibility check.
+        // Host loads the corp deck.  The player-panel is an offcanvas element
+        // rendered off-screen; use evaluate() to dispatch the click directly and
+        // bypass Playwright's viewport-geometry check.
         await hostPage.evaluate(() => {
             document.querySelector("#corp-deck-list").value = "3x Hedge Fund";
+            document.querySelector("#load-deck-button").click();
         });
-        await hostPage.locator("#load-deck-button").click({ force: true });
 
         // Corp deck element must appear locally in the host's #card-layer.
         await expect(hostPage.locator("#card-layer .deck")).toHaveCount(1);
