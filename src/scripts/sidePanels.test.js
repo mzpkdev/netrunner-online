@@ -81,6 +81,21 @@ describe("flipBoard", () => {
 });
 
 // ---------------------------------------------------------------------------
+// setupSidePanels — initialization
+// ---------------------------------------------------------------------------
+describe("setupSidePanels — initialization", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        buildFullDOM();
+    });
+
+    it("sets #corp-check.checked to true on initialization", () => {
+        setupSidePanels();
+        expect(document.querySelector("#corp-check").checked).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
 // setupSidePanels — mousemove edge triggers
 // ---------------------------------------------------------------------------
 describe("setupSidePanels — mousemove edge triggers", () => {

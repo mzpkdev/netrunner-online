@@ -176,8 +176,8 @@ export const setupTokenSpawning = () => {
         "bad-publicity",
         "brain-damage",
     ].forEach((tokenName) => {
-        document
-            .querySelector(`#${tokenName}`)
+        /** @type {HTMLElement} */ (document
+            .querySelector(`#${tokenName}`))
             .addEventListener("mousedown", (e) => {
                 e.preventDefault();
 

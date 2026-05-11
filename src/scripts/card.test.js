@@ -70,6 +70,12 @@ describe("createCard", () => {
         expect(src).not.toContain("gstatic.com");
     });
 
+    it("sets style.left and style.top from the x and y arguments", () => {
+        const el = createCard(cardInfo, "10px", "20px", "position-test");
+        expect(el.style.left).toBe("10px");
+        expect(el.style.top).toBe("20px");
+    });
+
     it("treats a malicious image value as a literal src without injecting extra DOM nodes", () => {
         const maliciousInfo = {
             ...cardInfo,

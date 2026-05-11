@@ -133,6 +133,6 @@ const cardElementToCardInfo = (cardElement) => {
         side_code: cardElement.getAttribute("data-side"),
         faction_code: cardElement.getAttribute("data-faction"),
         type_code: cardElement.getAttribute("data-type"),
-        image: cardElement.querySelector(".card-front img").src,
+        image: /** @type {HTMLImageElement} */ (cardElement.querySelector(".card-front img")).src,
     };
 };

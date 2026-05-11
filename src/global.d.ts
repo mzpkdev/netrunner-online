@@ -69,36 +69,34 @@ interface Window {
 // ---------------------------------------------------------------------------
 // Element augmentation
 //
-// document.querySelector() returns Element in the lib, but every queried
-// element in this application is an HTML element.  Adding the HTML
-// properties that are accessed throughout the codebase avoids per-call casts.
+// document.querySelector() returns Element in the lib, but the application
+// accesses style on queried nodes before narrowing to HTMLElement.  Only
+// properties that belong to the Element interface itself are declared here;
+// HTML-specific properties (value, checked, disabled, innerText, src) are
+// accessed via targeted casts (HTMLInputElement, HTMLElement, HTMLImageElement)
+// at the individual call sites.
 // ---------------------------------------------------------------------------
 
 interface Element {
     style: CSSStyleDeclaration;
-    value: string;
-    checked: boolean;
-    disabled: boolean;
     select(): void;
     focus(): void;
     click(): void;
-    innerText: string;
-    src: string;
 }
 
 // ---------------------------------------------------------------------------
 // Event augmentation
 //
-// Custom events ("grab", "move", "puttop", etc.) and pointer events accessed
-// through Element.addEventListener fall back to the generic Event type.
-// Adding the properties used throughout the codebase avoids per-handler casts.
+// Only detail is declared here because it is accessed on custom events whose
+// listener type falls back to the generic Event interface.  Pointer-event
+// properties (clientX, clientY, button) belong to MouseEvent / PointerEvent
+// and are available via TypeScript's named-event inference or per-handler
+// casts — adding them to the base Event interface would suppress legitimate
+// type errors on non-pointer event callbacks.
 // ---------------------------------------------------------------------------
 
 interface Event {
     /** Present on CustomEvent; typed as any to allow arbitrary detail shapes. */
     // biome-ignore lint/suspicious/noExplicitAny: detail carries arbitrary custom-event payloads; the shapes differ per event and narrowing at call sites would require casts throughout application code
     detail: any;
-    clientX: number;
-    clientY: number;
-    button: number;
 }

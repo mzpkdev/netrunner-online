@@ -13,12 +13,12 @@ export const setupCorp = () => {
         window.playerSide === "corp" ? ["75vw", "75vh"] : ["25vw", "25vh"];
 
     createDeck(
-        document.querySelector("#corp-deck-list").value,
+        /** @type {HTMLInputElement} */ (document.querySelector("#corp-deck-list")).value,
         "corp-deck",
         corpDeckLocation[0],
         corpDeckLocation[1],
     );
-    const corpIdentity = document.querySelector("#corp-identity").value.trim();
+    const corpIdentity = /** @type {HTMLInputElement} */ (document.querySelector("#corp-identity")).value.trim();
     const corpIdentityCard = window.allCards.find(
         (cardInfo) => cardInfo.title === corpIdentity,
     );
@@ -39,14 +39,13 @@ export const setupRunner = () => {
         window.playerSide === "corp" ? ["25vw", "25vh"] : ["75vw", "75vh"];
 
     createDeck(
-        document.querySelector("#runner-deck-list").value,
+        /** @type {HTMLInputElement} */ (document.querySelector("#runner-deck-list")).value,
         "runner-deck",
         runnerDeckLocation[0],
         runnerDeckLocation[1],
     );
-    const runnerIdentity = document
-        .querySelector("#runner-identity")
-        .value.trim();
+    const runnerIdentity = /** @type {HTMLInputElement} */ (document
+        .querySelector("#runner-identity")).value.trim();
     const runnerIdentityCard = window.allCards.find(
         (cardInfo) => cardInfo.title === runnerIdentity,
     );

@@ -418,15 +418,15 @@ export const setupP2P = () => {
     });
 
     peer.on("open", (id) => {
-        const yourHostId = document.querySelector("#your-host-id");
+        const yourHostId = /** @type {HTMLInputElement} */ (document.querySelector("#your-host-id"));
         yourHostId.value = id;
         window.location.hash = id;
 
-        const opponentHostId = document.querySelector("#opponent-host-id");
+        const opponentHostId = /** @type {HTMLInputElement} */ (document.querySelector("#opponent-host-id"));
         opponentHostId.value = "";
 
-        document.querySelector("#host-game").disabled = false;
-        document.querySelector("#join-game").disabled = false;
+        /** @type {HTMLButtonElement} */ (document.querySelector("#host-game")).disabled = false;
+        /** @type {HTMLButtonElement} */ (document.querySelector("#join-game")).disabled = false;
     });
 
     peer.on("connection", (connection) => {
@@ -472,13 +472,13 @@ export const setupP2P = () => {
     document.querySelector("#opponent-host-id").focus();
 
     document.querySelector("#host-game").addEventListener("click", (e) => {
-        const yourHostId = document.querySelector("#your-host-id");
+        const yourHostId = /** @type {HTMLInputElement} */ (document.querySelector("#your-host-id"));
         yourHostId.select();
         navigator.clipboard.writeText(yourHostId.value);
     });
 
     document.querySelector("#join-game").addEventListener("click", (e) => {
-        const opponentHostId = document.querySelector("#opponent-host-id");
+        const opponentHostId = /** @type {HTMLInputElement} */ (document.querySelector("#opponent-host-id"));
         const connection = peer.connect(opponentHostId.value);
         setupP2PConnection(connection);
         document.querySelector("#start-game-panel").remove();

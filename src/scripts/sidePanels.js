@@ -79,14 +79,14 @@ export const setupSidePanels = () => {
             }
         });
 
-    document.querySelector("#corp-check").checked = true;
+    /** @type {HTMLInputElement} */ (document.querySelector("#corp-check")).checked = true;
     document.querySelector("#corp-check").addEventListener("click", (e) => {
         if (window.playerSide !== "corp") {
             window.playerSide = "corp";
             flipBoard();
         }
-        document.querySelector("#your-title").innerText = "Corporation";
-        document.querySelector("#opponent-title").innerText = "Runner";
+        /** @type {HTMLElement} */ (document.querySelector("#your-title")).innerText = "Corporation";
+        /** @type {HTMLElement} */ (document.querySelector("#opponent-title")).innerText = "Runner";
 
         document.querySelector("#corp-deck-panel").classList.remove("hidden");
         document.querySelector("#runner-deck-panel").classList.add("hidden");
@@ -97,8 +97,8 @@ export const setupSidePanels = () => {
             window.playerSide = "runner";
             flipBoard();
         }
-        document.querySelector("#your-title").innerText = "Runner";
-        document.querySelector("#opponent-title").innerText = "Corporation";
+        /** @type {HTMLElement} */ (document.querySelector("#your-title")).innerText = "Runner";
+        /** @type {HTMLElement} */ (document.querySelector("#opponent-title")).innerText = "Corporation";
 
         document.querySelector("#corp-deck-panel").classList.add("hidden");
         document.querySelector("#runner-deck-panel").classList.remove("hidden");
