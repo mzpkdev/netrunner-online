@@ -1,40 +1,5 @@
 import { expect, test } from "@playwright/test";
-
-const NETRUNNERDB_API = "https://netrunnerdb.com/api/2.0/public/cards";
-
-/** Minimal fixture — only the cards exercised by this test suite. */
-const apiFixture = {
-    data: [
-        {
-            code: "26100",
-            title: "Pravdivost Consulting: Political Solutions",
-            side_code: "corp",
-            faction_code: "weyland-consortium",
-            type_code: "identity",
-        },
-        {
-            code: "01054",
-            title: "Hedge Fund",
-            side_code: "corp",
-            faction_code: "neutral-corp",
-            type_code: "operation",
-        },
-        {
-            code: "33079",
-            title: 'Nyusha "Sable" Sintashta: Symphonic Prodigy',
-            side_code: "runner",
-            faction_code: "criminal",
-            type_code: "identity",
-        },
-        {
-            code: "01088",
-            title: "Sure Gamble",
-            side_code: "runner",
-            faction_code: "neutral-runner",
-            type_code: "event",
-        },
-    ],
-};
+import { NETRUNNERDB_API, apiFixture } from "./fixtures.js";
 
 /**
  * Synthetic PeerJS implementation injected into each browser context via
@@ -83,10 +48,15 @@ const MOCK_PEER_SCRIPT = `
     MockConnection.prototype.send = function (data) {
         window.__bridgeSend(JSON.stringify(data));
     };
+    MockConnection.prototype.close = function () {
+        clearInterval(this._poll);
+        if (this._h.close) this._h.close();
+    };
 
     function MockPeer(opts) {
         var self = this;
         this._h = {};
+        this._conn = null;
         var id = 'mock-' + Math.random().toString(36).slice(2, 9);
         setTimeout(function () {
             if (self._h.open) self._h.open(id);
@@ -97,6 +67,7 @@ const MOCK_PEER_SCRIPT = `
                 if (item.__type === 'connection') {
                     clearInterval(self._peerPoll);
                     var conn = new MockConnection();
+                    self._conn = conn;
                     if (self._h.connection) self._h.connection(conn);
                 }
             });
@@ -108,7 +79,13 @@ const MOCK_PEER_SCRIPT = `
     };
     MockPeer.prototype.connect = function (remoteId) {
         window.__bridgeConnect(remoteId);
-        return new MockConnection();
+        var conn = new MockConnection();
+        this._conn = conn;
+        return conn;
+    };
+    MockPeer.prototype.destroy = function () {
+        clearInterval(this._peerPoll);
+        if (this._conn) this._conn.close();
     };
 
     window.Peer = MockPeer;
@@ -262,6 +239,22 @@ test.describe("p2p two-player flow", () => {
 
         // The create-card message for the drawn card must propagate to the joiner.
         await expect(joinerPage.locator("#card-layer .game-card")).toHaveCount(2, {
+            timeout: 8000,
+        });
+
+        // ── Reverse channel: joiner → host ──────────────────────────────────────
+        // Joiner loads a runner deck.  This exercises the reverse P2P path:
+        // sendCreateMessage on the joiner → __bridgeSend → hostQueue →
+        // __bridgeConnPoll on the host → receiveMessage on the host.
+        // The joiner has not sent any messages up to this point, so its throttle
+        // window is clear and the first create-deck message fires on the leading edge.
+        await joinerPage.evaluate(() => {
+            document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
+            document.querySelector("#load-deck-button").click();
+        });
+
+        // The runner deck create-message must propagate from joiner to host.
+        await expect(hostPage.locator("#card-layer .deck")).toHaveCount(2, {
             timeout: 8000,
         });
 
