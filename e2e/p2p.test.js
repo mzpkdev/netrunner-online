@@ -155,6 +155,21 @@ test.describe("p2p two-player flow", () => {
         await hostPage.route(NETRUNNERDB_API, apiRoute);
         await joinerPage.route(NETRUNNERDB_API, apiRoute);
 
+        // Block the PeerJS CDN so the mock Peer installed by addInitScript is
+        // not overwritten.  Without this the real PeerJS script loads after
+        // addInitScript runs and replaces window.Peer; messages then travel
+        // over WebRTC rather than the in-process bridge, making delivery
+        // timing unpredictable and causing the deck-sync assertions to time
+        // out in CI.
+        const blockPeerJS = (route) =>
+            route.fulfill({
+                status: 200,
+                contentType: "application/javascript",
+                body: "",
+            });
+        await hostPage.route("https://unpkg.com/**", blockPeerJS);
+        await joinerPage.route("https://unpkg.com/**", blockPeerJS);
+
         await hostPage.goto("/");
         await joinerPage.goto("/");
 
@@ -246,8 +261,14 @@ test.describe("p2p two-player flow", () => {
         // Joiner loads a runner deck.  This exercises the reverse P2P path:
         // sendCreateMessage on the joiner → __bridgeSend → hostQueue →
         // __bridgeConnPoll on the host → receiveMessage on the host.
-        // The joiner has not sent any messages up to this point, so its throttle
-        // window is clear and the first create-deck message fires on the leading edge.
+        //
+        // Because the mock bridge is active, the joiner has already fired its
+        // throttle (for the echo messages sent when it received the host's deck
+        // and identity-card creates).  Wait 250ms so the joiner's 200ms throttle
+        // window expires; the first create-deck message from setupRunner then
+        // fires on the leading edge rather than being coalesced with the identity
+        // card that follows it.
+        await joinerPage.waitForTimeout(250);
         await joinerPage.evaluate(() => {
             document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
             document.querySelector("#load-deck-button").click();
