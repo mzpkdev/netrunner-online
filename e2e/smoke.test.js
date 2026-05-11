@@ -89,5 +89,28 @@ test.describe("solo play flow", () => {
 
         // The drawn card must appear as an additional .game-card in #card-layer
         await expect(page.locator("#card-layer .game-card")).toHaveCount(3);
+
+        // Keyboard navigation: ArrowRight must move focus to the first .game-card
+        await page.keyboard.press("ArrowRight");
+        const firstFocusedCard = page.locator("#card-layer .game-card:focus");
+        await expect(firstFocusedCard).toHaveCount(1);
+
+        const firstFocusedId = await firstFocusedCard.getAttribute("id");
+
+        // A second ArrowRight must advance focus to a different card
+        await page.keyboard.press("ArrowRight");
+        const secondFocusedCard = page.locator("#card-layer .game-card:focus");
+        await expect(secondFocusedCard).toHaveCount(1);
+
+        const secondFocusedId = await secondFocusedCard.getAttribute("id");
+        expect(secondFocusedId).not.toBe(firstFocusedId);
+
+        // F key must toggle the flipped class on the currently focused card
+        await page.keyboard.press("f");
+        await expect(page.locator(`#${secondFocusedId}`)).toHaveClass(/flipped/);
+
+        // Escape must clear the selected class from all cards
+        await page.keyboard.press("Escape");
+        await expect(page.locator("#card-layer .game-card.selected")).toHaveCount(0);
     });
 });
