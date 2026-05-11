@@ -96,6 +96,7 @@ test.describe("solo play flow", () => {
         await expect(firstFocusedCard).toHaveCount(1);
 
         const firstFocusedId = await firstFocusedCard.getAttribute("id");
+        expect(firstFocusedId).toBeTruthy();
 
         // A second ArrowRight must advance focus to a different card
         await page.keyboard.press("ArrowRight");
@@ -103,11 +104,27 @@ test.describe("solo play flow", () => {
         await expect(secondFocusedCard).toHaveCount(1);
 
         const secondFocusedId = await secondFocusedCard.getAttribute("id");
+        expect(secondFocusedId).toBeTruthy();
         expect(secondFocusedId).not.toBe(firstFocusedId);
+
+        // ArrowLeft must move focus backward to a different card than secondFocusedId
+        await page.keyboard.press("ArrowLeft");
+        const afterLeftCard = page.locator("#card-layer .game-card:focus");
+        await expect(afterLeftCard).toHaveCount(1);
+        const afterLeftId = await afterLeftCard.getAttribute("id");
+        expect(afterLeftId).toBeTruthy();
+        expect(afterLeftId).not.toBe(secondFocusedId);
+
+        // Advance back to secondFocusedId to set up the flip and Escape assertions
+        await page.keyboard.press("ArrowRight");
+        await expect(page.locator(`#${secondFocusedId}:focus`)).toHaveCount(1);
 
         // F key must toggle the flipped class on the currently focused card
         await page.keyboard.press("f");
         await expect(page.locator(`#${secondFocusedId}`)).toHaveClass(/flipped/);
+
+        // Confirm a card carries the selected class before Escape fires
+        await expect(page.locator("#card-layer .game-card.selected")).toHaveCount(1);
 
         // Escape must clear the selected class from all cards
         await page.keyboard.press("Escape");
