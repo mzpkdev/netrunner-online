@@ -19,6 +19,30 @@ declare module "*.jpg" {
 }
 
 // ---------------------------------------------------------------------------
+// PeerJS minimal structural types
+//
+// PeerJS is injected via a CDN script tag with no bundled types. Only the
+// surface actually called by p2p.js is described here. Each event overload
+// is listed explicitly so that callback argument types are inferred correctly
+// at call sites without requiring any casts in application code.
+// ---------------------------------------------------------------------------
+
+interface PeerConnection {
+    send(message: unknown): void;
+    on(event: "data", callback: (message: import('./scripts/types.ts').P2PMessage) => void): void;
+    on(event: "open" | "close", callback: () => void): void;
+    on(event: string, callback: (...args: unknown[]) => void): void;
+}
+
+interface PeerInstance {
+    on(event: "open", callback: (id: string) => void): void;
+    on(event: "connection", callback: (connection: PeerConnection) => void): void;
+    on(event: "error", callback: (err: { type: string }) => void): void;
+    on(event: string, callback: (...args: unknown[]) => void): void;
+    connect(id: string): PeerConnection;
+}
+
+// ---------------------------------------------------------------------------
 // Global window extensions
 // ---------------------------------------------------------------------------
 
@@ -39,7 +63,7 @@ interface Window {
     /** Immediate P2P send — set up by setupP2PConnection(). */
     sendMessageImmediate: (message: unknown) => void;
     /** PeerJS constructor injected via CDN script tag. */
-    Peer: new (options?: unknown) => any;
+    Peer: new (options?: unknown) => PeerInstance;
 }
 
 // ---------------------------------------------------------------------------
@@ -71,6 +95,7 @@ interface Element {
 // ---------------------------------------------------------------------------
 
 interface Event {
+    // biome-ignore lint/suspicious/noExplicitAny: detail carries arbitrary custom-event payloads; the shapes differ per event and narrowing at call sites would require casts throughout application code
     /** Present on CustomEvent; typed as any to allow arbitrary detail shapes. */
     detail: any;
     clientX: number;
