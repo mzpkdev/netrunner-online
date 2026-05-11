@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeck } from "./deck.js";
 
 // Only P2P send functions are mocked to prevent network-related errors.
@@ -81,6 +81,15 @@ describe("deck-load-to-card-draw pipeline (integration)", () => {
         setupDOM();
     });
 
+    afterEach(() => {
+        // grab.js registers mousemove and mouseup on document.body when a card is
+        // grabbed. If no mouseup is dispatched (e.g. test ends mid-drag), those
+        // listeners outlive the test. Dispatching mouseup here triggers the ungrab
+        // closure, which self-removes both handlers before the next beforeEach
+        // resets innerHTML.
+        document.body.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    });
+
     it("createDeck appends a .deck element to #card-layer with the correct title", () => {
         const deckEl = createDeck(
             "3x Sure Gamble\n2x Hedge Fund",
@@ -112,14 +121,40 @@ describe("deck-load-to-card-draw pipeline (integration)", () => {
         expect(deckEl.title).toBe("1 card");
     });
 
-    it("puttop event on deck increases the deck count and updates the title", () => {
+    it("puttop event on deck with a createCard-produced element increases the deck count and updates the title", () => {
         const deckEl = createDeck("2x Sure Gamble", "puttop-deck", "0px", "0px");
         expect(deckEl.title).toBe("2 cards");
 
-        const cardEl = makeCardElement(allCards[0]); // Sure Gamble
+        // Draw a real card through the mousedown handler so the element is
+        // produced by the actual createCard pipeline, validating attribute
+        // compatibility between createCard output and cardElementToCardInfo.
         deckEl.dispatchEvent(
-            new CustomEvent("puttop", { detail: { card: cardEl } }),
+            new MouseEvent("mousedown", { bubbles: true, button: 0 }),
         );
+        // Release the grab immediately to remove body-level listeners before
+        // the puttop dispatch.
+        document.body.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+
+        expect(deckEl.title).toBe("1 card");
+        const drawnCard = document.querySelector("#card-layer .game-card");
+        expect(drawnCard).not.toBeNull();
+
+        deckEl.dispatchEvent(
+            new CustomEvent("puttop", { detail: { card: drawnCard } }),
+        );
+
+        expect(deckEl.title).toBe("2 cards");
+    });
+
+    it("shuffle event on deck element does not corrupt the card count", () => {
+        // The shuffle event listener in deck.js calls shuffle(deck) in place.
+        // This test confirms the handler executes without error and that the
+        // internal array length is preserved — i.e. no cards are dropped or
+        // duplicated by the shuffle operation.
+        const deckEl = createDeck("3x Sure Gamble", "shuffle-deck", "0px", "0px");
+        expect(deckEl.title).toBe("3 cards");
+
+        deckEl.dispatchEvent(new CustomEvent("shuffle"));
 
         expect(deckEl.title).toBe("3 cards");
     });
