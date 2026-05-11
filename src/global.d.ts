@@ -95,8 +95,8 @@ interface Element {
 // ---------------------------------------------------------------------------
 
 interface Event {
-    // biome-ignore lint/suspicious/noExplicitAny: detail carries arbitrary custom-event payloads; the shapes differ per event and narrowing at call sites would require casts throughout application code
     /** Present on CustomEvent; typed as any to allow arbitrary detail shapes. */
+    // biome-ignore lint/suspicious/noExplicitAny: detail carries arbitrary custom-event payloads; the shapes differ per event and narrowing at call sites would require casts throughout application code
     detail: any;
     clientX: number;
     clientY: number;
