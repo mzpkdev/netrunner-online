@@ -109,8 +109,13 @@ test.describe("token lifecycle", () => {
         // Open the resource panel so #credit is interactable
         await page.click("#open-resource-panel");
 
+        await expect(page.locator("#credit")).toBeVisible();
         const creditBox = await page.locator("#credit").boundingBox();
+        if (!creditBox) throw new Error("#credit bounding box is null — resource panel may not have opened");
+
+        await expect(page.locator("#card-layer")).toBeVisible();
         const cardLayerBox = await page.locator("#card-layer").boundingBox();
+        if (!cardLayerBox) throw new Error("#card-layer bounding box is null");
 
         // Board target: bottom-right area, away from the auto-placed identity cards
         const boardX = cardLayerBox.x + cardLayerBox.width * 0.8;
@@ -132,11 +137,16 @@ test.describe("token lifecycle", () => {
         // Re-open the resource panel so #token-bin is visible in the viewport
         await page.click("#open-resource-panel");
 
+        await expect(page.locator("#card-layer .token").first()).toBeVisible();
         const tokenBox = await page
             .locator("#card-layer .token")
             .first()
             .boundingBox();
+        if (!tokenBox) throw new Error(".token bounding box is null — token may not be in the viewport");
+
+        await expect(page.locator("#token-bin")).toBeVisible();
         const binBox = await page.locator("#token-bin").boundingBox();
+        if (!binBox) throw new Error("#token-bin bounding box is null — resource panel may have closed");
 
         // Drag the token to the token bin: mousedown on token, move to bin, mouseup
         // The ungrab handler in token.js checks getBoundingClientRect against #token-bin
