@@ -106,6 +106,9 @@ test.describe("token lifecycle", () => {
         await page.click("#play-solo");
         await expect(page.locator("#start-game-panel")).not.toBeAttached();
 
+        // Wait for both decks to be placed in #card-layer (game fully initialised)
+        await expect(page.locator("#card-layer .deck")).toHaveCount(2);
+
         // Open the resource panel so #credit is interactable
         await page.click("#open-resource-panel");
 
@@ -113,13 +116,11 @@ test.describe("token lifecycle", () => {
         const creditBox = await page.locator("#credit").boundingBox();
         if (!creditBox) throw new Error("#credit bounding box is null — resource panel may not have opened");
 
-        await expect(page.locator("#card-layer")).toBeVisible();
-        const cardLayerBox = await page.locator("#card-layer").boundingBox();
-        if (!cardLayerBox) throw new Error("#card-layer bounding box is null");
-
-        // Board target: bottom-right area, away from the auto-placed identity cards
-        const boardX = cardLayerBox.x + cardLayerBox.width * 0.8;
-        const boardY = cardLayerBox.y + cardLayerBox.height * 0.8;
+        // #card-layer children are all position:absolute and do not contribute to the
+        // parent's layout dimensions — use viewport size for board target coordinates
+        const viewport = page.viewportSize();
+        const boardX = (viewport?.width ?? 1280) * 0.8;
+        const boardY = (viewport?.height ?? 720) * 0.8;
 
         // Spawn a credit token: mousedown on #credit triggers createToken + grabCard,
         // mousemove drives the drag, mouseup deposits the token on the board
