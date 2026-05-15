@@ -79,3 +79,80 @@ test.describe("solo play flow", () => {
         await expect(page.locator("#card-layer .game-card.selected")).toHaveCount(0);
     });
 });
+
+test.describe("token lifecycle", () => {
+    test("spawns a credit token, drops it to the board, drags it to the token bin, and verifies removal", async ({
+        page,
+    }) => {
+        // Intercept the NetrunnerDB API and return the minimal fixture
+        await page.route(NETRUNNERDB_API, (route) =>
+            route.fulfill({
+                status: 200,
+                contentType: "application/json",
+                body: JSON.stringify(apiFixture),
+            }),
+        );
+
+        await page.goto("/");
+        await page.waitForFunction(() => typeof window.allCards !== "undefined");
+
+        // Overwrite the deck lists with cards present in the fixture
+        await page.evaluate(() => {
+            document.querySelector("#corp-deck-list").value = "3x Hedge Fund";
+            document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
+        });
+
+        // Start a solo game
+        await page.click("#play-solo");
+        await expect(page.locator("#start-game-panel")).not.toBeAttached();
+
+        // Open the resource panel so #credit is interactable
+        await page.click("#open-resource-panel");
+
+        const creditBox = await page.locator("#credit").boundingBox();
+        const cardLayerBox = await page.locator("#card-layer").boundingBox();
+
+        // Board target: bottom-right area, away from the auto-placed identity cards
+        const boardX = cardLayerBox.x + cardLayerBox.width * 0.8;
+        const boardY = cardLayerBox.y + cardLayerBox.height * 0.8;
+
+        // Spawn a credit token: mousedown on #credit triggers createToken + grabCard,
+        // mousemove drives the drag, mouseup deposits the token on the board
+        await page.mouse.move(
+            creditBox.x + creditBox.width / 2,
+            creditBox.y + creditBox.height / 2,
+        );
+        await page.mouse.down();
+        await page.mouse.move(boardX, boardY);
+        await page.mouse.up();
+
+        // At least one .token must appear in #card-layer after spawning
+        await expect(page.locator("#card-layer .token")).toHaveCount(1);
+
+        // Re-open the resource panel so #token-bin is visible in the viewport
+        await page.click("#open-resource-panel");
+
+        const tokenBox = await page
+            .locator("#card-layer .token")
+            .first()
+            .boundingBox();
+        const binBox = await page.locator("#token-bin").boundingBox();
+
+        // Drag the token to the token bin: mousedown on token, move to bin, mouseup
+        // The ungrab handler in token.js checks getBoundingClientRect against #token-bin
+        // and calls tokenElement.remove() when the hit-test passes
+        await page.mouse.move(
+            tokenBox.x + tokenBox.width / 2,
+            tokenBox.y + tokenBox.height / 2,
+        );
+        await page.mouse.down();
+        await page.mouse.move(
+            binBox.x + binBox.width / 2,
+            binBox.y + binBox.height / 2,
+        );
+        await page.mouse.up();
+
+        // No .token elements must remain in #card-layer after bin removal
+        await expect(page.locator("#card-layer .token")).toHaveCount(0);
+    });
+});
