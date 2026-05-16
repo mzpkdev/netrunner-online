@@ -31,3 +31,17 @@ try {
     // @ts-expect-error useUnknownInCatchVariables: property access on unknown
     void e.message;
 }
+
+// --- strictBindCallApply -------------------------------------------------
+// Under this flag, .call() / .bind() / .apply() are typed precisely against
+// their target's signature. Without it, those methods accept `any[]` arguments
+// and no mismatch is reported. Passing a string where number is required is
+// only a type error when strictBindCallApply is active.
+function _numFn(_x: number): void {}
+// @ts-expect-error strictBindCallApply: mismatched argument type in .call()
+_numFn.call(null, "not-a-number");
+
+// Convert file to module scope to prevent global namespace pollution.
+// Without this line TypeScript treats the file as a script and every
+// declaration above becomes a global identifier visible to all included files.
+export {};
