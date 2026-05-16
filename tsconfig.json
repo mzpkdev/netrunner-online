@@ -10,6 +10,12 @@
         "isolatedModules": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
+        // TODO: remove these three overrides once all JS files pass under strict
+        // null checks and implicit-any enforcement. They are required because
+        // checkJs: true causes strict: true to propagate into card.js, deck.js,
+        // game.js, grab.js, keyboard.js, p2p.js, sidePanels.js, token.js, and
+        // utils.js. Removing them without first fixing those files will produce
+        // hundreds of type errors across the JS layer.
         "noImplicitAny": false,
         "strictNullChecks": false,
         "noImplicitThis": false
