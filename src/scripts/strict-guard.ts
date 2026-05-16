@@ -26,6 +26,7 @@ const _fnGuard: _StringFn = (_x: "a") => {};
 // `any`). Accessing a property on `unknown` is a type error, satisfying the
 // directive below. Without the flag, `e` is `any` and the access is silent.
 try {
+    JSON.parse("{}"); // any call that can throw keeps the catch block reachable
 } catch (e) {
     // @ts-expect-error useUnknownInCatchVariables: property access on unknown
     void e.message;
