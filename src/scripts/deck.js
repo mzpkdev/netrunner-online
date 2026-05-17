@@ -7,7 +7,7 @@ import { shuffle } from "./utils.js";
 export const parseDeckList = (deckListString, allCards) => {
     const names = deckListString
         .trim()
-        .split("\n")
+        .split(/\r?\n|\r/)
         .flatMap((entry) => {
             const trimmed = entry.trim();
             if (!trimmed) return [];
