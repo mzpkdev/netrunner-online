@@ -7,39 +7,45 @@ test("page loads", async ({ page }) => {
     await expect(page).toHaveTitle(/netrunner/i);
 });
 
+/**
+ * Route-intercept the NetrunnerDB API, navigate to the app, and start a solo
+ * game with the fixture decks.  Both describe blocks share this setup.
+ */
+async function startSoloGame(page) {
+    await page.route(NETRUNNERDB_API, (route) =>
+        route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify(apiFixture),
+        }),
+    );
+
+    await page.goto("/");
+
+    // Wait for main() to complete — window.allCards is assigned after the
+    // API response resolves and before setupP2P() attaches click handlers
+    await page.waitForFunction(() => typeof window.allCards !== "undefined");
+
+    // Overwrite the deck lists with cards present in the fixture
+    await page.evaluate(() => {
+        document.querySelector("#corp-deck-list").value = "3x Hedge Fund";
+        document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
+    });
+
+    await page.click("#play-solo");
+
+    // The start-game-panel must be removed from the DOM
+    await expect(page.locator("#start-game-panel")).not.toBeAttached();
+
+    // Both deck elements must appear in #card-layer
+    await expect(page.locator("#card-layer .deck")).toHaveCount(2);
+}
+
 test.describe("solo play flow", () => {
     test("starts a game, loads decks, draws a card, and verifies count updates", async ({
         page,
     }) => {
-        // Intercept the NetrunnerDB API and return the minimal fixture
-        await page.route(NETRUNNERDB_API, (route) =>
-            route.fulfill({
-                status: 200,
-                contentType: "application/json",
-                body: JSON.stringify(apiFixture),
-            }),
-        );
-
-        await page.goto("/");
-
-        // Wait for main() to complete — window.allCards is assigned after the
-        // API response resolves and before setupP2P() attaches click handlers
-        await page.waitForFunction(() => typeof window.allCards !== "undefined");
-
-        // Overwrite the deck lists with cards present in the fixture
-        await page.evaluate(() => {
-            document.querySelector("#corp-deck-list").value = "3x Hedge Fund";
-            document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
-        });
-
-        // Click the solo play button
-        await page.click("#play-solo");
-
-        // The start-game-panel must be removed from the DOM
-        await expect(page.locator("#start-game-panel")).not.toBeAttached();
-
-        // Both deck elements must appear in #card-layer
-        await expect(page.locator("#card-layer .deck")).toHaveCount(2);
+        await startSoloGame(page);
 
         // Identity cards for each side must be present as .game-card elements
         await expect(page.locator("#card-layer .game-card")).toHaveCount(2);
@@ -84,26 +90,7 @@ test.describe("keyboard shortcuts", () => {
     test("flip, rotate, navigate, and delete a card via keyboard", async ({
         page,
     }) => {
-        // Intercept the NetrunnerDB API and return the minimal fixture
-        await page.route(NETRUNNERDB_API, (route) =>
-            route.fulfill({
-                status: 200,
-                contentType: "application/json",
-                body: JSON.stringify(apiFixture),
-            }),
-        );
-
-        await page.goto("/");
-        await page.waitForFunction(() => typeof window.allCards !== "undefined");
-
-        // Load decks and start solo play
-        await page.evaluate(() => {
-            document.querySelector("#corp-deck-list").value = "3x Hedge Fund";
-            document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
-        });
-        await page.click("#play-solo");
-        await expect(page.locator("#start-game-panel")).not.toBeAttached();
-        await expect(page.locator("#card-layer .deck")).toHaveCount(2);
+        await startSoloGame(page);
 
         // Draw a card from the corp deck
         const corpDeck = page.locator("#corp-deck");
@@ -132,11 +119,16 @@ test.describe("keyboard shortcuts", () => {
         await page.keyboard.press("r");
         await expect(page.locator(`#${drawnCardId}`)).toHaveClass(/rotated/);
 
-        // ArrowRight must move browser focus to a different .game-card
+        // ArrowRight must move browser focus to a different .game-card.
+        // Guard against the vacuous-pass case: if ArrowRight fails to land focus
+        // on any card (e.g., focus falls through to document.body), the optional
+        // chain returns null and expect(null).not.toBe(drawnCardId) would pass
+        // spuriously.  The toBeTruthy check makes that failure self-diagnosing.
         await page.keyboard.press("ArrowRight");
         const focusedCardId = await page.evaluate(() =>
             document.activeElement?.getAttribute("id"),
         );
+        expect(focusedCardId).toBeTruthy();
         expect(focusedCardId).not.toBe(drawnCardId);
         await expect(page.locator(`#${focusedCardId}`)).toHaveClass(/game-card/);
 
