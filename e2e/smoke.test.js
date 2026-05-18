@@ -79,3 +79,69 @@ test.describe("solo play flow", () => {
         await expect(page.locator("#card-layer .game-card.selected")).toHaveCount(0);
     });
 });
+
+test.describe("keyboard shortcuts", () => {
+    test("flip, rotate, navigate, and delete a card via keyboard", async ({
+        page,
+    }) => {
+        // Intercept the NetrunnerDB API and return the minimal fixture
+        await page.route(NETRUNNERDB_API, (route) =>
+            route.fulfill({
+                status: 200,
+                contentType: "application/json",
+                body: JSON.stringify(apiFixture),
+            }),
+        );
+
+        await page.goto("/");
+        await page.waitForFunction(() => typeof window.allCards !== "undefined");
+
+        // Load decks and start solo play
+        await page.evaluate(() => {
+            document.querySelector("#corp-deck-list").value = "3x Hedge Fund";
+            document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
+        });
+        await page.click("#play-solo");
+        await expect(page.locator("#start-game-panel")).not.toBeAttached();
+        await expect(page.locator("#card-layer .deck")).toHaveCount(2);
+
+        // Draw a card from the corp deck
+        const corpDeck = page.locator("#corp-deck");
+        await corpDeck.dispatchEvent("mousedown", { button: 0, buttons: 1 });
+        await expect(page.locator("#card-layer .game-card")).toHaveCount(3);
+
+        // Focus the drawn card via the DOM — fires the focus event, which calls
+        // selectCard and sets it as the active card for keyboard shortcuts.
+        // Direct DOM focus is used because .game-card has zero intrinsic size
+        // (all children are position:absolute), which blocks Playwright's click
+        // actionability check.
+        const drawnCardId = await page.evaluate(() => {
+            const cards = Array.from(
+                document.querySelectorAll("#card-layer .game-card"),
+            );
+            const last = cards[cards.length - 1];
+            last.focus();
+            return last.getAttribute("id");
+        });
+
+        // f must toggle the flipped class on the selected card
+        await page.keyboard.press("f");
+        await expect(page.locator(`#${drawnCardId}`)).toHaveClass(/flipped/);
+
+        // r must toggle the rotated class on the selected card
+        await page.keyboard.press("r");
+        await expect(page.locator(`#${drawnCardId}`)).toHaveClass(/rotated/);
+
+        // ArrowRight must move browser focus to a different .game-card
+        await page.keyboard.press("ArrowRight");
+        const focusedCardId = await page.evaluate(() =>
+            document.activeElement?.getAttribute("id"),
+        );
+        expect(focusedCardId).not.toBe(drawnCardId);
+        await expect(page.locator(`#${focusedCardId}`)).toHaveClass(/game-card/);
+
+        // Delete must remove the focused card from the DOM
+        await page.keyboard.press("Delete");
+        await expect(page.locator(`#${focusedCardId}`)).not.toBeAttached();
+    });
+});
