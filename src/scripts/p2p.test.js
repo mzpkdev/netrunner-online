@@ -533,12 +533,11 @@ describe("receiveMessage delete-element positive path", () => {
     });
 
     it("removes the element from the DOM when the id matches", () => {
-        receiveMessage(/** @type {any} */ ({
+        receiveMessage({
             messageType: "delete-element",
             entityId: "delete-entity",
             perspective: "corp",
-            content: {},
-        }));
+        });
         expect(document.getElementById("delete-entity")).toBeNull();
     });
 });
@@ -554,22 +553,20 @@ describe("receiveMessage delete-element null guard", () => {
 
     it("does not throw when delete-element references a nonexistent entityId", () => {
         expect(() =>
-            receiveMessage(/** @type {any} */ ({
+            receiveMessage({
                 messageType: "delete-element",
                 entityId: "nonexistent-entity",
                 perspective: "corp",
-                content: {},
-            })),
+            }),
         ).not.toThrow();
     });
 
     it("emits a console.warn when delete-element references a nonexistent entityId", () => {
-        receiveMessage(/** @type {any} */ ({
+        receiveMessage({
             messageType: "delete-element",
             entityId: "nonexistent-entity",
             perspective: "corp",
-            content: {},
-        }));
+        });
         expect(console.warn).toHaveBeenCalledOnce();
     });
 });
