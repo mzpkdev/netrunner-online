@@ -40,6 +40,7 @@ describe("grabCard", () => {
         it("dispatches a grab CustomEvent with targetX and targetY from getBoundingClientRect", () => {
             const grabHandler = grabCard(element);
 
+            /** @type {any} */
             let capturedDetail = null;
             element.addEventListener("grab", (e) => {
                 capturedDetail = e.detail;
@@ -95,6 +96,7 @@ describe("grabCard", () => {
         });
 
         it("dispatches a move CustomEvent with coordinates matching clientX + offsetX", () => {
+            /** @type {any} */
             let capturedDetail = null;
             element.addEventListener("move", (e) => {
                 capturedDetail = e.detail;

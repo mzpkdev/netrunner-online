@@ -20,6 +20,5 @@
         "strictNullChecks": false,
         "noImplicitThis": false
     },
-    "include": ["src"],
-    "exclude": ["src/**/*.test.js", "src/**/*.integration.test.js"]
+    "include": ["src"]
 }

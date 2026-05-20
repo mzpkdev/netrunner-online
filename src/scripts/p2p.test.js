@@ -50,6 +50,7 @@ describe("receiveMessage positive path", () => {
     });
 
     it("dispatches grab CustomEvent with targetX/targetY from message.content for grab-element", () => {
+        /** @type {any} */
         let detail = null;
         element.addEventListener("grab", (e) => {
             detail = e.detail;
@@ -76,6 +77,7 @@ describe("receiveMessage positive path", () => {
     });
 
     it("dispatches move CustomEvent with targetX/targetY from message.content for move-element", () => {
+        /** @type {any} */
         let detail = null;
         element.addEventListener("move", (e) => {
             detail = e.detail;
@@ -102,6 +104,7 @@ describe("receiveMessage positive path", () => {
     });
 
     it("dispatches ungrab CustomEvent with targetX/targetY from message.content for ungrab-element", () => {
+        /** @type {any} */
         let detail = null;
         element.addEventListener("ungrab", (e) => {
             detail = e.detail;
@@ -206,7 +209,7 @@ describe("receiveMessage create-element", () => {
     });
 
     it("calls createCard with spread content for entityType card", () => {
-        createCard.mockReturnValue(fakeElement);
+        vi.mocked(createCard).mockReturnValue(fakeElement);
         receiveMessage({
             messageType: "create-element",
             entityType: "card",
@@ -218,7 +221,7 @@ describe("receiveMessage create-element", () => {
     });
 
     it("calls createDeck with spread content for entityType deck", () => {
-        createDeck.mockReturnValue(fakeElement);
+        vi.mocked(createDeck).mockReturnValue(fakeElement);
         receiveMessage({
             messageType: "create-element",
             entityType: "deck",
@@ -230,7 +233,7 @@ describe("receiveMessage create-element", () => {
     });
 
     it("calls createToken with spread content for entityType token", () => {
-        createToken.mockReturnValue(fakeElement);
+        vi.mocked(createToken).mockReturnValue(fakeElement);
         receiveMessage({
             messageType: "create-element",
             entityType: "token",
@@ -254,7 +257,7 @@ describe("receiveMessage create-element", () => {
     });
 
     it("calls flipElement when perspective differs from playerSide", () => {
-        createCard.mockReturnValue(fakeElement);
+        vi.mocked(createCard).mockReturnValue(fakeElement);
         receiveMessage({
             messageType: "create-element",
             entityType: "card",
@@ -269,7 +272,7 @@ describe("receiveMessage create-element", () => {
     });
 
     it("calls snapToGrid on the created element", () => {
-        createCard.mockReturnValue(fakeElement);
+        vi.mocked(createCard).mockReturnValue(fakeElement);
         receiveMessage({
             messageType: "create-element",
             entityType: "card",
@@ -305,7 +308,7 @@ describe("receiveMessage create-element", () => {
     });
 
     it("calls flipElement with the deck element when perspective differs from playerSide", () => {
-        createDeck.mockReturnValue(fakeElement);
+        vi.mocked(createDeck).mockReturnValue(fakeElement);
         receiveMessage({
             messageType: "create-element",
             entityType: "deck",
@@ -320,7 +323,7 @@ describe("receiveMessage create-element", () => {
     });
 
     it("calls snapToGrid with the token element", () => {
-        createToken.mockReturnValue(fakeElement);
+        vi.mocked(createToken).mockReturnValue(fakeElement);
         receiveMessage({
             messageType: "create-element",
             entityType: "token",
@@ -333,13 +336,13 @@ describe("receiveMessage create-element", () => {
 
     it("does not throw and calls no create function for an unrecognized entityType", () => {
         expect(() =>
-            receiveMessage({
+            receiveMessage(/** @type {any} */ ({
                 messageType: "create-element",
                 entityType: "unknown",
                 entityId: "new-entity",
                 perspective: "corp",
                 content: [],
-            }),
+            })),
         ).not.toThrow();
         expect(createCard).not.toHaveBeenCalled();
         expect(createDeck).not.toHaveBeenCalled();
@@ -348,13 +351,13 @@ describe("receiveMessage create-element", () => {
 
     it("emits a console.warn when entityType is unrecognized", () => {
         vi.spyOn(console, "warn").mockImplementation(() => {});
-        receiveMessage({
+        receiveMessage(/** @type {any} */ ({
             messageType: "create-element",
             entityType: "unknown",
             entityId: "new-entity",
             perspective: "corp",
             content: [],
-        });
+        }));
         expect(console.warn).toHaveBeenCalledOnce();
     });
 });
@@ -530,12 +533,12 @@ describe("receiveMessage delete-element positive path", () => {
     });
 
     it("removes the element from the DOM when the id matches", () => {
-        receiveMessage({
+        receiveMessage(/** @type {any} */ ({
             messageType: "delete-element",
             entityId: "delete-entity",
             perspective: "corp",
             content: {},
-        });
+        }));
         expect(document.getElementById("delete-entity")).toBeNull();
     });
 });
@@ -551,22 +554,22 @@ describe("receiveMessage delete-element null guard", () => {
 
     it("does not throw when delete-element references a nonexistent entityId", () => {
         expect(() =>
-            receiveMessage({
+            receiveMessage(/** @type {any} */ ({
                 messageType: "delete-element",
                 entityId: "nonexistent-entity",
                 perspective: "corp",
                 content: {},
-            }),
+            })),
         ).not.toThrow();
     });
 
     it("emits a console.warn when delete-element references a nonexistent entityId", () => {
-        receiveMessage({
+        receiveMessage(/** @type {any} */ ({
             messageType: "delete-element",
             entityId: "nonexistent-entity",
             perspective: "corp",
             content: {},
-        });
+        }));
         expect(console.warn).toHaveBeenCalledOnce();
     });
 });
@@ -656,23 +659,23 @@ describe("sendDeleteMessage", () => {
 describe("receiveMessage unknown messageType", () => {
     it("does not throw for an unrecognized messageType", () => {
         expect(() =>
-            receiveMessage({
+            receiveMessage(/** @type {any} */ ({
                 messageType: "unknown-type",
                 entityId: "any-id",
                 perspective: "corp",
                 content: {},
-            }),
+            })),
         ).not.toThrow();
     });
 
     it("emits a console.warn for an unrecognized messageType", () => {
         vi.spyOn(console, "warn").mockImplementation(() => {});
-        receiveMessage({
+        receiveMessage(/** @type {any} */ ({
             messageType: "unknown-type",
             entityId: "any-id",
             perspective: "corp",
             content: {},
-        });
+        }));
         expect(console.warn).toHaveBeenCalledOnce();
     });
 });
@@ -699,78 +702,78 @@ describe("receiveMessage malformed payload guards", () => {
 
     it("does not throw and emits console.warn when message is missing messageType", () => {
         expect(() =>
-            receiveMessage({ entityId: "test-entity", content: { x: 1, y: 2 } }),
+            receiveMessage(/** @type {any} */ ({ entityId: "test-entity", content: { x: 1, y: 2 } })),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not throw and emits console.warn for grab-element when content is null", () => {
         expect(() =>
-            receiveMessage({
+            receiveMessage(/** @type {any} */ ({
                 messageType: "grab-element",
                 entityId: "test-entity",
                 perspective: "corp",
                 content: null,
-            }),
+            })),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not throw and emits console.warn for move-element when coordinates are non-numeric", () => {
         expect(() =>
-            receiveMessage({
+            receiveMessage(/** @type {any} */ ({
                 messageType: "move-element",
                 entityId: "test-entity",
                 perspective: "corp",
                 content: { x: "bad", y: "data" },
-            }),
+            })),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not throw and emits console.warn for ungrab-element when content is null", () => {
         expect(() =>
-            receiveMessage({
+            receiveMessage(/** @type {any} */ ({
                 messageType: "ungrab-element",
                 entityId: "test-entity",
                 perspective: "corp",
                 content: null,
-            }),
+            })),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not throw and emits console.warn for create-element when content is missing", () => {
         expect(() =>
-            receiveMessage({
+            receiveMessage(/** @type {any} */ ({
                 messageType: "create-element",
                 entityType: "card",
                 entityId: "test-entity",
                 perspective: "corp",
-            }),
+            })),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not throw and emits console.warn for create-element when entityId is missing", () => {
         expect(() =>
-            receiveMessage({
+            receiveMessage(/** @type {any} */ ({
                 messageType: "create-element",
                 entityType: "card",
                 perspective: "corp",
                 content: ["arg1"],
-            }),
+            })),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not call createCard when grab-element content.x is non-numeric", () => {
-        receiveMessage({
+        receiveMessage(/** @type {any} */ ({
             messageType: "grab-element",
             entityId: "test-entity",
             perspective: "corp",
             content: { x: null, y: 50 },
-        });
+        }));
         expect(element.style.left).toBe("");
     });
 });
@@ -855,13 +858,13 @@ describe("receiveMessage create-element content shape validation", () => {
     });
 
     it("rejects and warns when content is not an array", () => {
-        receiveMessage({
+        receiveMessage(/** @type {any} */ ({
             messageType: "create-element",
             entityType: "card",
             entityId: "new-entity",
             perspective: "corp",
             content: { title: "not an array" },
-        });
+        }));
         expect(createCard).not.toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledOnce();
     });

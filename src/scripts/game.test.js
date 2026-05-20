@@ -165,7 +165,7 @@ describe("main", () => {
     });
 
     it("appends a #fetch-error element with the expected message and does not call setup functions when fetchAllCards rejects", async () => {
-        fetchAllCards.mockRejectedValue(new Error("Network failure"));
+        vi.mocked(fetchAllCards).mockRejectedValue(new Error("Network failure"));
         await main();
         const errorEl = document.querySelector("#fetch-error");
         expect(errorEl).not.toBeNull();
@@ -179,7 +179,7 @@ describe("main", () => {
     });
 
     it("populates window.allCards and calls all four setup functions when fetchAllCards resolves", async () => {
-        fetchAllCards.mockResolvedValue({
+        vi.mocked(fetchAllCards).mockResolvedValue({
             data: [{ code: "01001", title: "Hedge Fund" }],
         });
         await main();
@@ -191,7 +191,7 @@ describe("main", () => {
     });
 
     it("maps each card entry to include an image URL derived from card.code", async () => {
-        fetchAllCards.mockResolvedValue({
+        vi.mocked(fetchAllCards).mockResolvedValue({
             data: [
                 { code: "01001", title: "Hedge Fund" },
                 { code: "02002", title: "Sure Gamble" },
