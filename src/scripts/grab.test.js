@@ -20,7 +20,7 @@ describe("grabCard", () => {
         element = document.createElement("div");
         element.id = "card-1";
         // elementRect.x=100, elementRect.y=200
-        element.getBoundingClientRect = vi.fn(() => ({ x: 100, y: 200 }));
+        element.getBoundingClientRect = vi.fn(() => /** @type {DOMRect} */ ({ x: 100, y: 200, top: 200, right: 100, bottom: 200, left: 100, width: 0, height: 0, toJSON: () => ({}) }));
         document.body.appendChild(element);
     });
 
