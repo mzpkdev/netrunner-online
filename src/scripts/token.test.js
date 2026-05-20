@@ -107,7 +107,7 @@ describe("tryPutTokenOnCard", () => {
 
         // First isPointWithinElement call: token-bin check → false
         // Second call: card child overlap check → true
-        isPointWithinElement
+        vi.mocked(isPointWithinElement)
             .mockReturnValueOnce(false)
             .mockReturnValueOnce(true);
 
@@ -130,7 +130,7 @@ describe("token bin deletion", () => {
         const token = createToken("credit", "0px", "0px", "bin-token");
 
         // ungrab handler: first isPointWithinElement call is the token-bin check → true
-        isPointWithinElement.mockReturnValueOnce(true);
+        vi.mocked(isPointWithinElement).mockReturnValueOnce(true);
 
         token.dispatchEvent(new Event("ungrab"));
 
@@ -141,7 +141,7 @@ describe("token bin deletion", () => {
         const token = createToken("credit", "0px", "0px", "no-bin-token");
 
         // isPointWithinElement returns false for the bin
-        isPointWithinElement.mockReturnValue(false);
+        vi.mocked(isPointWithinElement).mockReturnValue(false);
 
         token.dispatchEvent(new Event("ungrab"));
 

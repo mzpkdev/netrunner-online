@@ -289,7 +289,7 @@ describe("createCard ungrab handler — deck drop", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         setupDOM();
-        isPointWithinElement.mockReturnValue(false);
+        vi.mocked(isPointWithinElement).mockReturnValue(false);
     });
 
     it("calls sendDeleteMessage with the card id when ungrab lands on a deck element", () => {
@@ -302,7 +302,7 @@ describe("createCard ungrab handler — deck drop", () => {
         const el = createCard(cardInfo, "10px", "20px", "ungrab-deck-test");
         vi.clearAllMocks();
 
-        isPointWithinElement.mockReturnValue(true);
+        vi.mocked(isPointWithinElement).mockReturnValue(true);
         el.dispatchEvent(new CustomEvent("ungrab"));
 
         expect(sendDeleteMessage).toHaveBeenCalledWith("ungrab-deck-test");
@@ -312,7 +312,7 @@ describe("createCard ungrab handler — deck drop", () => {
         const el = createCard(cardInfo, "10px", "20px", "ungrab-no-deck-test");
         vi.clearAllMocks();
 
-        isPointWithinElement.mockReturnValue(false);
+        vi.mocked(isPointWithinElement).mockReturnValue(false);
         el.dispatchEvent(new CustomEvent("ungrab"));
 
         expect(sendDeleteMessage).not.toHaveBeenCalled();
