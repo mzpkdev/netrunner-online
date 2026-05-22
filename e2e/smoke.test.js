@@ -24,12 +24,15 @@ test.describe("solo play flow", () => {
 
         // Wait for main() to complete — window.allCards is assigned after the
         // API response resolves and before setupP2P() attaches click handlers
-        await page.waitForFunction(() => typeof window.allCards !== "undefined");
+        await page.waitForFunction(
+            () => typeof window.allCards !== "undefined",
+        );
 
         // Overwrite the deck lists with cards present in the fixture
         await page.evaluate(() => {
             document.querySelector("#corp-deck-list").value = "3x Hedge Fund";
-            document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
+            document.querySelector("#runner-deck-list").value =
+                "3x Sure Gamble";
         });
 
         // Click the solo play button
@@ -72,11 +75,15 @@ test.describe("solo play flow", () => {
 
         // F key must toggle the flipped class on the currently focused card
         await page.keyboard.press("f");
-        await expect(page.locator(`#${secondFocusedId}`)).toHaveClass(/flipped/);
+        await expect(page.locator(`#${secondFocusedId}`)).toHaveClass(
+            /flipped/,
+        );
 
         // Escape must clear the selected class from all cards
         await page.keyboard.press("Escape");
-        await expect(page.locator("#card-layer .game-card.selected")).toHaveCount(0);
+        await expect(
+            page.locator("#card-layer .game-card.selected"),
+        ).toHaveCount(0);
     });
 });
 
@@ -94,12 +101,15 @@ test.describe("keyboard shortcuts", () => {
         );
 
         await page.goto("/");
-        await page.waitForFunction(() => typeof window.allCards !== "undefined");
+        await page.waitForFunction(
+            () => typeof window.allCards !== "undefined",
+        );
 
         // Load decks and start solo play
         await page.evaluate(() => {
             document.querySelector("#corp-deck-list").value = "3x Hedge Fund";
-            document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
+            document.querySelector("#runner-deck-list").value =
+                "3x Sure Gamble";
         });
         await page.click("#play-solo");
         await expect(page.locator("#start-game-panel")).not.toBeAttached();
@@ -138,7 +148,9 @@ test.describe("keyboard shortcuts", () => {
             document.activeElement?.getAttribute("id"),
         );
         expect(focusedCardId).not.toBe(drawnCardId);
-        await expect(page.locator(`#${focusedCardId}`)).toHaveClass(/game-card/);
+        await expect(page.locator(`#${focusedCardId}`)).toHaveClass(
+            /game-card/,
+        );
 
         // Delete must remove the focused card from the DOM
         await page.keyboard.press("Delete");

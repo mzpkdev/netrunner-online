@@ -1,4 +1,8 @@
-import { sendDeleteMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
+import {
+    sendDeleteMessage,
+    sendFlipMessage,
+    sendRotateMessage,
+} from "./p2p.js";
 
 let selectedCard = null;
 
@@ -34,14 +38,20 @@ export const setupKeyboardShortcuts = () => {
             case "R":
                 if (selectedCard) {
                     selectedCard.classList.toggle("rotated");
-                    sendRotateMessage(selectedCard.id, selectedCard.classList.contains("rotated"));
+                    sendRotateMessage(
+                        selectedCard.id,
+                        selectedCard.classList.contains("rotated"),
+                    );
                 }
                 break;
             case "f":
             case "F":
                 if (selectedCard) {
                     selectedCard.classList.toggle("flipped");
-                    sendFlipMessage(selectedCard.id, selectedCard.classList.contains("flipped"));
+                    sendFlipMessage(
+                        selectedCard.id,
+                        selectedCard.classList.contains("flipped"),
+                    );
                 }
                 break;
             case "Delete":
@@ -55,15 +65,20 @@ export const setupKeyboardShortcuts = () => {
                 deselectCard();
                 break;
             case "ArrowRight": {
-                const cards = Array.from(document.querySelectorAll(".game-card"));
+                const cards = Array.from(
+                    document.querySelectorAll(".game-card"),
+                );
                 if (cards.length === 0) break;
                 const idx = cards.indexOf(document.activeElement);
-                const next = (idx === -1 || idx === cards.length - 1) ? 0 : idx + 1;
+                const next =
+                    idx === -1 || idx === cards.length - 1 ? 0 : idx + 1;
                 cards[next].focus();
                 break;
             }
             case "ArrowLeft": {
-                const cards = Array.from(document.querySelectorAll(".game-card"));
+                const cards = Array.from(
+                    document.querySelectorAll(".game-card"),
+                );
                 if (cards.length === 0) break;
                 const idx = cards.indexOf(document.activeElement);
                 const prev = idx <= 0 ? cards.length - 1 : idx - 1;
@@ -74,7 +89,10 @@ export const setupKeyboardShortcuts = () => {
             case " ":
                 if (selectedCard) {
                     selectedCard.classList.toggle("flipped");
-                    sendFlipMessage(selectedCard.id, selectedCard.classList.contains("flipped"));
+                    sendFlipMessage(
+                        selectedCard.id,
+                        selectedCard.classList.contains("flipped"),
+                    );
                 }
                 break;
         }

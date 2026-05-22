@@ -107,7 +107,7 @@ test.describe("p2p two-player flow", () => {
         browser,
     }) => {
         // Shared message queues in the Node.js test process.
-        const hostQueue = [];   // messages destined for the host (sent by joiner)
+        const hostQueue = []; // messages destined for the host (sent by joiner)
         const joinerQueue = []; // messages destined for the joiner (sent by host)
         let pendingConnection = false;
 
@@ -210,7 +210,9 @@ test.describe("p2p two-player flow", () => {
         await joinerPage.click("#join-game");
 
         // Joiner removes #start-game-panel synchronously on click.
-        await expect(joinerPage.locator("#start-game-panel")).not.toBeAttached();
+        await expect(
+            joinerPage.locator("#start-game-panel"),
+        ).not.toBeAttached();
 
         // Host removes #start-game-panel once MockPeer fires the 'connection' event
         // (~40–80 ms after the joiner signals via __bridgeConnect).
@@ -238,9 +240,12 @@ test.describe("p2p two-player flow", () => {
         // Wait for the host's identity card to propagate to the joiner before
         // the draw fires, so the test observes a clean count transition.
         await expect(hostPage.locator("#card-layer .game-card")).toHaveCount(1);
-        await expect(joinerPage.locator("#card-layer .game-card")).toHaveCount(1, {
-            timeout: 8000,
-        });
+        await expect(joinerPage.locator("#card-layer .game-card")).toHaveCount(
+            1,
+            {
+                timeout: 8000,
+            },
+        );
 
         // Host draws from the corp deck via a left-button mousedown.
         await hostPage
@@ -249,21 +254,28 @@ test.describe("p2p two-player flow", () => {
 
         // After drawing, the host's #card-layer contains the corp identity card
         // (placed by setupCorp) plus the newly drawn card: 2 total.
-        await expect(hostPage.locator("#card-layer .game-card")).toHaveCount(2, {
-            timeout: 3000,
-        });
+        await expect(hostPage.locator("#card-layer .game-card")).toHaveCount(
+            2,
+            {
+                timeout: 3000,
+            },
+        );
 
         // The create-card message for the drawn card must propagate to the joiner.
-        await expect(joinerPage.locator("#card-layer .game-card")).toHaveCount(2, {
-            timeout: 8000,
-        });
+        await expect(joinerPage.locator("#card-layer .game-card")).toHaveCount(
+            2,
+            {
+                timeout: 8000,
+            },
+        );
 
         // ── Reverse channel: joiner → host ──────────────────────────────────────
         // Joiner loads a runner deck.  This exercises the reverse P2P path:
         // sendCreateMessage on the joiner → __bridgeSend → hostQueue →
         // __bridgeConnPoll on the host → receiveMessage on the host.
         await joinerPage.evaluate(() => {
-            document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
+            document.querySelector("#runner-deck-list").value =
+                "3x Sure Gamble";
             document.querySelector("#load-deck-button").click();
         });
 
@@ -280,7 +292,7 @@ test.describe("p2p two-player flow", () => {
         browser,
     }) => {
         // Shared message queues in the Node.js test process.
-        const hostQueue = [];   // messages destined for the host (sent by joiner)
+        const hostQueue = []; // messages destined for the host (sent by joiner)
         const joinerQueue = []; // messages destined for the joiner (sent by host)
         let pendingConnection = false;
 
@@ -367,7 +379,9 @@ test.describe("p2p two-player flow", () => {
         await joinerPage.fill("#opponent-host-id", hostId);
         await joinerPage.click("#join-game");
 
-        await expect(joinerPage.locator("#start-game-panel")).not.toBeAttached();
+        await expect(
+            joinerPage.locator("#start-game-panel"),
+        ).not.toBeAttached();
         await expect(hostPage.locator("#start-game-panel")).not.toBeAttached({
             timeout: 5000,
         });

@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCard, handleCardBehavior, snapOutOfHandArea } from "./card.js";
-import { sendDeleteMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
+import {
+    sendDeleteMessage,
+    sendFlipMessage,
+    sendRotateMessage,
+} from "./p2p.js";
 import { isPointWithinElement } from "./utils.js";
 
 vi.mock("./p2p.js", () => ({
@@ -157,7 +161,9 @@ describe("handleCardBehavior", () => {
         handleCardBehavior(cardElement);
         expect(cardElement.classList.contains("flipped")).toBe(false);
         expect(
-            cardElement.querySelector(".card-front").classList.contains("hidden"),
+            cardElement
+                .querySelector(".card-front")
+                .classList.contains("hidden"),
         ).toBe(false);
     });
 
@@ -167,7 +173,9 @@ describe("handleCardBehavior", () => {
         handleCardBehavior(cardElement);
         expect(cardElement.classList.contains("flipped")).toBe(false);
         expect(
-            cardElement.querySelector(".card-front").classList.contains("hidden"),
+            cardElement
+                .querySelector(".card-front")
+                .classList.contains("hidden"),
         ).toBe(true);
     });
 
@@ -177,7 +185,9 @@ describe("handleCardBehavior", () => {
         cardElement.setAttribute("data-type", "operation");
         handleCardBehavior(cardElement);
         expect(
-            cardElement.querySelector(".card-front").classList.contains("hidden"),
+            cardElement
+                .querySelector(".card-front")
+                .classList.contains("hidden"),
         ).toBe(false);
     });
 
@@ -187,10 +197,14 @@ describe("handleCardBehavior", () => {
         cardElement.setAttribute("data-type", "asset");
         handleCardBehavior(cardElement);
         expect(
-            cardElement.querySelector(".card-front").classList.contains("hidden"),
+            cardElement
+                .querySelector(".card-front")
+                .classList.contains("hidden"),
         ).toBe(true);
         expect(
-            cardElement.querySelector(".card-back").classList.contains("hidden"),
+            cardElement
+                .querySelector(".card-back")
+                .classList.contains("hidden"),
         ).toBe(false);
     });
 
@@ -200,7 +214,9 @@ describe("handleCardBehavior", () => {
         cardElement.setAttribute("data-type", "program");
         handleCardBehavior(cardElement);
         expect(
-            cardElement.querySelector(".card-front").classList.contains("hidden"),
+            cardElement
+                .querySelector(".card-front")
+                .classList.contains("hidden"),
         ).toBe(false);
     });
 
@@ -243,7 +259,10 @@ describe("createCard dblclick handler", () => {
         vi.clearAllMocks();
         el.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
         el.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
-        expect(sendFlipMessage).toHaveBeenLastCalledWith("dblclick-test-2", false);
+        expect(sendFlipMessage).toHaveBeenLastCalledWith(
+            "dblclick-test-2",
+            false,
+        );
     });
 });
 
@@ -264,7 +283,10 @@ describe("createCard context-menu-rotate handler", () => {
         document
             .querySelector("#context-menu-rotate")
             .dispatchEvent(new MouseEvent("click", { bubbles: true }));
-        expect(sendRotateMessage).toHaveBeenCalledWith("rotate-ctx-test-1", true);
+        expect(sendRotateMessage).toHaveBeenCalledWith(
+            "rotate-ctx-test-1",
+            true,
+        );
     });
 
     it("calls sendRotateMessage with (element.id, false) on second click (toggle off)", () => {
@@ -278,7 +300,10 @@ describe("createCard context-menu-rotate handler", () => {
         document
             .querySelector("#context-menu-rotate")
             .dispatchEvent(new MouseEvent("click", { bubbles: true }));
-        expect(sendRotateMessage).toHaveBeenLastCalledWith("rotate-ctx-test-2", false);
+        expect(sendRotateMessage).toHaveBeenLastCalledWith(
+            "rotate-ctx-test-2",
+            false,
+        );
     });
 });
 

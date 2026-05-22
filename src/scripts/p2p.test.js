@@ -220,7 +220,11 @@ describe("receiveMessage create-element", () => {
             perspective: "corp",
             content: [{ title: "Test Card" }, "100px", "200px"],
         });
-        expect(createCard).toHaveBeenCalledWith({ title: "Test Card" }, "100px", "200px");
+        expect(createCard).toHaveBeenCalledWith(
+            { title: "Test Card" },
+            "100px",
+            "200px",
+        );
     });
 
     it("calls createDeck with spread content for entityType deck", () => {
@@ -232,7 +236,12 @@ describe("receiveMessage create-element", () => {
             perspective: "corp",
             content: ["deckList", "deck-id", "100px", "200px"],
         });
-        expect(createDeck).toHaveBeenCalledWith("deckList", "deck-id", "100px", "200px");
+        expect(createDeck).toHaveBeenCalledWith(
+            "deckList",
+            "deck-id",
+            "100px",
+            "200px",
+        );
     });
 
     it("calls createToken with spread content for entityType token", () => {
@@ -339,13 +348,15 @@ describe("receiveMessage create-element", () => {
 
     it("does not throw and calls no create function for an unrecognized entityType", () => {
         expect(() =>
-            receiveMessage(/** @type {any} */ ({
-                messageType: "create-element",
-                entityType: "unknown",
-                entityId: "new-entity",
-                perspective: "corp",
-                content: [],
-            })),
+            receiveMessage(
+                /** @type {any} */ ({
+                    messageType: "create-element",
+                    entityType: "unknown",
+                    entityId: "new-entity",
+                    perspective: "corp",
+                    content: [],
+                }),
+            ),
         ).not.toThrow();
         expect(createCard).not.toHaveBeenCalled();
         expect(createDeck).not.toHaveBeenCalled();
@@ -354,13 +365,15 @@ describe("receiveMessage create-element", () => {
 
     it("emits a console.warn when entityType is unrecognized", () => {
         vi.spyOn(console, "warn").mockImplementation(() => {});
-        receiveMessage(/** @type {any} */ ({
-            messageType: "create-element",
-            entityType: "unknown",
-            entityId: "new-entity",
-            perspective: "corp",
-            content: [],
-        }));
+        receiveMessage(
+            /** @type {any} */ ({
+                messageType: "create-element",
+                entityType: "unknown",
+                entityId: "new-entity",
+                perspective: "corp",
+                content: [],
+            }),
+        );
         expect(console.warn).toHaveBeenCalledOnce();
     });
 });
@@ -659,23 +672,27 @@ describe("sendDeleteMessage", () => {
 describe("receiveMessage unknown messageType", () => {
     it("does not throw for an unrecognized messageType", () => {
         expect(() =>
-            receiveMessage(/** @type {any} */ ({
-                messageType: "unknown-type",
-                entityId: "any-id",
-                perspective: "corp",
-                content: {},
-            })),
+            receiveMessage(
+                /** @type {any} */ ({
+                    messageType: "unknown-type",
+                    entityId: "any-id",
+                    perspective: "corp",
+                    content: {},
+                }),
+            ),
         ).not.toThrow();
     });
 
     it("emits a console.warn for an unrecognized messageType", () => {
         vi.spyOn(console, "warn").mockImplementation(() => {});
-        receiveMessage(/** @type {any} */ ({
-            messageType: "unknown-type",
-            entityId: "any-id",
-            perspective: "corp",
-            content: {},
-        }));
+        receiveMessage(
+            /** @type {any} */ ({
+                messageType: "unknown-type",
+                entityId: "any-id",
+                perspective: "corp",
+                content: {},
+            }),
+        );
         expect(console.warn).toHaveBeenCalledOnce();
     });
 });
@@ -702,78 +719,95 @@ describe("receiveMessage malformed payload guards", () => {
 
     it("does not throw and emits console.warn when message is missing messageType", () => {
         expect(() =>
-            receiveMessage(/** @type {any} */ ({ entityId: "test-entity", content: { x: 1, y: 2 } })),
+            receiveMessage(
+                /** @type {any} */ ({
+                    entityId: "test-entity",
+                    content: { x: 1, y: 2 },
+                }),
+            ),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not throw and emits console.warn for grab-element when content is null", () => {
         expect(() =>
-            receiveMessage(/** @type {any} */ ({
-                messageType: "grab-element",
-                entityId: "test-entity",
-                perspective: "corp",
-                content: null,
-            })),
+            receiveMessage(
+                /** @type {any} */ ({
+                    messageType: "grab-element",
+                    entityId: "test-entity",
+                    perspective: "corp",
+                    content: null,
+                }),
+            ),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not throw and emits console.warn for move-element when coordinates are non-numeric", () => {
         expect(() =>
-            receiveMessage(/** @type {any} */ ({
-                messageType: "move-element",
-                entityId: "test-entity",
-                perspective: "corp",
-                content: { x: "bad", y: "data" },
-            })),
+            receiveMessage(
+                /** @type {any} */ ({
+                    messageType: "move-element",
+                    entityId: "test-entity",
+                    perspective: "corp",
+                    content: { x: "bad", y: "data" },
+                }),
+            ),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not throw and emits console.warn for ungrab-element when content is null", () => {
         expect(() =>
-            receiveMessage(/** @type {any} */ ({
-                messageType: "ungrab-element",
-                entityId: "test-entity",
-                perspective: "corp",
-                content: null,
-            })),
+            receiveMessage(
+                /** @type {any} */ ({
+                    messageType: "ungrab-element",
+                    entityId: "test-entity",
+                    perspective: "corp",
+                    content: null,
+                }),
+            ),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not throw and emits console.warn for create-element when content is missing", () => {
         expect(() =>
-            receiveMessage(/** @type {any} */ ({
-                messageType: "create-element",
-                entityType: "card",
-                entityId: "test-entity",
-                perspective: "corp",
-            })),
+            receiveMessage(
+                /** @type {any} */ ({
+                    messageType: "create-element",
+                    entityType: "card",
+                    entityId: "test-entity",
+                    perspective: "corp",
+                }),
+            ),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not throw and emits console.warn for create-element when entityId is missing", () => {
         expect(() =>
-            receiveMessage(/** @type {any} */ ({
-                messageType: "create-element",
-                entityType: "card",
-                perspective: "corp",
-                content: ["arg1"],
-            })),
+            receiveMessage(
+                /** @type {any} */ ({
+                    messageType: "create-element",
+                    entityType: "card",
+                    perspective: "corp",
+                    content: ["arg1"],
+                }),
+            ),
         ).not.toThrow();
         expect(console.warn).toHaveBeenCalledOnce();
     });
 
     it("does not call createCard when grab-element content.x is non-numeric", () => {
-        receiveMessage(/** @type {any} */ ({
-            messageType: "grab-element",
-            entityId: "test-entity",
-            perspective: "corp",
-            content: { x: null, y: 50 },
-        }));
+        receiveMessage(
+            /** @type {any} */ ({
+                messageType: "grab-element",
+                entityId: "test-entity",
+                perspective: "corp",
+                content: { x: null, y: 50 },
+            }),
+        );
         expect(element.style.left).toBe("");
     });
 });
@@ -787,7 +821,8 @@ describe("heartbeat", () => {
 
     beforeEach(() => {
         vi.useFakeTimers();
-        document.body.innerHTML = '<div id="p2p-status" style="display:none;"></div>';
+        document.body.innerHTML =
+            '<div id="p2p-status" style="display:none;"></div>';
         statusEl = document.querySelector("#p2p-status");
         mockConnection = { send: vi.fn() };
     });
@@ -800,7 +835,9 @@ describe("heartbeat", () => {
     it("sends a heartbeat message to the peer on each 5-second interval", () => {
         setupHeartbeat(mockConnection);
         vi.advanceTimersByTime(5000);
-        expect(mockConnection.send).toHaveBeenCalledWith({ messageType: "heartbeat" });
+        expect(mockConnection.send).toHaveBeenCalledWith({
+            messageType: "heartbeat",
+        });
     });
 
     it("does not show the disconnect banner before 3 missed pings", () => {
@@ -858,13 +895,15 @@ describe("receiveMessage create-element content shape validation", () => {
     });
 
     it("rejects and warns when content is not an array", () => {
-        receiveMessage(/** @type {any} */ ({
-            messageType: "create-element",
-            entityType: "card",
-            entityId: "new-entity",
-            perspective: "corp",
-            content: { title: "not an array" },
-        }));
+        receiveMessage(
+            /** @type {any} */ ({
+                messageType: "create-element",
+                entityType: "card",
+                entityId: "new-entity",
+                perspective: "corp",
+                content: { title: "not an array" },
+            }),
+        );
         expect(createCard).not.toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledOnce();
     });
@@ -965,7 +1004,11 @@ describe("sendCreateMessage", () => {
     });
 
     it("calls window.sendMessageImmediate with the correct create-element payload", () => {
-        sendCreateMessage("card", "card-1", [{ title: "Test Card" }, "50px", "100px"]);
+        sendCreateMessage("card", "card-1", [
+            { title: "Test Card" },
+            "50px",
+            "100px",
+        ]);
         expect(window.sendMessageImmediate).toHaveBeenCalledWith({
             perspective: "corp",
             messageType: "create-element",
@@ -976,7 +1019,12 @@ describe("sendCreateMessage", () => {
     });
 
     it("does not call window.sendMessage (throttled path) for sendCreateMessage", () => {
-        sendCreateMessage("deck", "deck-1", ["deckList", "deck-1", "0px", "0px"]);
+        sendCreateMessage("deck", "deck-1", [
+            "deckList",
+            "deck-1",
+            "0px",
+            "0px",
+        ]);
         expect(window.sendMessage).not.toHaveBeenCalled();
     });
 });

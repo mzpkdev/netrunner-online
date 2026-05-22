@@ -92,15 +92,21 @@ describe("setupSidePanels — mousemove edge triggers", () => {
 
     it("opens resource panel when clientX is 0", () => {
         const resourcePanel = document.querySelector("#resource-panel");
-        const container = document.querySelector(".flex-container").parentElement;
+        const container =
+            document.querySelector(".flex-container").parentElement;
         container.dispatchEvent(new MouseEvent("mousemove", { clientX: 0 }));
         expect(resourcePanel.classList.contains("show")).toBe(true);
     });
 
     it("opens player panel when clientX equals window.innerWidth - 1", () => {
         const playerPanel = document.querySelector("#player-panel");
-        Object.defineProperty(window, "innerWidth", { value: 1280, writable: true, configurable: true });
-        const container = document.querySelector(".flex-container").parentElement;
+        Object.defineProperty(window, "innerWidth", {
+            value: 1280,
+            writable: true,
+            configurable: true,
+        });
+        const container =
+            document.querySelector(".flex-container").parentElement;
         container.dispatchEvent(new MouseEvent("mousemove", { clientX: 1279 }));
         expect(playerPanel.classList.contains("show")).toBe(true);
     });
