@@ -40,6 +40,7 @@ export function sendMoveMessage(id, x, y) {
 }
 
 export function sendUngrabMessage(id, x, y) {
+    window.sendMessage.cancel?.();
     window.sendMessageImmediate({
         perspective: window.playerSide,
         messageType: "ungrab-element",

@@ -8,6 +8,7 @@ import {
     sendDeleteMessage,
     sendFlipMessage,
     sendGrabMessage,
+    sendMoveMessage,
     sendRotateMessage,
     sendUngrabMessage,
     setupHeartbeat,
@@ -1030,5 +1031,34 @@ describe("sendUngrabMessage", () => {
     it("does not call window.sendMessage (throttled path) for sendUngrabMessage", () => {
         sendUngrabMessage("card-1", 300, 400);
         expect(window.sendMessage).not.toHaveBeenCalled();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// sendUngrabMessage — cancels pending throttled move before firing
+// ---------------------------------------------------------------------------
+describe("sendUngrabMessage cancels pending sendMoveMessage", () => {
+    beforeEach(() => {
+        window.playerSide = "corp";
+        window.sendMessageImmediate = vi.fn();
+        window.sendMessage = vi.fn();
+        window.sendMessage.cancel = vi.fn();
+    });
+
+    it("calls window.sendMessage.cancel before firing the ungrab-element message", () => {
+        sendMoveMessage("card-1", 50, 60);
+        sendUngrabMessage("card-1", 300, 400);
+        expect(window.sendMessage.cancel).toHaveBeenCalled();
+    });
+
+    it("delivers ungrab-element via sendMessageImmediate after cancelling the pending move", () => {
+        sendMoveMessage("card-1", 50, 60);
+        sendUngrabMessage("card-1", 300, 400);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            perspective: "corp",
+            messageType: "ungrab-element",
+            entityId: "card-1",
+            content: { x: 300, y: 400 },
+        });
     });
 });
