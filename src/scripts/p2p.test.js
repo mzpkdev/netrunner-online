@@ -8,6 +8,7 @@ import {
     sendDeleteMessage,
     sendFlipMessage,
     sendGrabMessage,
+    sendMoveMessage,
     sendRotateMessage,
     sendUngrabMessage,
     setupHeartbeat,
@@ -1078,5 +1079,31 @@ describe("sendUngrabMessage", () => {
     it("does not call window.sendMessage (throttled path) for sendUngrabMessage", () => {
         sendUngrabMessage("card-1", 300, 400);
         expect(window.sendMessage).not.toHaveBeenCalled();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// sendMoveMessage — routes through window.sendMessage (throttled path)
+// ---------------------------------------------------------------------------
+describe("sendMoveMessage", () => {
+    beforeEach(() => {
+        window.playerSide = "corp";
+        window.sendMessageImmediate = vi.fn();
+        window.sendMessage = vi.fn();
+    });
+
+    it("calls window.sendMessage with the correct move-element payload", () => {
+        sendMoveMessage("card-1", 150, 250);
+        expect(window.sendMessage).toHaveBeenCalledWith({
+            perspective: "corp",
+            messageType: "move-element",
+            entityId: "card-1",
+            content: { x: 150, y: 250 },
+        });
+    });
+
+    it("does not call window.sendMessageImmediate for sendMoveMessage", () => {
+        sendMoveMessage("card-1", 150, 250);
+        expect(window.sendMessageImmediate).not.toHaveBeenCalled();
     });
 });
