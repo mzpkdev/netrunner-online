@@ -14,7 +14,11 @@ import {
     selectCard,
     setupKeyboardShortcuts,
 } from "./keyboard.js";
-import { sendDeleteMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
+import {
+    sendDeleteMessage,
+    sendFlipMessage,
+    sendRotateMessage,
+} from "./p2p.js";
 
 const makeCard = (id = "test-card") => {
     const el = document.createElement("div");

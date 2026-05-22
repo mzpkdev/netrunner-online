@@ -1,7 +1,12 @@
 import cardBackUrl from "../assets/card-back.jpg";
 import { grabCard } from "./grab.js";
 import { selectCard } from "./keyboard.js";
-import { sendCreateMessage, sendDeleteMessage, sendFlipMessage, sendRotateMessage } from "./p2p.js";
+import {
+    sendCreateMessage,
+    sendDeleteMessage,
+    sendFlipMessage,
+    sendRotateMessage,
+} from "./p2p.js";
 import {
     isPointWithinElement,
     putElementBottom,
@@ -123,7 +128,9 @@ const cardContextMenu = (element) => {
     return (e) => {
         e.preventDefault();
         const contextMenu = document.querySelector(".dropdown-menu");
-        const newContextMenu = /** @type {HTMLElement} */ (contextMenu.cloneNode(true));
+        const newContextMenu = /** @type {HTMLElement} */ (
+            contextMenu.cloneNode(true)
+        );
         contextMenu.parentNode.replaceChild(newContextMenu, contextMenu);
 
         newContextMenu.style.display = "block";
@@ -140,7 +147,10 @@ const cardContextMenu = (element) => {
             .querySelector("#context-menu-rotate")
             .addEventListener("click", () => {
                 element.classList.toggle("rotated");
-                sendRotateMessage(element.id, element.classList.contains("rotated"));
+                sendRotateMessage(
+                    element.id,
+                    element.classList.contains("rotated"),
+                );
             });
     };
 };

@@ -23,7 +23,11 @@ export const setupCorp = () => {
         (cardInfo) => cardInfo.title === corpIdentity,
     );
     if (corpIdentityCard) {
-        createCard(corpIdentityCard, corpIdentityLocation[0], corpIdentityLocation[1]);
+        createCard(
+            corpIdentityCard,
+            corpIdentityLocation[0],
+            corpIdentityLocation[1],
+        );
     } else {
         const error = document.createElement("p");
         error.id = "corp-identity-error";
@@ -51,7 +55,11 @@ export const setupRunner = () => {
         (cardInfo) => cardInfo.title === runnerIdentity,
     );
     if (runnerIdentityCard) {
-        createCard(runnerIdentityCard, runnerIdentityLocation[0], runnerIdentityLocation[1]);
+        createCard(
+            runnerIdentityCard,
+            runnerIdentityLocation[0],
+            runnerIdentityLocation[1],
+        );
     } else {
         const error = document.createElement("p");
         error.id = "runner-identity-error";

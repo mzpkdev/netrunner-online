@@ -29,14 +29,20 @@ declare module "*.jpg" {
 
 interface PeerConnection {
     send(message: unknown): void;
-    on(event: "data", callback: (message: import('./scripts/types.ts').P2PMessage) => void): void;
+    on(
+        event: "data",
+        callback: (message: import("./scripts/types.ts").P2PMessage) => void,
+    ): void;
     on(event: "open" | "close", callback: () => void): void;
     on(event: string, callback: (...args: unknown[]) => void): void;
 }
 
 interface PeerInstance {
     on(event: "open", callback: (id: string) => void): void;
-    on(event: "connection", callback: (connection: PeerConnection) => void): void;
+    on(
+        event: "connection",
+        callback: (connection: PeerConnection) => void,
+    ): void;
     on(event: "error", callback: (err: { type: string }) => void): void;
     on(event: string, callback: (...args: unknown[]) => void): void;
     connect(id: string): PeerConnection;
@@ -63,7 +69,9 @@ interface Window {
     /** Immediate P2P send — set up by setupP2PConnection(). */
     sendMessageImmediate: (message: unknown) => void;
     /** PeerJS constructor injected via CDN script tag. */
-    Peer: new (options?: unknown) => PeerInstance;
+    Peer: new (
+        options?: unknown,
+    ) => PeerInstance;
 }
 
 // ---------------------------------------------------------------------------

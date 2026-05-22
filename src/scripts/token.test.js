@@ -1,11 +1,14 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createToken, setupTokenSpawning } from "./token.js";
 import { sendDeleteMessage } from "./p2p.js";
+import { createToken, setupTokenSpawning } from "./token.js";
 import { isPointWithinElement } from "./utils.js";
 
 vi.mock("./grab.js", () => ({ grabCard: vi.fn(() => () => {}) }));
-vi.mock("./p2p.js", () => ({ sendCreateMessage: vi.fn(), sendDeleteMessage: vi.fn() }));
+vi.mock("./p2p.js", () => ({
+    sendCreateMessage: vi.fn(),
+    sendDeleteMessage: vi.fn(),
+}));
 vi.mock("./utils.js", () => ({
     putElementTop: vi.fn(),
     isPointWithinElement: vi.fn(() => false),

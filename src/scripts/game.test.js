@@ -74,19 +74,22 @@ describe("setupCorp", () => {
     });
 
     it("does not call createCard when the corp identity input value does not match any card in allCards", () => {
-        document.querySelector("#corp-identity").value = "Unknown Corp Identity";
+        document.querySelector("#corp-identity").value =
+            "Unknown Corp Identity";
         setupCorp();
         expect(createCard).not.toHaveBeenCalled();
     });
 
     it("appends an error element to the DOM when the corp identity input value does not match any card in allCards", () => {
-        document.querySelector("#corp-identity").value = "Unknown Corp Identity";
+        document.querySelector("#corp-identity").value =
+            "Unknown Corp Identity";
         setupCorp();
         expect(document.querySelector("#corp-identity-error")).not.toBeNull();
     });
 
     it("still calls createDeck when the corp identity input value does not match any card in allCards", () => {
-        document.querySelector("#corp-identity").value = "Unknown Corp Identity";
+        document.querySelector("#corp-identity").value =
+            "Unknown Corp Identity";
         setupCorp();
         expect(createDeck).toHaveBeenCalledWith(
             "3x Ice Wall",
@@ -165,7 +168,9 @@ describe("main", () => {
     });
 
     it("appends a #fetch-error element with the expected message and does not call setup functions when fetchAllCards rejects", async () => {
-        vi.mocked(fetchAllCards).mockRejectedValue(new Error("Network failure"));
+        vi.mocked(fetchAllCards).mockRejectedValue(
+            new Error("Network failure"),
+        );
         await main();
         const errorEl = document.querySelector("#fetch-error");
         expect(errorEl).not.toBeNull();

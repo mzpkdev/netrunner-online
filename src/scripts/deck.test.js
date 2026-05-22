@@ -12,9 +12,27 @@ vi.mock("./grab.js", () => ({ grabCard: vi.fn(() => vi.fn()) }));
 vi.mock("./utils.js", () => ({ shuffle: vi.fn() }));
 
 const allCards = [
-    { title: "Hedge Fund", side_code: "corp", faction_code: "nbn", type_code: "operation", image: "" },
-    { title: "Sure Gamble", side_code: "runner", faction_code: "neutral", type_code: "operation", image: "" },
-    { title: "Ice Wall", side_code: "corp", faction_code: "hb", type_code: "ice", image: "" },
+    {
+        title: "Hedge Fund",
+        side_code: "corp",
+        faction_code: "nbn",
+        type_code: "operation",
+        image: "",
+    },
+    {
+        title: "Sure Gamble",
+        side_code: "runner",
+        faction_code: "neutral",
+        type_code: "operation",
+        image: "",
+    },
+    {
+        title: "Ice Wall",
+        side_code: "corp",
+        faction_code: "hb",
+        type_code: "ice",
+        image: "",
+    },
 ];
 
 const makeCardElement = (title = "Hedge Fund") => {

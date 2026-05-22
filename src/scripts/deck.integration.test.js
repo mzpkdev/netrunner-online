@@ -113,7 +113,12 @@ describe("deck-load-to-card-draw pipeline (integration)", () => {
     });
 
     it("puttop event on deck increases the deck count and updates the title", () => {
-        const deckEl = createDeck("2x Sure Gamble", "puttop-deck", "0px", "0px");
+        const deckEl = createDeck(
+            "2x Sure Gamble",
+            "puttop-deck",
+            "0px",
+            "0px",
+        );
         expect(deckEl.title).toBe("2 cards");
 
         const cardEl = makeCardElement(allCards[0]); // Sure Gamble
