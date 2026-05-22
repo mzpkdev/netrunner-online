@@ -235,21 +235,12 @@ test.describe("p2p two-player flow", () => {
         });
 
         // setupCorp also places the corp identity card on the host.
-        // Wait for the host's identity card, then wait for the throttle-delayed
-        // create-card message to propagate to the joiner.
-        // This serves a second purpose: the host's sendMessage throttle runs at
-        // 200ms.  By waiting until the joiner has already received the identity
-        // card, we guarantee that the throttle window has elapsed before the draw
-        // fires, so the drawn-card message is sent as an immediate leading call
-        // rather than being silently overwritten as a trailing call.
+        // Wait for the host's identity card to propagate to the joiner before
+        // the draw fires, so the test observes a clean count transition.
         await expect(hostPage.locator("#card-layer .game-card")).toHaveCount(1);
         await expect(joinerPage.locator("#card-layer .game-card")).toHaveCount(1, {
             timeout: 8000,
         });
-
-        // Add a margin beyond the 200ms throttle window so the next sendMessage
-        // call from the draw fires immediately.
-        await hostPage.waitForTimeout(250);
 
         // Host draws from the corp deck via a left-button mousedown.
         await hostPage
@@ -271,14 +262,6 @@ test.describe("p2p two-player flow", () => {
         // Joiner loads a runner deck.  This exercises the reverse P2P path:
         // sendCreateMessage on the joiner → __bridgeSend → hostQueue →
         // __bridgeConnPoll on the host → receiveMessage on the host.
-        //
-        // Because the mock bridge is active, the joiner has already fired its
-        // throttle (for the echo messages sent when it received the host's deck
-        // and identity-card creates).  Wait 250ms so the joiner's 200ms throttle
-        // window expires; the first create-deck message from setupRunner then
-        // fires on the leading edge rather than being coalesced with the identity
-        // card that follows it.
-        await joinerPage.waitForTimeout(250);
         await joinerPage.evaluate(() => {
             document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
             document.querySelector("#load-deck-button").click();

@@ -4,9 +4,12 @@ import { createCard } from "./card.js";
 import { createDeck } from "./deck.js";
 import {
     receiveMessage,
+    sendCreateMessage,
     sendDeleteMessage,
     sendFlipMessage,
+    sendGrabMessage,
     sendRotateMessage,
+    sendUngrabMessage,
     setupHeartbeat,
     teardownHeartbeat,
 } from "./p2p.js";
@@ -948,5 +951,84 @@ describe("receiveMessage create-element content shape validation", () => {
         });
         expect(createToken).not.toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledOnce();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// sendCreateMessage — routes through window.sendMessageImmediate
+// ---------------------------------------------------------------------------
+describe("sendCreateMessage", () => {
+    beforeEach(() => {
+        window.playerSide = "corp";
+        window.sendMessageImmediate = vi.fn();
+        window.sendMessage = vi.fn();
+    });
+
+    it("calls window.sendMessageImmediate with the correct create-element payload", () => {
+        sendCreateMessage("card", "card-1", [{ title: "Test Card" }, "50px", "100px"]);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            perspective: "corp",
+            messageType: "create-element",
+            entityType: "card",
+            entityId: "card-1",
+            content: [{ title: "Test Card" }, "50px", "100px"],
+        });
+    });
+
+    it("does not call window.sendMessage (throttled path) for sendCreateMessage", () => {
+        sendCreateMessage("deck", "deck-1", ["deckList", "deck-1", "0px", "0px"]);
+        expect(window.sendMessage).not.toHaveBeenCalled();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// sendGrabMessage — routes through window.sendMessageImmediate
+// ---------------------------------------------------------------------------
+describe("sendGrabMessage", () => {
+    beforeEach(() => {
+        window.playerSide = "corp";
+        window.sendMessageImmediate = vi.fn();
+        window.sendMessage = vi.fn();
+    });
+
+    it("calls window.sendMessageImmediate with the correct grab-element payload", () => {
+        sendGrabMessage("card-1", 120, 240);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            perspective: "corp",
+            messageType: "grab-element",
+            entityId: "card-1",
+            content: { x: 120, y: 240 },
+        });
+    });
+
+    it("does not call window.sendMessage (throttled path) for sendGrabMessage", () => {
+        sendGrabMessage("card-1", 120, 240);
+        expect(window.sendMessage).not.toHaveBeenCalled();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// sendUngrabMessage — routes through window.sendMessageImmediate
+// ---------------------------------------------------------------------------
+describe("sendUngrabMessage", () => {
+    beforeEach(() => {
+        window.playerSide = "corp";
+        window.sendMessageImmediate = vi.fn();
+        window.sendMessage = vi.fn();
+    });
+
+    it("calls window.sendMessageImmediate with the correct ungrab-element payload", () => {
+        sendUngrabMessage("card-1", 300, 400);
+        expect(window.sendMessageImmediate).toHaveBeenCalledWith({
+            perspective: "corp",
+            messageType: "ungrab-element",
+            entityId: "card-1",
+            content: { x: 300, y: 400 },
+        });
+    });
+
+    it("does not call window.sendMessage (throttled path) for sendUngrabMessage", () => {
+        sendUngrabMessage("card-1", 300, 400);
+        expect(window.sendMessage).not.toHaveBeenCalled();
     });
 });

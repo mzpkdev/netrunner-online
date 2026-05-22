@@ -12,7 +12,7 @@ let _missedPings = 0;
 let _heartbeatBannerVisible = false;
 
 export function sendCreateMessage(entity, id, params) {
-    window.sendMessage({
+    window.sendMessageImmediate({
         perspective: window.playerSide,
         messageType: "create-element",
         entityType: entity,
@@ -22,7 +22,7 @@ export function sendCreateMessage(entity, id, params) {
 }
 
 export function sendGrabMessage(id, x, y) {
-    window.sendMessage({
+    window.sendMessageImmediate({
         perspective: window.playerSide,
         messageType: "grab-element",
         entityId: id,
@@ -40,7 +40,7 @@ export function sendMoveMessage(id, x, y) {
 }
 
 export function sendUngrabMessage(id, x, y) {
-    window.sendMessage({
+    window.sendMessageImmediate({
         perspective: window.playerSide,
         messageType: "ungrab-element",
         entityId: id,
