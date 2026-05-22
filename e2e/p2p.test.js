@@ -30,7 +30,7 @@ const MOCK_PEER_SCRIPT = `
     function MockConnection() {
         var self = this;
         this._h = {};
-        setTimeout(function () {
+        this._openTimer = setTimeout(function () {
             if (self._h.open) self._h.open();
         }, OPEN_DELAY_MS);
         this._poll = setInterval(function () {
@@ -55,6 +55,7 @@ const MOCK_PEER_SCRIPT = `
         // A plain object with __type === 'close' is a synthetic close sentinel
         // pushed by the test to simulate the remote peer dropping the connection.
         if (typeof item === 'object' && item.__type === 'close') {
+            clearTimeout(this._openTimer);
             clearInterval(this._poll);
             if (this._h.close) this._h.close();
             return;
@@ -102,121 +103,148 @@ const MOCK_PEER_SCRIPT = `
 })();
 `;
 
+/**
+ * Creates two isolated browser contexts (host + joiner), wires up the
+ * in-process message bridge, injects the mock Peer, stubs the API and PeerJS
+ * CDN routes, navigates both pages, and establishes a live MockConnection
+ * between them.
+ *
+ * Returns all handles needed by the calling test:
+ *   { hostPage, joinerPage, hostQueue, joinerQueue, hostContext, joinerContext }
+ *
+ * hostQueue / joinerQueue are the live arrays drained by __bridgeConnPoll.
+ * Tests may push sentinel objects directly into hostQueue to simulate remote
+ * events (e.g. a close sentinel).
+ */
+async function setupConnectedPair(browser) {
+    // Shared message queues in the Node.js test process.
+    const hostQueue = [];   // messages destined for the host (sent by joiner)
+    const joinerQueue = []; // messages destined for the joiner (sent by host)
+    let pendingConnection = false;
+
+    // Two isolated browser contexts: host plays corp, joiner plays runner.
+    const hostContext = await browser.newContext({
+        permissions: ["clipboard-read", "clipboard-write"],
+    });
+    const joinerContext = await browser.newContext();
+    const hostPage = await hostContext.newPage();
+    const joinerPage = await joinerContext.newPage();
+
+    // Host-side bridge: peer poll surfaces incoming connections; conn poll
+    // drains messages sent by the joiner.
+    await hostPage.exposeFunction("__bridgePeerPoll", async () => {
+        if (pendingConnection) {
+            pendingConnection = false;
+            return { __type: "connection" };
+        }
+        return null;
+    });
+    await hostPage.exposeFunction(
+        "__bridgeConnPoll",
+        async () => hostQueue.shift() || null,
+    );
+    await hostPage.exposeFunction("__bridgeSend", async (json) => {
+        joinerQueue.push(json);
+    });
+    await hostPage.exposeFunction("__bridgeConnect", async () => {});
+
+    // Joiner-side bridge: peer poll is a no-op; conn poll drains messages
+    // sent by the host.
+    await joinerPage.exposeFunction("__bridgePeerPoll", async () => null);
+    await joinerPage.exposeFunction(
+        "__bridgeConnPoll",
+        async () => joinerQueue.shift() || null,
+    );
+    await joinerPage.exposeFunction("__bridgeSend", async (json) => {
+        hostQueue.push(json);
+    });
+    await joinerPage.exposeFunction("__bridgeConnect", async (_hostId) => {
+        pendingConnection = true;
+    });
+
+    // Inject the mock Peer before any application script runs.
+    await hostPage.addInitScript(MOCK_PEER_SCRIPT);
+    await joinerPage.addInitScript(MOCK_PEER_SCRIPT);
+
+    // Intercept the NetrunnerDB card-data API on both pages.
+    const apiRoute = (route) =>
+        route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify(apiFixture),
+        });
+    await hostPage.route(NETRUNNERDB_API, apiRoute);
+    await joinerPage.route(NETRUNNERDB_API, apiRoute);
+
+    // Block the PeerJS CDN so the mock Peer installed by addInitScript is
+    // not overwritten.  Without this the real PeerJS script loads after
+    // addInitScript runs and replaces window.Peer; messages then travel
+    // over WebRTC rather than the in-process bridge, making delivery
+    // timing unpredictable and causing the deck-sync assertions to time
+    // out in CI.
+    const blockPeerJS = (route) =>
+        route.fulfill({
+            status: 200,
+            contentType: "application/javascript",
+            body: "",
+        });
+    await hostPage.route("https://unpkg.com/**", blockPeerJS);
+    await joinerPage.route("https://unpkg.com/**", blockPeerJS);
+
+    await hostPage.goto("/");
+    await joinerPage.goto("/");
+
+    // Wait for card data to resolve on both pages.
+    await hostPage.waitForFunction(
+        () => typeof window.allCards !== "undefined",
+    );
+    await joinerPage.waitForFunction(
+        () => typeof window.allCards !== "undefined",
+    );
+
+    // Wait for MockPeer.on('open') to fire, which enables the host/join buttons.
+    await hostPage.waitForFunction(
+        () => !document.querySelector("#host-game").disabled,
+    );
+    await joinerPage.waitForFunction(
+        () => !document.querySelector("#join-game").disabled,
+    );
+
+    // Host clicks #host-game (copies the peer ID to clipboard).
+    // The test reads the ID directly from the input rather than from the clipboard.
+    await hostPage.click("#host-game");
+    const hostId = await hostPage.inputValue("#your-host-id");
+    expect(hostId).toBeTruthy();
+
+    // Joiner fills the host ID field and initiates the connection.
+    await joinerPage.fill("#opponent-host-id", hostId);
+    await joinerPage.click("#join-game");
+
+    // Joiner removes #start-game-panel synchronously on click.
+    await expect(joinerPage.locator("#start-game-panel")).not.toBeAttached();
+
+    // Host removes #start-game-panel once MockPeer fires the 'connection' event
+    // (~40–80 ms after the joiner signals via __bridgeConnect).
+    await expect(hostPage.locator("#start-game-panel")).not.toBeAttached({
+        timeout: 5000,
+    });
+
+    return {
+        hostPage,
+        joinerPage,
+        hostQueue,
+        joinerQueue,
+        hostContext,
+        joinerContext,
+    };
+}
+
 test.describe("p2p two-player flow", () => {
     test("host and joiner connect, host deck and drawn card sync to joiner", async ({
         browser,
     }) => {
-        // Shared message queues in the Node.js test process.
-        const hostQueue = [];   // messages destined for the host (sent by joiner)
-        const joinerQueue = []; // messages destined for the joiner (sent by host)
-        let pendingConnection = false;
-
-        // Two isolated browser contexts: host plays corp, joiner plays runner.
-        const hostContext = await browser.newContext({
-            permissions: ["clipboard-read", "clipboard-write"],
-        });
-        const joinerContext = await browser.newContext();
-        const hostPage = await hostContext.newPage();
-        const joinerPage = await joinerContext.newPage();
-
-        // Host-side bridge: peer poll surfaces incoming connections; conn poll
-        // drains messages sent by the joiner.
-        await hostPage.exposeFunction("__bridgePeerPoll", async () => {
-            if (pendingConnection) {
-                pendingConnection = false;
-                return { __type: "connection" };
-            }
-            return null;
-        });
-        await hostPage.exposeFunction(
-            "__bridgeConnPoll",
-            async () => hostQueue.shift() || null,
-        );
-        await hostPage.exposeFunction("__bridgeSend", async (json) => {
-            joinerQueue.push(json);
-        });
-        await hostPage.exposeFunction("__bridgeConnect", async () => {});
-
-        // Joiner-side bridge: peer poll is a no-op; conn poll drains messages
-        // sent by the host.
-        await joinerPage.exposeFunction("__bridgePeerPoll", async () => null);
-        await joinerPage.exposeFunction(
-            "__bridgeConnPoll",
-            async () => joinerQueue.shift() || null,
-        );
-        await joinerPage.exposeFunction("__bridgeSend", async (json) => {
-            hostQueue.push(json);
-        });
-        await joinerPage.exposeFunction("__bridgeConnect", async (_hostId) => {
-            pendingConnection = true;
-        });
-
-        // Inject the mock Peer before any application script runs.
-        await hostPage.addInitScript(MOCK_PEER_SCRIPT);
-        await joinerPage.addInitScript(MOCK_PEER_SCRIPT);
-
-        // Intercept the NetrunnerDB card-data API on both pages.
-        const apiRoute = (route) =>
-            route.fulfill({
-                status: 200,
-                contentType: "application/json",
-                body: JSON.stringify(apiFixture),
-            });
-        await hostPage.route(NETRUNNERDB_API, apiRoute);
-        await joinerPage.route(NETRUNNERDB_API, apiRoute);
-
-        // Block the PeerJS CDN so the mock Peer installed by addInitScript is
-        // not overwritten.  Without this the real PeerJS script loads after
-        // addInitScript runs and replaces window.Peer; messages then travel
-        // over WebRTC rather than the in-process bridge, making delivery
-        // timing unpredictable and causing the deck-sync assertions to time
-        // out in CI.
-        const blockPeerJS = (route) =>
-            route.fulfill({
-                status: 200,
-                contentType: "application/javascript",
-                body: "",
-            });
-        await hostPage.route("https://unpkg.com/**", blockPeerJS);
-        await joinerPage.route("https://unpkg.com/**", blockPeerJS);
-
-        await hostPage.goto("/");
-        await joinerPage.goto("/");
-
-        // Wait for card data to resolve on both pages.
-        await hostPage.waitForFunction(
-            () => typeof window.allCards !== "undefined",
-        );
-        await joinerPage.waitForFunction(
-            () => typeof window.allCards !== "undefined",
-        );
-
-        // Wait for MockPeer.on('open') to fire, which enables the host/join buttons.
-        await hostPage.waitForFunction(
-            () => !document.querySelector("#host-game").disabled,
-        );
-        await joinerPage.waitForFunction(
-            () => !document.querySelector("#join-game").disabled,
-        );
-
-        // Host clicks #host-game (copies the peer ID to clipboard).
-        // The test reads the ID directly from the input rather than from the clipboard.
-        await hostPage.click("#host-game");
-        const hostId = await hostPage.inputValue("#your-host-id");
-        expect(hostId).toBeTruthy();
-
-        // Joiner fills the host ID field and initiates the connection.
-        await joinerPage.fill("#opponent-host-id", hostId);
-        await joinerPage.click("#join-game");
-
-        // Joiner removes #start-game-panel synchronously on click.
-        await expect(joinerPage.locator("#start-game-panel")).not.toBeAttached();
-
-        // Host removes #start-game-panel once MockPeer fires the 'connection' event
-        // (~40–80 ms after the joiner signals via __bridgeConnect).
-        await expect(hostPage.locator("#start-game-panel")).not.toBeAttached({
-            timeout: 5000,
-        });
+        const { hostPage, joinerPage, hostContext, joinerContext } =
+            await setupConnectedPair(browser);
 
         // Host loads the corp deck.  The player-panel is an offcanvas element
         // rendered off-screen; use evaluate() to dispatch the click directly and
@@ -296,98 +324,14 @@ test.describe("p2p two-player flow", () => {
     test("host sees disconnect banner when joiner closes connection", async ({
         browser,
     }) => {
-        // Shared message queues in the Node.js test process.
-        const hostQueue = [];   // messages destined for the host (sent by joiner)
-        const joinerQueue = []; // messages destined for the joiner (sent by host)
-        let pendingConnection = false;
+        const { hostPage, hostQueue, hostContext, joinerContext } =
+            await setupConnectedPair(browser);
 
-        const hostContext = await browser.newContext({
-            permissions: ["clipboard-read", "clipboard-write"],
-        });
-        const joinerContext = await browser.newContext();
-        const hostPage = await hostContext.newPage();
-        const joinerPage = await joinerContext.newPage();
-
-        // Host-side bridge.
-        await hostPage.exposeFunction("__bridgePeerPoll", async () => {
-            if (pendingConnection) {
-                pendingConnection = false;
-                return { __type: "connection" };
-            }
-            return null;
-        });
-        await hostPage.exposeFunction(
-            "__bridgeConnPoll",
-            async () => hostQueue.shift() || null,
-        );
-        await hostPage.exposeFunction("__bridgeSend", async (json) => {
-            joinerQueue.push(json);
-        });
-        await hostPage.exposeFunction("__bridgeConnect", async () => {});
-
-        // Joiner-side bridge.
-        await joinerPage.exposeFunction("__bridgePeerPoll", async () => null);
-        await joinerPage.exposeFunction(
-            "__bridgeConnPoll",
-            async () => joinerQueue.shift() || null,
-        );
-        await joinerPage.exposeFunction("__bridgeSend", async (json) => {
-            hostQueue.push(json);
-        });
-        await joinerPage.exposeFunction("__bridgeConnect", async (_hostId) => {
-            pendingConnection = true;
-        });
-
-        await hostPage.addInitScript(MOCK_PEER_SCRIPT);
-        await joinerPage.addInitScript(MOCK_PEER_SCRIPT);
-
-        const apiRoute = (route) =>
-            route.fulfill({
-                status: 200,
-                contentType: "application/json",
-                body: JSON.stringify(apiFixture),
-            });
-        await hostPage.route(NETRUNNERDB_API, apiRoute);
-        await joinerPage.route(NETRUNNERDB_API, apiRoute);
-
-        const blockPeerJS = (route) =>
-            route.fulfill({
-                status: 200,
-                contentType: "application/javascript",
-                body: "",
-            });
-        await hostPage.route("https://unpkg.com/**", blockPeerJS);
-        await joinerPage.route("https://unpkg.com/**", blockPeerJS);
-
-        await hostPage.goto("/");
-        await joinerPage.goto("/");
-
-        await hostPage.waitForFunction(
-            () => typeof window.allCards !== "undefined",
-        );
-        await joinerPage.waitForFunction(
-            () => typeof window.allCards !== "undefined",
-        );
-
-        await hostPage.waitForFunction(
-            () => !document.querySelector("#host-game").disabled,
-        );
-        await joinerPage.waitForFunction(
-            () => !document.querySelector("#join-game").disabled,
-        );
-
-        // Establish the connection.
-        await hostPage.click("#host-game");
-        const hostId = await hostPage.inputValue("#your-host-id");
-        expect(hostId).toBeTruthy();
-
-        await joinerPage.fill("#opponent-host-id", hostId);
-        await joinerPage.click("#join-game");
-
-        await expect(joinerPage.locator("#start-game-panel")).not.toBeAttached();
-        await expect(hostPage.locator("#start-game-panel")).not.toBeAttached({
-            timeout: 5000,
-        });
+        // Establish the baseline: the disconnect banner must be hidden before the
+        // close sentinel fires.  Without this assertion, a spurious showP2PStatus
+        // call during setup would cause the visibility check below to pass
+        // vacuously.
+        await expect(hostPage.locator("#p2p-status")).toBeHidden();
 
         // Simulate joiner dropping the connection: push the close sentinel into
         // hostQueue so the host's MockConnection poll loop fires the 'close'
