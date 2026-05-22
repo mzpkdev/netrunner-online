@@ -35,9 +35,7 @@ const MOCK_PEER_SCRIPT = `
         }, OPEN_DELAY_MS);
         this._poll = setInterval(function () {
             window.__bridgeConnPoll().then(function (item) {
-                if (!item) return;
-                var msg = typeof item === 'string' ? JSON.parse(item) : item;
-                if (self._h.data) self._h.data(msg);
+                self._handlePollItem(item);
             });
         }, DATA_POLL_MS);
     }
@@ -51,6 +49,18 @@ const MOCK_PEER_SCRIPT = `
     MockConnection.prototype.close = function () {
         clearInterval(this._poll);
         if (this._h.close) this._h.close();
+    };
+    MockConnection.prototype._handlePollItem = function (item) {
+        if (!item) return;
+        // A plain object with __type === 'close' is a synthetic close sentinel
+        // pushed by the test to simulate the remote peer dropping the connection.
+        if (typeof item === 'object' && item.__type === 'close') {
+            clearInterval(this._poll);
+            if (this._h.close) this._h.close();
+            return;
+        }
+        var msg = typeof item === 'string' ? JSON.parse(item) : item;
+        if (this._h.data) this._h.data(msg);
     };
 
     function MockPeer(opts) {
@@ -278,6 +288,120 @@ test.describe("p2p two-player flow", () => {
         await expect(hostPage.locator("#card-layer .deck")).toHaveCount(2, {
             timeout: 8000,
         });
+
+        await hostContext.close();
+        await joinerContext.close();
+    });
+
+    test("host sees disconnect banner when joiner closes connection", async ({
+        browser,
+    }) => {
+        // Shared message queues in the Node.js test process.
+        const hostQueue = [];   // messages destined for the host (sent by joiner)
+        const joinerQueue = []; // messages destined for the joiner (sent by host)
+        let pendingConnection = false;
+
+        const hostContext = await browser.newContext({
+            permissions: ["clipboard-read", "clipboard-write"],
+        });
+        const joinerContext = await browser.newContext();
+        const hostPage = await hostContext.newPage();
+        const joinerPage = await joinerContext.newPage();
+
+        // Host-side bridge.
+        await hostPage.exposeFunction("__bridgePeerPoll", async () => {
+            if (pendingConnection) {
+                pendingConnection = false;
+                return { __type: "connection" };
+            }
+            return null;
+        });
+        await hostPage.exposeFunction(
+            "__bridgeConnPoll",
+            async () => hostQueue.shift() || null,
+        );
+        await hostPage.exposeFunction("__bridgeSend", async (json) => {
+            joinerQueue.push(json);
+        });
+        await hostPage.exposeFunction("__bridgeConnect", async () => {});
+
+        // Joiner-side bridge.
+        await joinerPage.exposeFunction("__bridgePeerPoll", async () => null);
+        await joinerPage.exposeFunction(
+            "__bridgeConnPoll",
+            async () => joinerQueue.shift() || null,
+        );
+        await joinerPage.exposeFunction("__bridgeSend", async (json) => {
+            hostQueue.push(json);
+        });
+        await joinerPage.exposeFunction("__bridgeConnect", async (_hostId) => {
+            pendingConnection = true;
+        });
+
+        await hostPage.addInitScript(MOCK_PEER_SCRIPT);
+        await joinerPage.addInitScript(MOCK_PEER_SCRIPT);
+
+        const apiRoute = (route) =>
+            route.fulfill({
+                status: 200,
+                contentType: "application/json",
+                body: JSON.stringify(apiFixture),
+            });
+        await hostPage.route(NETRUNNERDB_API, apiRoute);
+        await joinerPage.route(NETRUNNERDB_API, apiRoute);
+
+        const blockPeerJS = (route) =>
+            route.fulfill({
+                status: 200,
+                contentType: "application/javascript",
+                body: "",
+            });
+        await hostPage.route("https://unpkg.com/**", blockPeerJS);
+        await joinerPage.route("https://unpkg.com/**", blockPeerJS);
+
+        await hostPage.goto("/");
+        await joinerPage.goto("/");
+
+        await hostPage.waitForFunction(
+            () => typeof window.allCards !== "undefined",
+        );
+        await joinerPage.waitForFunction(
+            () => typeof window.allCards !== "undefined",
+        );
+
+        await hostPage.waitForFunction(
+            () => !document.querySelector("#host-game").disabled,
+        );
+        await joinerPage.waitForFunction(
+            () => !document.querySelector("#join-game").disabled,
+        );
+
+        // Establish the connection.
+        await hostPage.click("#host-game");
+        const hostId = await hostPage.inputValue("#your-host-id");
+        expect(hostId).toBeTruthy();
+
+        await joinerPage.fill("#opponent-host-id", hostId);
+        await joinerPage.click("#join-game");
+
+        await expect(joinerPage.locator("#start-game-panel")).not.toBeAttached();
+        await expect(hostPage.locator("#start-game-panel")).not.toBeAttached({
+            timeout: 5000,
+        });
+
+        // Simulate joiner dropping the connection: push the close sentinel into
+        // hostQueue so the host's MockConnection poll loop fires the 'close'
+        // handler, which calls teardownHeartbeat() and showP2PStatus().
+        hostQueue.push({ __type: "close" });
+
+        // The host should show the disconnect banner within a short window.
+        await expect(hostPage.locator("#p2p-status")).toBeVisible({
+            timeout: 5000,
+        });
+        await expect(hostPage.locator("#p2p-status")).toContainText(
+            "disconnected",
+            { ignoreCase: true },
+        );
 
         await hostContext.close();
         await joinerContext.close();
