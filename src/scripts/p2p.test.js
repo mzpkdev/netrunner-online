@@ -1106,4 +1106,15 @@ describe("sendMoveMessage", () => {
         sendMoveMessage("card-1", 150, 250);
         expect(window.sendMessageImmediate).not.toHaveBeenCalled();
     });
+
+    it("uses window.playerSide dynamically — runner perspective", () => {
+        window.playerSide = "runner";
+        sendMoveMessage("card-1", 150, 250);
+        expect(window.sendMessage).toHaveBeenCalledWith({
+            perspective: "runner",
+            messageType: "move-element",
+            entityId: "card-1",
+            content: { x: 150, y: 250 },
+        });
+    });
 });
