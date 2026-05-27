@@ -78,6 +78,39 @@ describe("parseDeckList", () => {
         expect(result.matched).toHaveLength(3);
     });
 
+    it("parses Windows CRLF line endings", () => {
+        const result = parseDeckList(
+            "2x Hedge Fund\r\n1x Sure Gamble\r\n3x Ice Wall",
+            allCards,
+        );
+        expect(result.matched).toHaveLength(6);
+        expect(result.failed).toHaveLength(0);
+        expect(
+            result.matched.filter((c) => c.title === "Hedge Fund"),
+        ).toHaveLength(2);
+        expect(
+            result.matched.filter((c) => c.title === "Sure Gamble"),
+        ).toHaveLength(1);
+        expect(
+            result.matched.filter((c) => c.title === "Ice Wall"),
+        ).toHaveLength(3);
+    });
+
+    it("parses bare carriage-return line endings", () => {
+        const result = parseDeckList(
+            "1x Hedge Fund\r2x Sure Gamble",
+            allCards,
+        );
+        expect(result.matched).toHaveLength(3);
+        expect(result.failed).toHaveLength(0);
+        expect(
+            result.matched.filter((c) => c.title === "Hedge Fund"),
+        ).toHaveLength(1);
+        expect(
+            result.matched.filter((c) => c.title === "Sure Gamble"),
+        ).toHaveLength(2);
+    });
+
     it("returns an empty matched array for an entirely empty string", () => {
         const result = parseDeckList("", allCards);
         expect(result.matched).toHaveLength(0);
