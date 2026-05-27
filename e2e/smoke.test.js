@@ -157,3 +157,91 @@ test.describe("keyboard shortcuts", () => {
         await expect(page.locator(`#${focusedCardId}`)).not.toBeAttached();
     });
 });
+
+test.describe("token lifecycle", () => {
+    test("spawns a credit token, drops it to the board, drags it to the token bin, and verifies removal", async ({
+        page,
+    }) => {
+        // Intercept the NetrunnerDB API and return the minimal fixture
+        await page.route(NETRUNNERDB_API, (route) =>
+            route.fulfill({
+                status: 200,
+                contentType: "application/json",
+                body: JSON.stringify(apiFixture),
+            }),
+        );
+
+        await page.goto("/");
+        await page.waitForFunction(() => typeof window.allCards !== "undefined");
+
+        // Overwrite the deck lists with cards present in the fixture
+        await page.evaluate(() => {
+            document.querySelector("#corp-deck-list").value = "3x Hedge Fund";
+            document.querySelector("#runner-deck-list").value = "3x Sure Gamble";
+        });
+
+        // Start a solo game
+        await page.click("#play-solo");
+        await expect(page.locator("#start-game-panel")).not.toBeAttached();
+
+        // Wait for both decks to be placed in #card-layer (game fully initialised)
+        await expect(page.locator("#card-layer .deck")).toHaveCount(2);
+
+        // Open the resource panel so #credit is interactable
+        await page.click("#open-resource-panel");
+
+        await expect(page.locator("#credit")).toBeVisible();
+        const creditBox = await page.locator("#credit").boundingBox();
+        if (!creditBox) throw new Error("#credit bounding box is null — resource panel may not have opened");
+
+        // #card-layer children are all position:absolute and do not contribute to the
+        // parent's layout dimensions — use viewport size for board target coordinates
+        const viewport = page.viewportSize();
+        const boardX = (viewport?.width ?? 1280) * 0.8;
+        const boardY = (viewport?.height ?? 720) * 0.8;
+
+        // Spawn a credit token: mousedown on #credit triggers createToken + grabCard,
+        // mousemove drives the drag, mouseup deposits the token on the board
+        await page.mouse.move(
+            creditBox.x + creditBox.width / 2,
+            creditBox.y + creditBox.height / 2,
+        );
+        await page.mouse.down();
+        await page.mouse.move(boardX, boardY);
+        await page.mouse.up();
+
+        // At least one .token must appear in #card-layer after spawning
+        await expect(page.locator("#card-layer .token")).toHaveCount(1);
+
+        // Re-open the resource panel so #token-bin is visible in the viewport
+        await page.click("#open-resource-panel");
+
+        await expect(page.locator("#card-layer .token").first()).toBeVisible();
+        const tokenBox = await page
+            .locator("#card-layer .token")
+            .first()
+            .boundingBox();
+        if (!tokenBox) throw new Error(".token bounding box is null — token may not be in the viewport");
+
+        await expect(page.locator("#token-bin")).toBeVisible();
+        const binBox = await page.locator("#token-bin").boundingBox();
+        if (!binBox) throw new Error("#token-bin bounding box is null — resource panel may have closed");
+
+        // Drag the token to the token bin: mousedown on token, move to bin, mouseup
+        // The ungrab handler in token.js checks getBoundingClientRect against #token-bin
+        // and calls tokenElement.remove() when the hit-test passes
+        await page.mouse.move(
+            tokenBox.x + tokenBox.width / 2,
+            tokenBox.y + tokenBox.height / 2,
+        );
+        await page.mouse.down();
+        await page.mouse.move(
+            binBox.x + binBox.width / 2,
+            binBox.y + binBox.height / 2,
+        );
+        await page.mouse.up();
+
+        // No .token elements must remain in #card-layer after bin removal
+        await expect(page.locator("#card-layer .token")).toHaveCount(0);
+    });
+});
