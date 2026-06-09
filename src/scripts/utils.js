@@ -28,6 +28,8 @@ export function snapToGrid(element, grid = 25) {
 }
 
 export function isPointWithinElement(x, y, element) {
+    if (!element) return false;
+
     const rect = element.getBoundingClientRect();
     return (
         x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
