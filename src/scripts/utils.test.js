@@ -121,6 +121,11 @@ describe("isPointWithinElement", () => {
         expect(isPointWithinElement(50, 70, el)).toBe(true);
     });
 
+    it("returns false for a nullish element", () => {
+        expect(isPointWithinElement(50, 70, null)).toBe(false);
+        expect(isPointWithinElement(50, 70, undefined)).toBe(false);
+    });
+
     it("returns false for a point to the left of the element", () => {
         expect(isPointWithinElement(5, 70, el)).toBe(false);
     });
